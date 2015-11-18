@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0-*",
+  "description": "TwentyTwenty.Storage.Local Class Library",
+  "authors": [ "Class Library template" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "tooling": {
+    "defaultNamespace": "TwentyTwenty.Storage.Local"
+  },
+
+  "frameworks": {
+    "net45": {}
+  },
+  "dependencies": {
+    "TwentyTwenty.Storage": "1.0.0-*"
+  },
+  "compilationOptions": {
+      "define": [ "DNX" ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0-*",
+  "description": "TwentyTwenty.Storage Class Library",
+  "authors": [ "Class Library template" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "tooling": {
+    "defaultNamespace": "TwentyTwenty.Storage"
+  },
+  "frameworks": {
+    "dotnet": {
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.0.0",
+        "System.Collections": "4.0.0.0",
+        "System.Linq": "4.0.0.0",
+        "System.Runtime": "4.0.0.0",
+        "System.Threading": "4.0.0.0"
+      }
+    },
+    "netcore45": {
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.0.0",
+        "System.Collections": "4.0.0.0",
+        "System.Linq": "4.0.0.0",
+        "System.Runtime": "4.0.0.0",
+        "System.Threading": "4.0.0.0"
+      }
+    },
+    "net45": { }
+  },
+  "compilationOptions": {
+      "define": [ "DNX" ]
+  }
+}

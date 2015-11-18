@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0-*",
+  "description": "TwentyTwenty.Storage.Azure Class Library",
+  "authors": [ "Class Library template" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "tooling": {
+    "defaultNamespace": "TwentyTwenty.Storage.Azure"
+  },
+
+  "frameworks": {
+    "net45": { },    
+    "dnxcore50": {
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.0",
+        "System.Collections": "4.0.10",
+        "System.Linq": "4.0.0",
+        "System.Runtime": "4.0.20",
+        "System.Threading": "4.0.10"
+      }
+    }
+  },
+  "dependencies": {
+    "WindowsAzure.Storage": "6.1.1-preview",
+    "TwentyTwenty.Storage": "1.0.0-*"
+  },
+  "compilationOptions": {
+      "define": [ "DNX" ]
+  }
+}
