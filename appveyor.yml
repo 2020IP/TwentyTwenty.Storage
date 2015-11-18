@@ -3,14 +3,14 @@ init:
 build_script:
   - build.cmd --quiet verify
 environment:
-	PublicKey:
-		secure: JcLckzd8pEVfTQcbjarE0iTpOP5LpcVNK9JgAEwQfoo=
-	PrivateKey:
-		secure: ds9mht4+7sP2kGrRMVUZqVkxJJ8XghMu9/TmzNxbSOD5YWiLE4fA8QE9LpZAUJR4
-	Bucket:
-		secure: fRpLLhsG0i4uDTlsToxZdE+1lOaQkUWjjCHF6fUZVwk=
-	ConnectionString:
-		secure: I1jJEwh9J372gesfYOasmqmi4LqVjDEFD3+n1Yh4+UVEKSQgTRvoBvvHFwJRLggTCDOAyKEV6w13AEam6Of+/CdIhzcA0jGuIQf0aIBZtzXxKS+efCKbPDSaCLHrGIVGFaSrH3QWTuLwVEb+zdKUYBx2mvA28vU3HIMssUmaaCedBEyJ8Kwa6gwauWgmxwMhwFNhMPwLJDInQ3vOiBatvyt3GFDPkOgP1tqgXtYVb6E=
+  PublicKey:
+    secure: JcLckzd8pEVfTQcbjarE0iTpOP5LpcVNK9JgAEwQfoo=
+  PrivateKey:
+    secure: ds9mht4+7sP2kGrRMVUZqVkxJJ8XghMu9/TmzNxbSOD5YWiLE4fA8QE9LpZAUJR4
+  Bucket:
+    secure: fRpLLhsG0i4uDTlsToxZdE+1lOaQkUWjjCHF6fUZVwk=
+  ConnectionString:
+    secure: I1jJEwh9J372gesfYOasmqmi4LqVjDEFD3+n1Yh4+UVEKSQgTRvoBvvHFwJRLggTCDOAyKEV6w13AEam6Of+/CdIhzcA0jGuIQf0aIBZtzXxKS+efCKbPDSaCLHrGIVGFaSrH3QWTuLwVEb+zdKUYBx2mvA28vU3HIMssUmaaCedBEyJ8Kwa6gwauWgmxwMhwFNhMPwLJDInQ3vOiBatvyt3GFDPkOgP1tqgXtYVb6E=
 clone_depth: 1
 test: off
 deploy: off
