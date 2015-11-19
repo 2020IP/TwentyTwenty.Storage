@@ -40,7 +40,11 @@ namespace TwentyTwenty.Storage.Local.Test
             var url = _provider.GetBlobSasUrl(container, blobName, new DateTimeOffset());
 
             Assert.NotEmpty(url);
-            Assert.True(StreamEquals(File.OpenRead(url), data));
+
+            using (var file = File.OpenRead(url))
+            {
+                Assert.True(StreamEquals(file, data));
+            }
         }
 
         [Fact]
@@ -55,7 +59,10 @@ namespace TwentyTwenty.Storage.Local.Test
             var url = _provider.GetBlobSasUrl(container, blobName, new DateTimeOffset());
 
             Assert.NotEmpty(url);
-            Assert.True(StreamEquals(File.OpenRead(url), data));
+            using (var file = File.OpenRead(url))
+            {
+                Assert.True(StreamEquals(file, data));
+            }
         }
 
         [Fact]
