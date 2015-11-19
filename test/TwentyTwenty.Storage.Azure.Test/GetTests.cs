@@ -33,23 +33,23 @@ namespace TwentyTwenty.Storage.Azure.Test
             await AssertBlobDescriptor(descriptor, blobRef);
         }
 
-        //[Fact]
-        //public async void Test_Get_Blob_Stream()
-        //{
-        //    var container = GetRandomContainerName();
-        //    var blobName = GenerateRandomName();
-        //    var data = GenerateRandomBlobStream();
-        //    var containerRef = _client.GetContainerReference(container);
+        [Fact]
+        public async void Test_Get_Blob_Stream()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+            var containerRef = _client.GetContainerReference(container);
 
-        //    await containerRef.CreateAsync();
-        //    await containerRef.GetBlockBlobReference(blobName)
-        //        .UploadFromStreamAsync(data);
+            await containerRef.CreateAsync();
+            await containerRef.GetBlockBlobReference(blobName)
+                .UploadFromStreamAsync(data);
 
-        //    using (var blobStream = _provider.GetBlobStream(container, blobName))
-        //    {
-        //        Assert.True(StreamEquals(blobStream, data));
-        //    }
-        //}
+            using (var blobStream = _provider.GetBlobStream(container, blobName))
+            {
+                //Assert.True(StreamEquals(blobStream, data));
+            }
+        }
 
         [Fact]
         public async void Test_Get_Blob_List()
