@@ -312,11 +312,11 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
         {
             try
             {
-                return _s3Client.GetObjectStreamAsync(_bucket, GenerateKeyName(containerName, blobName), null);
+                return await _s3Client.GetObjectStreamAsync(_bucket, GenerateKeyName(containerName, blobName), null);
             }
             catch (AmazonS3Exception asex)
             {
