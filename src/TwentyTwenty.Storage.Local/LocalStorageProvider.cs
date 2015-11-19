@@ -81,7 +81,7 @@ namespace TwentyTwenty.Storage.Local
 
         public Task DeleteContainerAsync(string containerName)
         {
-            return Task.Factory.StartNew(() => DeleteContainer(containerName));
+            return Task.Run(() => DeleteContainer(containerName));
         }
 
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
@@ -113,7 +113,7 @@ namespace TwentyTwenty.Storage.Local
 
         public Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
         {
-            return Task.Factory.StartNew(() => GetBlobDescriptor(containerName, blobName));
+            return Task.Run(() => GetBlobDescriptor(containerName, blobName));
         }
 
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, 
@@ -158,9 +158,9 @@ namespace TwentyTwenty.Storage.Local
             }
         }
 
-        public Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
         {
-            return Task.Factory.StartNew(() => GetBlobStream(containerName, blobName));
+            return await Task.Run(() => GetBlobStream(containerName, blobName));
         }
 
         public string GetBlobUrl(string containerName, string blobName)
@@ -203,7 +203,7 @@ namespace TwentyTwenty.Storage.Local
 
         public Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
-            return Task.Factory.StartNew(()=> ListBlobs(containerName));
+            return Task.Run(()=> ListBlobs(containerName));
         }
 
         public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null)
