@@ -1,7 +1,7 @@
 init:
   - git config --global core.autocrlf true
 build_script:
-  - build.cmd --quiet verify
+  - build.cmd --quiet --parallel verify
 environment:
   PublicKey:
     secure: JcLckzd8pEVfTQcbjarE0iTpOP5LpcVNK9JgAEwQfoo=
@@ -11,6 +11,8 @@ environment:
     secure: fRpLLhsG0i4uDTlsToxZdE+1lOaQkUWjjCHF6fUZVwk=
   ConnectionString:
     secure: I1jJEwh9J372gesfYOasmqmi4LqVjDEFD3+n1Yh4+UVEKSQgTRvoBvvHFwJRLggTCDOAyKEV6w13AEam6Of+/CdIhzcA0jGuIQf0aIBZtzXxKS+efCKbPDSaCLHrGIVGFaSrH3QWTuLwVEb+zdKUYBx2mvA28vU3HIMssUmaaCedBEyJ8Kwa6gwauWgmxwMhwFNhMPwLJDInQ3vOiBatvyt3GFDPkOgP1tqgXtYVb6E=
+artifacts:
+  - path: 'artifacts\build\*.nupkg'
 clone_depth: 1
 test: off
 deploy: off
