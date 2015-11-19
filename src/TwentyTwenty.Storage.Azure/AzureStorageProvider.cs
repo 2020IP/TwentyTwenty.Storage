@@ -34,7 +34,8 @@ namespace TwentyTwenty.Storage.Azure
             {
                 await _blobClient.GetContainerReference(containerName)
                     .GetBlobReference(blobName)
-                    .DeleteIfExistsAsync(DeleteSnapshotsOption.None, null, _requestOptions, _context);
+                    .DeleteIfExistsAsync(DeleteSnapshotsOption.None, null, _requestOptions, _context)
+                    .ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -119,7 +120,7 @@ namespace TwentyTwenty.Storage.Azure
 
             try
             {
-                return await blob.OpenReadAsync(null, _requestOptions, _context);
+                return await blob.OpenReadAsync(null, _requestOptions, _context).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -185,7 +186,10 @@ namespace TwentyTwenty.Storage.Azure
             {
                 do
                 {
-                    var results = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.Metadata, 100, token, _requestOptions, _context);
+                    var results = await container
+                        .ListBlobsSegmentedAsync(null, true, BlobListingDetails.Metadata, 100, token, _requestOptions, _context)
+                        .ConfigureAwait(false);
+
                     list.AddRange(results.Results.OfType<CloudBlockBlob>().Select(blob =>
                     {
                         return new BlobDescriptor
