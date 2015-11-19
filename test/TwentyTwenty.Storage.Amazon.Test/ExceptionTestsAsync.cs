@@ -9,18 +9,18 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public void Test_Blob_Created_Exception_Async()
+        public async void Test_Blob_Created_Exception_Async()
         {
-            var ex = Assert.ThrowsAsync<StorageException>(async () =>
-            {
-                var container = GetRandomContainerName();
-                var blobName = GenerateRandomName();
-                var data = GenerateRandomBlobStream();
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
 
-                await _exceptionProvider.SaveBlobStreamAsync(container, blobName, data);
+            var ex = await Assert.ThrowsAsync<StorageException>(() =>
+            {
+                return _exceptionProvider.SaveBlobStreamAsync(container, blobName, data);
             });
 
-            Assert.Equal(ex.Result.ErrorCode, 1000);
+            Assert.Equal(ex.ErrorCode, 1000);
         }
     }
 }
