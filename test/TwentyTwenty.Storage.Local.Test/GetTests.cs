@@ -22,8 +22,10 @@ namespace TwentyTwenty.Storage.Local.Test
 
             CreateNewFile(container, blobName, data);
 
-            var blobStream = _provider.GetBlobStream(container, blobName);
-            Assert.True(StreamEquals(data, blobStream));
+            using (var blobStream = _provider.GetBlobStream(container, blobName))
+            {
+                Assert.True(StreamEquals(data, blobStream));
+            }
         }
 
         [Fact]

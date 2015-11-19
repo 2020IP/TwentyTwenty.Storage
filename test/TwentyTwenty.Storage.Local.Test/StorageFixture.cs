@@ -14,8 +14,6 @@ namespace TwentyTwenty.Storage.Local.Test
 
         public void Dispose()
         {
-            // Make sure the process has finished before trying to delete the directory
-            GC.Collect();
             foreach (var d in Directory.GetDirectories(BasePath))
             {
                 if (d.Replace($"{BasePath}\\", "").StartsWith(ContainerPrefix))
