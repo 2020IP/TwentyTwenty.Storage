@@ -28,7 +28,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.True(StreamEquals(amzStream, stream));
         }
 
-        [Fact, Trait("Category", "Long")]
+        //[Fact, Trait("Category", "Long")]
         public void Test_Blob_Created_Multipart()
         {
             var container = GetRandomContainerName();

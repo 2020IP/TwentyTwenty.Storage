@@ -22,8 +22,10 @@ namespace TwentyTwenty.Storage.Local.Test
 
             CreateNewFile(container, blobName, data);
 
-            var blobStream = _provider.GetBlobStream(container, blobName);
-            Assert.True(StreamEquals(data, blobStream));
+            using (var blobStream = _provider.GetBlobStream(container, blobName))
+            {
+                Assert.True(StreamEquals(data, blobStream));
+            }
         }
 
         [Fact]
@@ -38,7 +40,11 @@ namespace TwentyTwenty.Storage.Local.Test
             var url = _provider.GetBlobSasUrl(container, blobName, new DateTimeOffset());
 
             Assert.NotEmpty(url);
-            Assert.True(StreamEquals(File.OpenRead(url), data));
+
+            using (var file = File.OpenRead(url))
+            {
+                Assert.True(StreamEquals(file, data));
+            }
         }
 
         [Fact]
@@ -53,7 +59,10 @@ namespace TwentyTwenty.Storage.Local.Test
             var url = _provider.GetBlobSasUrl(container, blobName, new DateTimeOffset());
 
             Assert.NotEmpty(url);
-            Assert.True(StreamEquals(File.OpenRead(url), data));
+            using (var file = File.OpenRead(url))
+            {
+                Assert.True(StreamEquals(file, data));
+            }
         }
 
         [Fact]

@@ -22,9 +22,10 @@ namespace TwentyTwenty.Storage.Local.Test
 
             CreateNewFile(container, blobName, data);
 
-            var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
-
-            Assert.True(StreamEquals(data, blobStream));
+            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
+            {
+                Assert.True(StreamEquals(data, blobStream));
+            }
         }
 
         [Fact]
