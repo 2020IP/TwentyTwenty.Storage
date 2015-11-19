@@ -1,10 +1,11 @@
 {
   "version": "1.0.0-*",
-  "description": "TwentyTwenty.Storage Class Library",
-  "authors": [ "Class Library template" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "title": "2020 Storage",
+  "description": "A cross-cloud storage abstraction",
+  "authors": [ "2020IP" ],
+  "tags": [ "storage blob file scalable cloud azure amazon" ],
+  "projectUrl": "https://github.com/2020IP/TwentyTwenty.Storage",
+  "licenseUrl": "https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt",
   "tooling": {
     "defaultNamespace": "TwentyTwenty.Storage"
   },
