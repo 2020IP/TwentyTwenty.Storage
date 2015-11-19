@@ -17,13 +17,13 @@ namespace TwentyTwenty.Storage.Azure.Test
         [Fact]
         public async void Test_Exception_DeleteBlobAsync_Auth()
         {
-            await TestProviderAuthAsync(provider => provider.DeleteBlobAsync("asdf", "asdf"));
+            await TestProviderAuthAsync(provider => provider.DeleteBlobAsync(GetRandomContainerName(), "asdf"));
         }
 
         [Fact]
         public async void Test_Exception_DeleteContainerAsync_Auth()
         {
-            await TestProviderAuthAsync(provider => provider.DeleteContainerAsync("asdf"));
+            await TestProviderAuthAsync(provider => provider.DeleteContainerAsync(GetRandomContainerName()));
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         [Fact]
         public async void Test_Exception_SaveBlobStreamAsync_Auth()
         {
-            await TestProviderAuthAsync(provider => provider.SaveBlobStreamAsync("asdf", "asdf", new MemoryStream()));
+            await TestProviderAuthAsync(provider => provider.SaveBlobStreamAsync(GetRandomContainerName(), "asdf", new MemoryStream()));
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         [Fact]
         public async void Test_Exception_ListBlobAsync_ContainerName()
         {
-            var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.ListBlobsAsync("asdf"));
+            var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.ListBlobsAsync(GetRandomContainerName()));
             Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidContainerName);
         }
 
