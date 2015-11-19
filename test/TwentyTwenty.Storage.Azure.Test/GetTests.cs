@@ -1,149 +1,150 @@
-﻿//using Microsoft.WindowsAzure.Storage.Blob;
-//using Xunit;
-//using System;
-//using System.Net.Http;
+﻿using Microsoft.WindowsAzure.Storage.Blob;
+using Xunit;
+using System;
+using System.Net.Http;
 
-//namespace TwentyTwenty.Storage.Azure.Test
-//{
-//    [Trait("Category", "Azure")]
-//    public sealed class GetTests : BlobTestBase
-//    {
-//        private HttpClient _httpClient = new HttpClient();
+namespace TwentyTwenty.Storage.Azure.Test
+{
+    [Trait("Category", "Azure")]
+    public sealed class GetTests : BlobTestBase
+    {
+        private HttpClient _httpClient = new HttpClient();
 
-//        public GetTests(StorageFixture fixture)
-//            : base(fixture) { }
+        public GetTests(StorageFixture fixture)
+            : base(fixture)
+        { }
 
-//        [Fact]
-//        public async void Test_Get_Blob_Descriptor()
-//        {
-//            var container = GetRandomContainerName();
-//            var blobName = GenerateRandomName();
-//            var data = GenerateRandomBlobStream(256);
-//            var containerRef = _client.GetContainerReference(container);
-//            var blobRef = containerRef.GetBlockBlobReference(blobName);
-//            var contentType = "image/png";
-            
-//            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-//            blobRef.Properties.ContentType = contentType;            
-//            await blobRef.UploadFromStreamAsync(data);
+        [Fact]
+        public async void Test_Get_Blob_Descriptor()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream(256);
+            var containerRef = _client.GetContainerReference(container);
+            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var contentType = "image/png";
 
-//            var descriptor = _provider.GetBlobDescriptor(container, blobName);
-            
-//            await AssertBlobDescriptor(descriptor, blobRef);
-//        }
+            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
+            blobRef.Properties.ContentType = contentType;
+            await blobRef.UploadFromStreamAsync(data);
 
-//        [Fact]
-//        public async void Test_Get_Blob_Stream()
-//        {
-//            var container = GetRandomContainerName();
-//            var blobName = GenerateRandomName();
-//            var data = GenerateRandomBlobStream();
-//            var containerRef = _client.GetContainerReference(container);            
+            var descriptor = _provider.GetBlobDescriptor(container, blobName);
 
-//            await containerRef.CreateAsync();
-//            await containerRef.GetBlockBlobReference(blobName)
-//                .UploadFromStreamAsync(data);
-            
-//            var blobStream = _provider.GetBlobStream(container, blobName);
+            await AssertBlobDescriptor(descriptor, blobRef);
+        }
 
-//            Assert.True(StreamEquals(blobStream, data));
-//        }
+        //[Fact]
+        //public async void Test_Get_Blob_Stream()
+        //{
+        //    var container = GetRandomContainerName();
+        //    var blobName = GenerateRandomName();
+        //    var data = GenerateRandomBlobStream();
+        //    var containerRef = _client.GetContainerReference(container);
 
-//        [Fact]
-//        public async void Test_Get_Blob_List()
-//        {
-//            var container = GetRandomContainerName();
+        //    await containerRef.CreateAsync();
+        //    await containerRef.GetBlockBlobReference(blobName)
+        //        .UploadFromStreamAsync(data);
 
-//            var containerRef = _client.GetContainerReference(container);
-//            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
+        //    var blobStream = _provider.GetBlobStream(container, blobName);
 
-//            var blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-//            blobRef.Properties.ContentType = "image/png";
-//            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+        //    Assert.True(StreamEquals(blobStream, data));
+        //}
 
-//            blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-//            blobRef.Properties.ContentType = "image/jpg";
-//            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+        [Fact]
+        public async void Test_Get_Blob_List()
+        {
+            var container = GetRandomContainerName();
 
-//            blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-//            blobRef.Properties.ContentType = "text/plain";
-//            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+            var containerRef = _client.GetContainerReference(container);
+            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
 
-//            foreach (var blob in _provider.ListBlobs(container))
-//            {
-//                await AssertBlobDescriptor(blob, containerRef.GetBlockBlobReference(blob.Name));
-//            }
-//        }
+            var blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
+            blobRef.Properties.ContentType = "image/png";
+            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
 
-//        [Fact]
-//        public async void Test_Get_Blob_Url()
-//        {
-//            var container = GetRandomContainerName();
-//            var blobName = GenerateRandomName();
-//            var data = GenerateRandomBlobStream();
-//            var containerRef = _client.GetContainerReference(container);
+            blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
+            blobRef.Properties.ContentType = "image/jpg";
+            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
 
-//            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-//            await containerRef.GetBlockBlobReference(blobName)
-//                .UploadFromStreamAsync(data);
+            blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
+            blobRef.Properties.ContentType = "text/plain";
+            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
 
-//            var url = _provider.GetBlobUrl(container, blobName);
+            foreach (var blob in _provider.ListBlobs(container))
+            {
+                await AssertBlobDescriptor(blob, containerRef.GetBlockBlobReference(blob.Name));
+            }
+        }
 
-//            Assert.NotEmpty(url);
+        [Fact]
+        public async void Test_Get_Blob_Url()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+            var containerRef = _client.GetContainerReference(container);
 
-//            var downloadedData = await _httpClient.GetStreamAsync(url);
-//            Assert.True(StreamEquals(downloadedData, data));
-//        }
+            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
+            await containerRef.GetBlockBlobReference(blobName)
+                .UploadFromStreamAsync(data);
 
-//        [Fact]
-//        public async void Test_Get_Blob_Sas_Url()
-//        {
-//            var container = GetRandomContainerName();
-//            var blobName = GenerateRandomName();
-//            var data = GenerateRandomBlobStream();
-//            var containerRef = _client.GetContainerReference(container);
-//            var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
+            var url = _provider.GetBlobUrl(container, blobName);
 
-//            await containerRef.CreateAsync();
-//            await containerRef.GetBlockBlobReference(blobName)
-//                .UploadFromStreamAsync(data);
+            Assert.NotEmpty(url);
 
-//            var url = _provider.GetBlobSasUrl(container, blobName, expiry);
+            var downloadedData = await _httpClient.GetStreamAsync(url);
+            Assert.True(StreamEquals(downloadedData, data));
+        }
 
-//            Assert.NotEmpty(url);
-//            Assert.Contains(expiry.ToString("s"), url);
+        [Fact]
+        public async void Test_Get_Blob_Sas_Url()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+            var containerRef = _client.GetContainerReference(container);
+            var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
 
-//            var downloadedData = await _httpClient.GetStreamAsync(url);
-//            Assert.True(StreamEquals(downloadedData, data));
-//        }
+            await containerRef.CreateAsync();
+            await containerRef.GetBlockBlobReference(blobName)
+                .UploadFromStreamAsync(data);
 
-//        [Fact]
-//        public async void Test_Get_Blob_Sas_Url_Options()
-//        {
-//            var container = GetRandomContainerName();
-//            var blobName = GenerateRandomName();
-//            var data = GenerateRandomBlobStream();
-//            var containerRef = _client.GetContainerReference(container);
-//            var blobRef = containerRef.GetBlockBlobReference(blobName);
-//            var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
-//            var overrideContentType = "image/jpg";
-//            var overrideFilename = "test.jpg";
+            var url = _provider.GetBlobSasUrl(container, blobName, expiry);
 
-//            await containerRef.CreateAsync();
-//            blobRef.Properties.ContentType = "image/png";
-//            await blobRef.UploadFromStreamAsync(data);
+            Assert.NotEmpty(url);
+            Assert.Contains(expiry.ToString("s"), url);
 
-//            var url = _provider.GetBlobSasUrl(container, blobName, expiry, true, overrideFilename, overrideContentType);            
+            var downloadedData = await _httpClient.GetStreamAsync(url);
+            Assert.True(StreamEquals(downloadedData, data));
+        }
 
-//            Assert.NotEmpty(url);
-//            Assert.Contains(expiry.ToString("s"), url);
+        [Fact]
+        public async void Test_Get_Blob_Sas_Url_Options()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+            var containerRef = _client.GetContainerReference(container);
+            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
+            var overrideContentType = "image/jpg";
+            var overrideFilename = "test.jpg";
 
-//            var response = await _httpClient.GetAsync(url);
-            
-//            Assert.True(StreamEquals(await response.Content.ReadAsStreamAsync(), data));
-//            Assert.Equal(overrideContentType, response.Content.Headers.ContentType.MediaType);
-//            Assert.Equal("attachment", response.Content.Headers.ContentDisposition.DispositionType);
-//            Assert.Equal("\"" + overrideFilename + "\"", response.Content.Headers.ContentDisposition.FileName);
-//        }
-//    }
-//}
+            await containerRef.CreateAsync();
+            blobRef.Properties.ContentType = "image/png";
+            await blobRef.UploadFromStreamAsync(data);
+
+            var url = _provider.GetBlobSasUrl(container, blobName, expiry, true, overrideFilename, overrideContentType);
+
+            Assert.NotEmpty(url);
+            Assert.Contains(expiry.ToString("s"), url);
+
+            var response = await _httpClient.GetAsync(url);
+
+            Assert.True(StreamEquals(await response.Content.ReadAsStreamAsync(), data));
+            Assert.Equal(overrideContentType, response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("attachment", response.Content.Headers.ContentDisposition.DispositionType);
+            Assert.Equal("\"" + overrideFilename + "\"", response.Content.Headers.ContentDisposition.FileName);
+        }
+    }
+}

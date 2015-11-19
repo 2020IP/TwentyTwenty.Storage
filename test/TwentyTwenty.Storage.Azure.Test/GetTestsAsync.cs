@@ -7,7 +7,8 @@ namespace TwentyTwenty.Storage.Azure.Test
     public sealed class GetTestsAsync : BlobTestBase
     {
         public GetTestsAsync(StorageFixture fixture)
-            :base(fixture) { }
+            : base(fixture)
+        { }
 
 
         [Fact]
@@ -19,32 +20,32 @@ namespace TwentyTwenty.Storage.Azure.Test
             var containerRef = _client.GetContainerReference(container);
             var blobRef = containerRef.GetBlockBlobReference(blobName);
             var contentType = "image/png";
-            
+
             await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-            blobRef.Properties.ContentType = contentType;            
+            blobRef.Properties.ContentType = contentType;
             await blobRef.UploadFromStreamAsync(data);
 
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
-            
+
             await AssertBlobDescriptor(descriptor, blobRef);
         }
 
-        [Fact]
-        public async void Test_Get_Blob_Stream_Async()
-        {
-            var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();
-            var data = GenerateRandomBlobStream();
-            var containerRef = _client.GetContainerReference(container);            
+        //[Fact]
+        //public async void Test_Get_Blob_Stream_Async()
+        //{
+        //    var container = GetRandomContainerName();
+        //    var blobName = GenerateRandomName();
+        //    var data = GenerateRandomBlobStream();
+        //    var containerRef = _client.GetContainerReference(container);
 
-            await containerRef.CreateAsync();
-            await containerRef.GetBlockBlobReference(blobName)
-                .UploadFromStreamAsync(data);
-            
-            var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+        //    await containerRef.CreateAsync();
+        //    await containerRef.GetBlockBlobReference(blobName)
+        //        .UploadFromStreamAsync(data);
 
-            Assert.True(StreamEquals(blobStream,data));
-        }
+        //    var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+
+        //    Assert.True(StreamEquals(blobStream, data));
+        //}
 
         [Fact]
         public async void Test_Get_Blob_List_Async()
