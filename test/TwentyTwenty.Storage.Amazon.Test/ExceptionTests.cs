@@ -9,7 +9,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public void Test_Blob_Created_Exception()
+        public void Test_Exception_BlobCreated_Auth()
         {
             var ex = Assert.Throws<StorageException>(() =>
             {
@@ -20,7 +20,81 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.SaveBlobStream(container, blobName, data);
             });
 
-            Assert.Equal(ex.ErrorCode, 1000);
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+        }
+
+        [Fact]
+        public void Test_Exception_BlobDeleted_Auth()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+
+            var ex = Assert.Throws<StorageException>(() =>
+            {
+                _exceptionProvider.DeleteBlob(container, blobName);
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+        }
+
+        [Fact]
+        public void Test_Exception_ContainerDeleted_Auth()
+        {
+            var container = GetRandomContainerName();
+
+            var ex = Assert.Throws<StorageException>(() =>
+            {
+                _exceptionProvider.DeleteContainer(container);
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+        }
+
+        [Fact]
+        public void Test_Exception_GetBlobStream_Auth()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+
+            var ex = Assert.Throws<StorageException>(() =>
+            {
+                _exceptionProvider.GetBlobStream(container, blobName);
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+        }
+
+        [Fact]
+        public void Test_Exception_GetBlobDescriptor_Forbidden()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+
+            var ex = Assert.Throws<StorageException>(() =>
+            {
+                _exceptionProvider.GetBlobDescriptor(container, blobName);
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.GenericException);
+        }
+
+        [Fact]
+        public void Test_Exception_BlobPropertiesUpdated_Auth()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var newContentType = "image/png";
+
+            var ex = Assert.Throws<StorageException>(() =>
+            {
+                _exceptionProvider.UpdateBlobProperties(container, blobName, new BlobProperties
+                {
+                    ContentType = newContentType,
+                    Security = BlobSecurity.Public
+                });
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
         }
     }
 }
