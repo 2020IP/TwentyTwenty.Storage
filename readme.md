@@ -10,9 +10,17 @@ dnu commands install Microsoft.Framework.SecretManager
 
 ### Adding Project-Specific Secrets
 The functional tests depend on access to actual cloud storage provider accounts.  Providing these configuration values can be done through environment variables or the user secret store. Here is how to add settings:
+Azure:
 ```
 cd test\TwentyTwenty.Storage.Azure.Test
 user-secret set ConnectionString "myreallylongconnectionstring"
+```
+Amazon:
+```
+cd test\TwentyTwenty.Storage.Amazon.Test
+user-secret set PublicKey "mypublickey"
+user-secret set PrivateKey "myprivatekey"
+user-secret set Bucket "mybucketname"
 ```
 Secrets can be listed with:
 ```
