@@ -2,6 +2,7 @@
 using Xunit;
 using System;
 using System.Net.Http;
+using System.IO;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -47,7 +48,7 @@ namespace TwentyTwenty.Storage.Azure.Test
 
             using (var blobStream = _provider.GetBlobStream(container, blobName))
             {
-                var ms = new System.IO.MemoryStream();
+                var ms = new MemoryStream();
                 await blobStream.CopyToAsync(ms);
                 Assert.True(StreamEquals(ms, data));
             }
