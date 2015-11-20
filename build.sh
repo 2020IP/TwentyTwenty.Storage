@@ -35,8 +35,12 @@ if ! type dnvm > /dev/null 2>&1; then
     source packages/KoreBuild/build/dnvm.sh
 fi
 
+if [ -z "$BUILDCMD_DNX_VERSION" ]
+    export BUILDCMD_DNX_VERSION=latest
+fi
+
 if ! type dnx > /dev/null 2>&1 || [ -z "$SKIP_DNX_INSTALL" ]; then
-    dnvm install latest -runtime coreclr -alias default
+    dnvm install $BUILDCMD_DNX_VERSION -runtime coreclr -alias default
     dnvm install default -runtime mono -alias default
 else
     dnvm use default -runtime mono
