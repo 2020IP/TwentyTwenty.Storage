@@ -4,7 +4,7 @@
   "description": "A cross-cloud storage abstraction",
   "authors": [ "2020IP" ],
   "iconUrl": "https://avatars3.githubusercontent.com/u/15891935?v=3&s=64",
-  "tags": [ "storage blob file scalable cloud azure amazon" ],
+  "tags": [ "storage blob file scalable cloud azure amazon store windows aws s3 local filesystem" ],
   "projectUrl": "https://github.com/2020IP/TwentyTwenty.Storage",
   "licenseUrl": "https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt",
   "tooling": {
