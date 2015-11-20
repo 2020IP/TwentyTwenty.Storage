@@ -35,7 +35,7 @@ if ! type dnvm > /dev/null 2>&1; then
     source packages/KoreBuild/build/dnvm.sh
 fi
 
-if [ -z "$BUILDCMD_DNX_VERSION" ]
+if [ -z "$BUILDCMD_DNX_VERSION" ]; then
     export BUILDCMD_DNX_VERSION=latest
 fi
 
