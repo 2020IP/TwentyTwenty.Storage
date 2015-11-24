@@ -1,6 +1,8 @@
 #20|20 Storage
 
 [![Build status](https://ci.appveyor.com/api/projects/status/0ss5kpj5gy739vwx?svg=true)](https://ci.appveyor.com/project/2020IP/twentytwenty-storage)
+<!--TravisCI: [![Build Status](https://travis-ci.org/2020IP/TwentyTwenty.Storage.svg)](https://travis-ci.org/2020IP/TwentyTwenty.Storage)-->
+[![Nuget Version](https://img.shields.io/nuget/v/TwentyTwenty.Storage.svg)](https://www.nuget.org/packages/TwentyTwenty.Storage/)
 
 ### Basic Usage
 
