@@ -20,7 +20,7 @@ IStorageProvider provider = new AmazonStorageProvider(new AmazonProviderOptions
 ### Installing User Secrets Manager
 The secret manager can be installed globally with:
 ```
-dnu commands install Microsoft.Framework.SecretManager
+dnu commands install Microsoft.Extensions.SecretManager
 ```
 
 ### Adding Project-Specific Secrets
