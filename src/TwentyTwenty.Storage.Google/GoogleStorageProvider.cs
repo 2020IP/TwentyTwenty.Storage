@@ -40,11 +40,11 @@ namespace TwentyTwenty.Storage.Google
             _bucket = options.Bucket;
         }
 
-        public void SaveBlobStream(string continerName, string blobName, Stream source, BlobProperties properties = null)
+        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null)
         {
             try
             {
-                var response = SaveRequest(continerName, blobName, source, properties).Upload();
+                var response = SaveRequest(containerName, blobName, source, properties).Upload();
 
                 //Google's errors are all generic, so there's really no way that I currently know to detect what went wrong exactly.
                 if (response.Status == UploadStatus.Failed)
@@ -58,11 +58,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public async Task SaveBlobStreamAsync(string continerName, string blobName, Stream source, BlobProperties properties = null)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null)
         {
             try
             {
-                var response = await SaveRequest(continerName, blobName, source, properties).UploadAsync();
+                var response = await SaveRequest(containerName, blobName, source, properties).UploadAsync();
 
                 if (response.Status == UploadStatus.Failed)
                 {

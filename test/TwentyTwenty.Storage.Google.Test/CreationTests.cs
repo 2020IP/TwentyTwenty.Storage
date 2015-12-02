@@ -34,7 +34,7 @@ namespace TwentyTwenty.Storage.Google.Test
             googleStream.Should().IsSameOrEqualTo(data);
         }
 
-//        [Fact, Trait("Category", "Long")]
+        [Fact, Trait("Category", "Long")]
         public async void Test_Blob_Created_Resumable()
         {
             var container = GetRandomContainerName();
