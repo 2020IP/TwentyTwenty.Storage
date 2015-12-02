@@ -47,7 +47,7 @@ namespace TwentyTwenty.Storage.Google.Test
 
         public BlobTestBase(StorageFixture fixture)
         {
-            Bucket = fixture.Config["Bucket"];
+            Bucket = fixture.Config["GoogleBucket"];
             _client = fixture.Client;
             _provider =
                 new GoogleStorageProvider(new GoogleProviderOptions {GoogleStorageClient = _client, Bucket = Bucket});
