@@ -23,7 +23,10 @@ namespace TwentyTwenty.Storage.Google.Test
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
+            var contentType = "image/jpg";
+            var data = GenerateRandomBlobStream();
 
+            await CreateNewObject(container, blobName, data, false, contentType);
             await TestProviderAuthAsync(p => p.DeleteBlobAsync(container, blobName));
         }
 

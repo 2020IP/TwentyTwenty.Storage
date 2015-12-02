@@ -58,23 +58,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public Task SaveBlobStreamAsync(string continerName, string blobName, Stream source, BlobProperties properties = null)
+        public async Task SaveBlobStreamAsync(string continerName, string blobName, Stream source, BlobProperties properties = null)
         {
             try
             {
-                return SaveBlobAsync(SaveRequest(continerName, blobName, source, properties));
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
-        private async Task SaveBlobAsync(ObjectsResource.InsertMediaUpload req)
-        {
-            try
-            {
-                var response = await req.UploadAsync();
+                var response = await SaveRequest(continerName, blobName, source, properties).UploadAsync();
 
                 if (response.Status == UploadStatus.Failed)
                 {
@@ -99,11 +87,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
         {
             try
             {
-                return _storageService.HttpClient.GetStreamAsync(GetBlob(containerName, blobName).MediaLink);
+                return await _storageService.HttpClient.GetStreamAsync(GetBlob(containerName, blobName).MediaLink);
             }
             catch (GoogleApiException gae)
             {
@@ -189,11 +177,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public Task DeleteBlobAsync(string containerName, string blobName)
+        public async Task DeleteBlobAsync(string containerName, string blobName)
         {
             try
             {
-                return _storageService.Objects.Delete(_bucket, string.Format(ContainerBlobFormat, containerName, blobName)).ExecuteAsync();
+                await _storageService.Objects.Delete(_bucket, string.Format(ContainerBlobFormat, containerName, blobName)).ExecuteAsync();
             }
             catch (GoogleApiException gae)
             {
@@ -249,11 +237,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
+        public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
             try
             {
-                return UpdateRequest(containerName, blobName, properties).ExecuteAsync();
+                await UpdateRequest(containerName, blobName, properties).ExecuteAsync();
             }
             catch (GoogleApiException gae)
             {
@@ -335,7 +323,7 @@ namespace TwentyTwenty.Storage.Google
             var match = Regex.Match(blob.Name, BlobNameRegex);
             if (!match.Success)
             {
-                throw new Exception("TODO:  Write in this Exception and use the proper exception type.");
+                throw new InvalidOperationException("Unable to match blob name with regex; all blob names");
             }
 
             var blobDescriptor = new BlobDescriptor
