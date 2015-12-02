@@ -28,7 +28,7 @@ namespace TwentyTwenty.Storage.Google.Test
                 new ServiceAccountCredential(new ServiceAccountCredential.Initializer(Config["GoogleEmail"])
                 {
                     Scopes = new[] {StorageService.Scope.DevstorageFullControl}
-                }.FromPrivateKey(Config["PrivateKey"]));
+                }.FromPrivateKey(Config["GooglePrivateKey"]));
 
             Client = new StorageService(new BaseClientService.Initializer
             {
@@ -41,12 +41,12 @@ namespace TwentyTwenty.Storage.Google.Test
 
         public void Dispose()
         {
-            var blobsToDelete = AsyncHelpers.RunSync(() => Client.Objects.List(Config["Bucket"]).ExecuteAsync()).Items
+            var blobsToDelete = AsyncHelpers.RunSync(() => Client.Objects.List(Config["GoogleBucket"]).ExecuteAsync()).Items
                 .WhereToListOrEmpty(b => b.Name.StartsWith(ContainerPrefix));
 
             foreach (var blob in blobsToDelete)
             {
-                AsyncHelpers.RunSync(() => Client.Objects.Delete(Config["Bucket"], blob.Name).ExecuteAsync());
+                AsyncHelpers.RunSync(() => Client.Objects.Delete(Config["GoogleBucket"], blob.Name).ExecuteAsync());
             }
         }
     }
