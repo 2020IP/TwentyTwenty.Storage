@@ -11,7 +11,7 @@ namespace TwentyTwenty.Storage
         public StorageException(StorageError error, Exception ex) : base(error.Message, ex)
         {
             ErrorCode = error.Code;
-            ProviderMessage = ex.Message;
+            ProviderMessage = ex?.Message;
         }
     }
 }
