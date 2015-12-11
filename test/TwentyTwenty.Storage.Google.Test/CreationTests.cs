@@ -39,7 +39,7 @@ namespace TwentyTwenty.Storage.Google.Test
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
-            var data = GenerateRandomBlobStream(100000000);
+            var data = GenerateRandomBlobStream(10000000);
             var stream = new MemoryStream();
             data.CopyTo(stream);
             stream.Position = 0;
