@@ -605,7 +605,7 @@ namespace TwentyTwenty.Storage.Amazon
                     PartSize = 6291456,
                     Key = GenerateKeyName(containerName, blobName),
                     ContentType = properties?.ContentType,
-                    CannedACL = S3CannedACL.PublicRead
+                    CannedACL = GetCannedACL(properties)
                 };
 
                 try

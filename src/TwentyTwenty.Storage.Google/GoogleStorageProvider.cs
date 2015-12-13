@@ -2,42 +2,32 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Google;
-using Google.Apis.Storage;
 using Google.Apis.Storage.v1;
-using Google.Apis.Storage.v1.Data;
 using Google.Apis.Upload;
-using Newtonsoft.Json.Linq;
-using TwentyTwenty.Storage;
-using Blob = Google.Apis.Storage.v1.Data.Object;
-using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
 using Google.Apis.Services;
 using Google.Apis.Auth.OAuth2;
+using Blob = Google.Apis.Storage.v1.Data.Object;
+using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
 
 namespace TwentyTwenty.Storage.Google
 {
     public class GoogleStorageProvider : IStorageProvider
     {
-        /// <summary>
-        /// {0} - Container name
-        /// {1} - Blob name
-        /// </summary>
-        private const string ContainerBlobFormat = @"{0}/{1}";
-
         private const string BlobNameRegex = @"(?<Container>[^/]+)/(?<Blob>.+)";
 
         private const string DefaultContentType = "application/octet-stream";
 
-        private StorageService _storageService;
+        readonly private StorageService _storageService;
 
-        private string _bucket;
+        readonly private string _bucket;
 
         public GoogleStorageProvider(GoogleProviderOptions options)
         {
+            // TODO: Throw error that private key required
+            // TODO: Need to handle exceptions for invalid secerets
             if (options.PrivateKey != null)
             {
                 var credential =
@@ -188,7 +178,7 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                _storageService.Objects.Delete(_bucket, string.Format(ContainerBlobFormat, containerName, blobName)).Execute();
+                _storageService.Objects.Delete(_bucket, $"{containerName}/{blobName}").Execute();
             }
             catch (GoogleApiException gae)
             {
@@ -200,7 +190,7 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                await _storageService.Objects.Delete(_bucket, string.Format(ContainerBlobFormat, containerName, blobName)).ExecuteAsync();
+                await _storageService.Objects.Delete(_bucket, $"{containerName}/{blobName}").ExecuteAsync();
             }
             catch (GoogleApiException gae)
             {
@@ -217,7 +207,7 @@ namespace TwentyTwenty.Storage.Google
                 //TODO:  Parallel.ForEach or something similarly performing.  To use that would currently change my project targets, and I don't think I want to do that.  I just have a feeling this is not going to perform very well...
                 foreach (var blob in containerBlobs)
                 {
-                    _storageService.Objects.Delete(_bucket, string.Format(ContainerBlobFormat, blob.Container, blob.Name)).Execute();
+                    _storageService.Objects.Delete(_bucket, $"{blob.Container}/{blob.Name}").Execute();
                 }
 
             }
@@ -234,7 +224,7 @@ namespace TwentyTwenty.Storage.Google
             {
                 var containerBlobs = await ListBlobsAsync(containerName);
                 var tasks = containerBlobs.Select(blob => _storageService.Objects.Delete(_bucket,
-                    string.Format(ContainerBlobFormat, blob.Container, blob.Name)).ExecuteAsync());
+                    $"{blob.Container}/{blob.Name}").ExecuteAsync());
                 //Something tells me this is not the best way to do this.
                 await Task.WhenAll(tasks);
             }
@@ -285,7 +275,7 @@ namespace TwentyTwenty.Storage.Google
         private ObjectsResource.UpdateRequest UpdateRequest(string containerName, string blobName, BlobProperties properties)
         {
             var blob = CreateBlob(containerName, blobName, properties);
-            var req = _storageService.Objects.Update(blob, _bucket, string.Format(ContainerBlobFormat, containerName, blobName));
+            var req = _storageService.Objects.Update(blob, _bucket, $"{containerName}/{blobName}");
             req.PredefinedAcl = properties?.Security == BlobSecurity.Public ? ObjectsResource.UpdateRequest.PredefinedAclEnum.PublicRead : ObjectsResource.UpdateRequest.PredefinedAclEnum.Private__;
             return req;
         }
@@ -294,7 +284,7 @@ namespace TwentyTwenty.Storage.Google
         {
             return new Blob
             {
-                Name = string.Format(ContainerBlobFormat, containerName, blobName),
+                Name = $"{containerName}/{blobName}",
                 ContentType = properties?.ContentType ?? DefaultContentType
             };
         }
@@ -303,7 +293,7 @@ namespace TwentyTwenty.Storage.Google
         {
             //TODO:  Use the optional fields
             //TODO:  Verify that unless the optional fields are provided, the URL provided will NOT be SAS.
-            var req = _storageService.Objects.Get(_bucket, string.Format(ContainerBlobFormat, containerName, blobName));
+            var req = _storageService.Objects.Get(_bucket, $"{containerName}/{blobName}");
             try
             {
                 return req.ExecuteAsync();
@@ -324,7 +314,7 @@ namespace TwentyTwenty.Storage.Google
         {
             //TODO:  Use the optional fields
             //TODO:  Verify that unless the optional fields are provided, the URL provided will NOT be SAS.
-            var req = _storageService.Objects.Get(_bucket, string.Format(ContainerBlobFormat, containerName, blobName));
+            var req = _storageService.Objects.Get(_bucket, $"{containerName}/{blobName}");
             req.Projection = ObjectsResource.GetRequest.ProjectionEnum.Full;
 
             try
@@ -354,7 +344,8 @@ namespace TwentyTwenty.Storage.Google
                 LastModified = DateTimeOffset.Parse(blob.UpdatedRaw),
                 Length = Convert.ToInt64(blob.Size),
                 Name = match.Groups["Blob"].Value,
-                Security = blob.Acl != null && blob.Acl.Any(acl => acl.Entity.ToLowerInvariant() == "allusers") ? BlobSecurity.Public : BlobSecurity.Private,
+                Security = blob.Acl != null 
+                    && blob.Acl.Any(acl => acl.Entity.ToLowerInvariant() == "allusers") ? BlobSecurity.Public : BlobSecurity.Private,
                 Url = blob.MediaLink
             };
 
