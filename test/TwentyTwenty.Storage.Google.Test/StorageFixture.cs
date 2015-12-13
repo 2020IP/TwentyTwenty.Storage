@@ -13,8 +13,7 @@ namespace TwentyTwenty.Storage.Google.Test
     public class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
-
-        public StorageService Client { get; }
+        public readonly StorageService _client;
 
         public StorageFixture()
         {
@@ -30,10 +29,9 @@ namespace TwentyTwenty.Storage.Google.Test
                     Scopes = new[] {StorageService.Scope.DevstorageFullControl}
                 }.FromPrivateKey(Config["GooglePrivateKey"]));
 
-            Client = new StorageService(new BaseClientService.Initializer
+            _client = new StorageService(new BaseClientService.Initializer
             {
-                HttpClientInitializer = credential,
-                ApplicationName = "Google Storage Test"
+                HttpClientInitializer = credential
             });
         }
 
@@ -41,12 +39,12 @@ namespace TwentyTwenty.Storage.Google.Test
 
         public void Dispose()
         {
-            var blobsToDelete = AsyncHelpers.RunSync(() => Client.Objects.List(Config["GoogleBucket"]).ExecuteAsync()).Items
+            var blobsToDelete = AsyncHelpers.RunSync(() => _client.Objects.List(Config["GoogleBucket"]).ExecuteAsync()).Items
                 .WhereToListOrEmpty(b => b.Name.StartsWith(ContainerPrefix));
 
             foreach (var blob in blobsToDelete)
             {
-                AsyncHelpers.RunSync(() => Client.Objects.Delete(Config["GoogleBucket"], blob.Name).ExecuteAsync());
+                AsyncHelpers.RunSync(() => _client.Objects.Delete(Config["GoogleBucket"], blob.Name).ExecuteAsync());
             }
         }
     }

@@ -15,6 +15,8 @@ using Newtonsoft.Json.Linq;
 using TwentyTwenty.Storage;
 using Blob = Google.Apis.Storage.v1.Data.Object;
 using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
+using Google.Apis.Services;
+using Google.Apis.Auth.OAuth2;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -36,7 +38,24 @@ namespace TwentyTwenty.Storage.Google
 
         public GoogleStorageProvider(GoogleProviderOptions options)
         {
-            _storageService = options.GoogleStorageClient;
+            if (options.PrivateKey != null)
+            {
+                var credential =
+                    new ServiceAccountCredential(new ServiceAccountCredential.Initializer(options.Email)
+                    {
+                        Scopes = new[] { StorageService.Scope.DevstorageFullControl }
+                    }.FromPrivateKey(options.PrivateKey));
+
+                _storageService = new StorageService(new BaseClientService.Initializer
+                {
+                    HttpClientInitializer = credential
+                });
+            }
+            else
+            {
+                _storageService = new StorageService();
+            }
+
             _bucket = options.Bucket;
         }
 
