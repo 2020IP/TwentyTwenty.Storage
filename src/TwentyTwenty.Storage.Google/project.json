@@ -1,0 +1,19 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "TwentyTwenty.Storage.Google Class Library",
+  "authors": [ "Andrew" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "TwentyTwenty.Storage": "1.0.1-*",
+    "Google.Apis.Storage.v1": "1.9.2.520",
+    "BouncyCastle": "1.7.0",
+    "Newtonsoft.Json":  "7.0.1"
+  },
+
+  "frameworks": {
+    "net45": { }
+  }
+}

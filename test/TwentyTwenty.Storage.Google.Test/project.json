@@ -1,0 +1,33 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "TwentyTwenty.Storage.Google.Test Class Library",
+  "authors": [ "Andrew" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "userSecretsId": "TwentyTwenty.Storage.Google.Test-EFCF7CA3-97B7-45A4-8D19-FAB47939AB03",
+  "tooling": {
+    "defaultNamespace": "TwentyTwenty.Storage.Google.Test"
+  },
+
+  "dependencies": {
+    "TwentyTwenty.Storage": "1.0.1-*",
+    "TwentyTwenty.Storage.Google": "1.0.0-*",
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-beta6-build191",
+    "Microsoft.Framework.Configuration": "1.0.0-beta8",
+    "Microsoft.Framework.Configuration.UserSecrets": "1.0.0-beta8",
+    "Microsoft.Framework.Configuration.EnvironmentVariables": "1.0.0-beta8",
+    "Google.Apis.Storage.v1": "1.9.2.520",
+    "FluentAssertions": "4.0.1",
+    "BouncyCastle": "1.7.0",
+    "Newtonsoft.Json": "7.0.1"
+  },
+  "commands": {
+    "test": "xunit.runner.dnx"
+  },
+
+  "frameworks": {
+    "dnx46": { }
+  }
+}

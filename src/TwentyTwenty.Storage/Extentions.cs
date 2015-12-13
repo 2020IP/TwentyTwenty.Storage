@@ -24,6 +24,26 @@ namespace TwentyTwenty.Storage
                 .FirstOrDefault();
         }
 
+        public static List<T2> SelectToListOrEmpty<T1, T2>(this IEnumerable<T1> e, Func<T1, T2> f)
+        {
+            if (e == null)
+            {
+                return new List<T2>();
+            }
+
+            return e.Select(f).ToList();
+        }
+
+        public static List<T1> WhereToListOrEmpty<T1>(this IEnumerable<T1> e, Func<T1, bool> f)
+        {
+            if (e == null)
+            {
+                return new List<T1>();
+            }
+
+            return e.Where(f).ToList();
+        }
+
         static Dictionary<int, string> errors = new Dictionary<int, string>
         {
             {
