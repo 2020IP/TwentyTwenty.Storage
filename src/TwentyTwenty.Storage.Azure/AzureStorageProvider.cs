@@ -10,9 +10,9 @@ namespace TwentyTwenty.Storage.Azure
 {
     public sealed class AzureStorageProvider : IStorageProvider
     {
-        private CloudBlobClient _blobClient;
-        private BlobRequestOptions _requestOptions;
-        private OperationContext _context;
+        private readonly CloudBlobClient _blobClient;
+        private readonly BlobRequestOptions _requestOptions;
+        private readonly OperationContext _context;
 
         public AzureStorageProvider(AzureProviderOptions options)
         {

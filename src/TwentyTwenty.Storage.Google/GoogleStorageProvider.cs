@@ -13,30 +13,34 @@ using Blob = Google.Apis.Storage.v1.Data.Object;
 using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
 using Google.Apis.Requests;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.Text;
+using System.Net;
 
 namespace TwentyTwenty.Storage.Google
 {
-    public class GoogleStorageProvider : IStorageProvider
+    public sealed class GoogleStorageProvider : IStorageProvider
     {
         private const string BlobNameRegex = @"(?<Container>[^/]+)/(?<Blob>.+)";
-
         private const string DefaultContentType = "application/octet-stream";
-
-        readonly private StorageService _storageService;
-
-        readonly private string _bucket;
-
-        readonly private string _serviceEmail;
-
-        readonly private X509Certificate2 _certificate;
+        private readonly StorageService _storageService;
+        private readonly string _bucket;
+        private readonly string _serviceEmail;
+        private readonly X509Certificate2 _certificate;
 
         public GoogleStorageProvider(GoogleProviderOptions options)
         {
-            _serviceEmail = options.Email;
+            if (options.P12PrivateKey == null)
+            {
+                throw new StorageException(new StorageError
+                {
+                    Code = 1007,
+                    Message = "P12 private key is required.",
+                    ProviderMessage = "P12 private key is required."
+                }, null);
+            }
 
-            // TODO: Throw error that private key required
-            // TODO: Need to handle exceptions for invalid secerets
-            if (options.P12PrivateKey != null)
+            try
             {
                 _certificate = new X509Certificate2(Convert.FromBase64String(options.P12PrivateKey), "notasecret", X509KeyStorageFlags.Exportable);
                 var credential =
@@ -50,11 +54,17 @@ namespace TwentyTwenty.Storage.Google
                     HttpClientInitializer = credential
                 });
             }
-            else
+            catch (Exception ex)
             {
-                _storageService = new StorageService();
+                throw new StorageException(new StorageError
+                {
+                    Code = 1000,
+                    Message = "Invalid P12 private key.",
+                    ProviderMessage = ex.Message
+                }, ex);
             }
 
+            _serviceEmail = options.Email;
             _bucket = options.Bucket;
         }
 
@@ -129,11 +139,16 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
+        // TODO: Currently google only support adding a content disposition when uploading
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
             string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
-            return new GoogleSignedUrlGenerator(_certificate, _serviceEmail, _bucket)
-                .GetSignedUrl($"{containerName}/{blobName}", expiry, contentType, fileName, access == BlobUrlAccess.Read ? "GET" : "PUT");
+            var expiration = expiry.ToUnixTimeSeconds();
+            //var disp = fileName != null ? "content-disposition:attachment;filename=\"" + fileName +"\"" : string.Empty;
+            var verb = access == BlobUrlAccess.Read ? "GET" : "PUT";
+            var urlSignature = SignString($"{verb}\n\n{contentType}\n{expiration}\n/{_bucket}/{containerName}/{blobName}");
+
+            return $"https://storage.googleapis.com/{_bucket}/{containerName}/{blobName}?GoogleAccessId={_serviceEmail}&Expires={expiration}&Signature={WebUtility.UrlEncode(urlSignature)}";
         }
 
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
@@ -290,7 +305,9 @@ namespace TwentyTwenty.Storage.Google
         {
             var blob = CreateBlob(containerName, blobName, properties);
             var req = _storageService.Objects.Update(blob, _bucket, $"{containerName}/{blobName}");
-            req.PredefinedAcl = properties?.Security == BlobSecurity.Public ? ObjectsResource.UpdateRequest.PredefinedAclEnum.PublicRead : ObjectsResource.UpdateRequest.PredefinedAclEnum.Private__;
+            req.PredefinedAcl = properties?.Security == BlobSecurity.Public ? 
+                ObjectsResource.UpdateRequest.PredefinedAclEnum.PublicRead : 
+                ObjectsResource.UpdateRequest.PredefinedAclEnum.Private__;
             return req;
         }
 
@@ -303,11 +320,11 @@ namespace TwentyTwenty.Storage.Google
             };
         }
 
-        private Task<Blob> GetBlobAsync(string containerName, string blobName, DateTimeOffset? endEx = null, bool isDownload = false, string optionalFileName = null)
+        private Task<Blob> GetBlobAsync(string containerName, string blobName)
         {
-            //TODO:  Use the optional fields
-            //TODO:  Verify that unless the optional fields are provided, the URL provided will NOT be SAS.
             var req = _storageService.Objects.Get(_bucket, $"{containerName}/{blobName}");
+            req.Projection = ObjectsResource.GetRequest.ProjectionEnum.Full;
+
             try
             {
                 return req.ExecuteAsync();
@@ -323,11 +340,8 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        private Blob GetBlob(string containerName, string blobName, DateTimeOffset? endEx = null,
-            bool isDownload = false, string optionalFileName = null)
+        private Blob GetBlob(string containerName, string blobName)
         {
-            //TODO:  Use the optional fields
-            //TODO:  Verify that unless the optional fields are provided, the URL provided will NOT be SAS.
             var req = _storageService.Objects.Get(_bucket, $"{containerName}/{blobName}");
             req.Projection = ObjectsResource.GetRequest.ProjectionEnum.Full;
 
@@ -375,13 +389,28 @@ namespace TwentyTwenty.Storage.Google
 
         private StorageException Error(GoogleApiException gae, int code = 1001, string message = null)
         {
-            return new StorageException(new StorageError()
+            return new StorageException(new StorageError
             {
                 Code = code,
                 Message =
-                    message ?? "Encountered an error when making a request to Google's Cloud API.  Unfortunately, as of the time this is being developed, Google's error messages (when using the .NET client library) are not very informative, and do not usually provide any clues as to what may have gone wrong.",
+                    message ?? "Encountered an error when making a request to Google's Cloud API.",
                 ProviderMessage = gae?.Message
             }, gae);
+        }
+
+        private string SignString(string stringToSign)
+        {
+            if (_certificate == null)
+            {
+                throw new Exception("Certificate not initialized");
+            }
+
+            var cp = new CspParameters(24, "Microsoft Enhanced RSA and AES Cryptographic Provider",
+                    ((RSACryptoServiceProvider)_certificate.PrivateKey).CspKeyContainerInfo.KeyContainerName);
+            var provider = new RSACryptoServiceProvider(cp);
+            var buffer = Encoding.UTF8.GetBytes(stringToSign);
+            var signature = provider.SignData(buffer, "SHA256");
+            return Convert.ToBase64String(signature);
         }
 
         #endregion

@@ -9,71 +9,37 @@ namespace TwentyTwenty.Storage.Google.Test
             : base(fixture) { }
 
         [Fact]
-        public void Test_Exception_BlobCreated_Auth()
+        public void Test_Exception_InvalidKey_Auth()
         {
-            var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();
-            var data = GenerateRandomBlobStream();
-
-            TestProviderAuth(p => p.SaveBlobStream(container, blobName, data));
-        }
-
-        [Fact]
-        public void Test_Exception_BlobDeleted_Auth()
-        {
-            var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();
-
-            TestProviderAuth(p => p.DeleteBlob(container, blobName));
-        }
-
-        [Fact]
-        public void Test_Exception_ContainerDeleted_Auth()
-        {
-            var container = GetRandomContainerName();
-
-            TestProviderAuth(p => p.DeleteContainer(container));
-        }
-
-        [Fact]
-        public async void Test_Exception_GetBlobStream_Auth()
-        {
-            var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();
-            var contentType = "image/jpg";
-            var data = GenerateRandomBlobStream();
-
-            await CreateNewObject(container, blobName, data, false, contentType);
-            TestProviderAuth(p => p.GetBlobStream(container, blobName));
-        }
-
-        [Fact]
-        public async void Test_Exception_GetBlobDescriptor_Forbidden()
-        {
-            var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();
-            var contentType = "image/jpg";
-            var data = GenerateRandomBlobStream();
-
-            await CreateNewObject(container, blobName, data, false, contentType);
-            TestProviderAuth(p => p.GetBlobDescriptor(container, blobName));
-        }
-
-        [Fact]
-        public async void Test_Exception_BlobPropertiesUpdated_Auth()
-        {
-            var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();
-            var contentType = "image/jpg";
-            var newContentType = "image/png";
-            var data = GenerateRandomBlobStream();
-
-            await CreateNewObject(container, blobName, data, false, contentType);
-            TestProviderAuth(p => p.UpdateBlobProperties(container, blobName, new BlobProperties
+            var ex = Assert.Throws<StorageException>(() =>
             {
-                ContentType = newContentType,
-                Security = BlobSecurity.Public
-            }));
+                new GoogleStorageProvider(new GoogleProviderOptions
+                {
+                    Email = "aaa",
+                    P12PrivateKey = "aaa",
+                    Bucket = Bucket
+                });
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+
+        }
+
+        [Fact]
+        public void Test_Exception_NoKey_Auth()
+        {
+            var ex = Assert.Throws<StorageException>(() =>
+            {
+                new GoogleStorageProvider(new GoogleProviderOptions
+                {
+                    Email = "aaa",
+                    P12PrivateKey = null,
+                    Bucket = Bucket
+                });
+            });
+
+            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.NoCredentialsProvided);
+
         }
     }
 }

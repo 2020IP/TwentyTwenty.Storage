@@ -28,7 +28,6 @@ namespace TwentyTwenty.Storage.Google.Test
         protected static readonly Random _rand = new Random();
         protected StorageService _client;
         protected IStorageProvider _provider;
-        protected IStorageProvider _exceptionProvider;
         protected string Bucket;
         protected string ContainerPrefix;
 
@@ -55,13 +54,6 @@ namespace TwentyTwenty.Storage.Google.Test
                     Email = fixture.Config["GoogleEmail"],
                     Bucket = Bucket,
                     P12PrivateKey = fixture.Config["GoogleP12PrivateKey"]
-                });
-            _exceptionProvider =
-                new GoogleStorageProvider(new GoogleProviderOptions
-                {
-                    Email = null,
-                    P12PrivateKey = null,
-                    Bucket = Bucket
                 });
         }
 
@@ -134,36 +126,6 @@ namespace TwentyTwenty.Storage.Google.Test
                 if (!buffer1.Take(count1).SequenceEqual(buffer2.Take(count2)))
                     return false;
             }
-        }
-
-        //TODO:  Unfortunately, it does not appear to be easy to determine whether an error is due to not being authenticated; in this case a generic error message of "BaseURI cannot be null" - but this is not unique to authentication errors either.
-        public void TestProviderAuth(Action<IStorageProvider> method)
-        {
-            var exception = Assert.Throws<StorageException>(() =>
-            {
-                method(_exceptionProvider);
-            });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.GenericException);
-        }
-
-        public T TestProviderAuth<T>(Func<IStorageProvider, T> method)
-        {
-            var exception = Assert.Throws<StorageException>(() =>
-            {
-                method(_exceptionProvider);
-            });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.GenericException);
-            return method(_provider);
-        }
-
-        public async Task TestProviderAuthAsync(Func<IStorageProvider, Task> method)
-        {
-            var exception = await Assert.ThrowsAsync<StorageException>(() =>
-            {
-                return method(_exceptionProvider);
-            });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.GenericException);
-            await method(_provider);
         }
     }
 }

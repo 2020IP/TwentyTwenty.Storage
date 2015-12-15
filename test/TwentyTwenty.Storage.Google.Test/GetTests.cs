@@ -108,7 +108,6 @@ namespace TwentyTwenty.Storage.Google.Test
             Assert.NotEmpty(url);
 
             _webClient.Headers.Add("Content-Type", overrideContentType);
-            //_webClient.Headers.Add("content-disposition", "attachment;filename=" + overrideFilename);
             var downloadedData = _webClient.DownloadData(url);
 
             Assert.True(StreamEquals(downloadedData.AsStream(), stream));

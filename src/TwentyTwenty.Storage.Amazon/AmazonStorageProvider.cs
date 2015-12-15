@@ -15,9 +15,9 @@ namespace TwentyTwenty.Storage.Amazon
 
     public sealed class AmazonStorageProvider : IStorageProvider
     {
-        readonly IAmazonS3 _s3Client;
-        readonly string _bucket;
-        readonly string _serviceUrl = "https://s3.amazonaws.com";
+        private readonly IAmazonS3 _s3Client;
+        private readonly string _bucket;
+        private readonly string _serviceUrl = "https://s3.amazonaws.com";
 
         public AmazonStorageProvider(AmazonProviderOptions options)
         {
