@@ -54,7 +54,8 @@ namespace TwentyTwenty.Storage.Google.Test
                 {
                     Email = fixture.Config["GoogleEmail"],
                     PrivateKey = fixture.Config["GooglePrivateKey"],
-                    Bucket = Bucket
+                    Bucket = Bucket,
+                    CertificatePath = fixture.Config["GoogleCertificatePath"]
                 });
             _exceptionProvider =
                 new GoogleStorageProvider(new GoogleProviderOptions

@@ -34,7 +34,7 @@ namespace TwentyTwenty.Storage.Google.Test
             }
         }
 
-        //[Fact]
+        [Fact]
         public async void Test_Get_Blob_Sas_Url_Read()
         {
             var container = GetRandomContainerName();
@@ -86,7 +86,7 @@ namespace TwentyTwenty.Storage.Google.Test
             Assert.True(StreamEquals(downloadedData.AsStream(), data));
         }
 
-        //[Fact]
+        [Fact]
         public async void Test_Get_Blob_Sas_Url_Options()
         {
             var container = GetRandomContainerName();
@@ -107,6 +107,7 @@ namespace TwentyTwenty.Storage.Google.Test
 
             Assert.NotEmpty(url);
 
+            _webClient.Headers.Add("Content-Type", overrideContentType);
             var downloadedData = _webClient.DownloadData(url);
 
             Assert.True(StreamEquals(downloadedData.AsStream(), stream));

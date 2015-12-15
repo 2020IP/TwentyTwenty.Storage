@@ -11,6 +11,8 @@ using Google.Apis.Services;
 using Google.Apis.Auth.OAuth2;
 using Blob = Google.Apis.Storage.v1.Data.Object;
 using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
+using Google.Apis.Requests;
+using System.Security.Cryptography.X509Certificates;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -24,8 +26,16 @@ namespace TwentyTwenty.Storage.Google
 
         readonly private string _bucket;
 
+        readonly private string _serviceEmail;
+
+        readonly private string _certificatePath;
+
         public GoogleStorageProvider(GoogleProviderOptions options)
         {
+            _serviceEmail = options.Email;
+
+            _certificatePath = options.CertificatePath;
+
             // TODO: Throw error that private key required
             // TODO: Need to handle exceptions for invalid secerets
             if (options.PrivateKey != null)
@@ -34,7 +44,7 @@ namespace TwentyTwenty.Storage.Google
                     new ServiceAccountCredential(new ServiceAccountCredential.Initializer(options.Email)
                     {
                         Scopes = new[] { StorageService.Scope.DevstorageFullControl }
-                    }.FromPrivateKey(options.PrivateKey));
+                    }.FromCertificate(new X509Certificate2(_certificatePath, "notasecret", X509KeyStorageFlags.Exportable)));
 
                 _storageService = new StorageService(new BaseClientService.Initializer
                 {
@@ -123,7 +133,8 @@ namespace TwentyTwenty.Storage.Google
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
             string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
-            throw new NotImplementedException();
+            return new GoogleSignedUrlGenerator(_certificatePath, _serviceEmail, _bucket)
+                .GetSignedUrl($"{containerName}/{blobName}", expiry, contentType, fileName);
         }
 
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
@@ -202,31 +213,35 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                var containerBlobs = ListBlobs(containerName);
+                var batch = new BatchRequest(_storageService);
 
-                //TODO:  Parallel.ForEach or something similarly performing.  To use that would currently change my project targets, and I don't think I want to do that.  I just have a feeling this is not going to perform very well...
-                foreach (var blob in containerBlobs)
+                foreach (var blob in ListBlobs(containerName))
                 {
-                    _storageService.Objects.Delete(_bucket, $"{blob.Container}/{blob.Name}").Execute();
+                    batch.Queue<string>(_storageService.Objects.Delete(_bucket, $"{blob.Container}/{blob.Name}"), 
+                        (content, error, i, message) => { });
                 }
 
+                AsyncHelpers.RunSync(() => batch.ExecuteAsync());
             }
             catch (GoogleApiException gae)
             {
                 throw Error(gae);
             }
-
         }
 
         public async Task DeleteContainerAsync(string containerName)
         {
             try
             {
-                var containerBlobs = await ListBlobsAsync(containerName);
-                var tasks = containerBlobs.Select(blob => _storageService.Objects.Delete(_bucket,
-                    $"{blob.Container}/{blob.Name}").ExecuteAsync());
-                //Something tells me this is not the best way to do this.
-                await Task.WhenAll(tasks);
+                var batch = new BatchRequest(_storageService);
+
+                foreach (var blob in await ListBlobsAsync(containerName))
+                {
+                    batch.Queue<string>(_storageService.Objects.Delete(_bucket, $"{blob.Container}/{blob.Name}"),
+                        (content, error, i, message) => { });
+                }
+
+                await batch.ExecuteAsync();
             }
             catch (GoogleApiException gae)
             {

@@ -9,5 +9,7 @@ namespace TwentyTwenty.Storage.Google
         public string PrivateKey { get; set; }
 
         public string Bucket { get; set; }
+
+        public string CertificatePath { get; set; }
     }
 }
