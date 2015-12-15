@@ -19,58 +19,10 @@ namespace TwentyTwenty.Storage.Google
             _cert = new X509Certificate2(keyPath, "notasecret");
         }
 
-        //private void Run()
-        //{
-        //    try
-        //    {
-        //        Console.WriteLine("======= PUT File =========");
-        //        string put_url = this.GetSignedUrl("PUT");
-        //        string payload = "Lorem ipsum";
-
-        //        HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(put_url);
-        //        request.Method = "PUT";
-        //        byte[] byte1 = new UTF8Encoding().GetBytes(payload);
-        //        using (Stream reqStream = request.GetRequestStream())
-        //        {
-        //            reqStream.Write(byte1, 0, byte1.Length);
-        //            Console.WriteLine(request.Method + " " + request.Host + request.RequestUri.PathAndQuery);
-        //            renderResponse((HttpWebResponse)request.GetResponse());
-        //        }
-
-        //        Console.WriteLine("======= GET File =========");
-        //        string get_url = this.GetSignedUrl("GET");
-        //        request = (HttpWebRequest)HttpWebRequest.Create(get_url);
-        //        request.Method = "GET";
-        //        Console.WriteLine(request.Method + " " + request.Host + request.RequestUri.PathAndQuery);
-        //        Console.WriteLine(renderResponse((HttpWebResponse)request.GetResponse()));
-
-        //        Console.WriteLine("======= DELETE File =========");
-        //        string delete_url = this.GetSignedUrl("DELETE");
-        //        request = (HttpWebRequest)HttpWebRequest.Create(delete_url);
-        //        request.Method = "DELETE";
-        //        Console.WriteLine(request.Method + " " + request.Host + request.RequestUri.PathAndQuery);
-        //        Console.WriteLine(renderResponse((HttpWebResponse)request.GetResponse()));
-        //    }
-        //    catch (WebException ex)
-        //    {
-        //        if (ex.Status == WebExceptionStatus.ProtocolError)
-        //        {
-        //            HttpStatusCode statusCode = ((HttpWebResponse)ex.Response).StatusCode;
-        //            string statusDescription = ((HttpWebResponse)ex.Response).StatusDescription;
-        //            Console.WriteLine("HTTP Error: " + statusCode + " " + statusDescription);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("Exception " + ex);
-        //    }
-
-        //}
-
         public string GetSignedUrl(string blob, DateTimeOffset expiry, string contentType = null, string fileName = null, string type = "GET")
         {
             var expiration = expiry.ToUnixTimeSeconds();
-            var disp = fileName != null ? "attachment;filename=" + fileName : string.Empty;
+            var disp = fileName != null ? "content-disposition:attachment;filename=" + fileName : string.Empty;
             var urlSignature = SignString($"{type}\n\n{contentType}\n{expiration}\n/{_bucket}/{blob}");
 
             return $"https://storage.googleapis.com/{_bucket}/{blob}?GoogleAccessId={_serviceEmail}&Expires={expiration}&Signature={WebUtility.UrlEncode(urlSignature)}";

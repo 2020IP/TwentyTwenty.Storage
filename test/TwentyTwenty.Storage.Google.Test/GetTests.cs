@@ -101,13 +101,14 @@ namespace TwentyTwenty.Storage.Google.Test
 
             var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
 
-            await CreateNewObject(container, blobName, data);
+            await CreateNewObject(container, blobName, data, contentType: overrideContentType);
 
             var url = _provider.GetBlobSasUrl(container, blobName, expiry, true, overrideFilename, overrideContentType);
 
             Assert.NotEmpty(url);
 
             _webClient.Headers.Add("Content-Type", overrideContentType);
+            //_webClient.Headers.Add("content-disposition", "attachment;filename=" + overrideFilename);
             var downloadedData = _webClient.DownloadData(url);
 
             Assert.True(StreamEquals(downloadedData.AsStream(), stream));
