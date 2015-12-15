@@ -7,6 +7,7 @@ using Google.Apis.Services;
 using Google.Apis.Storage.v1;
 using Microsoft.Framework.Configuration;
 using TwentyTwenty.Storage.Google;
+using System.Security.Cryptography.X509Certificates;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
@@ -27,7 +28,7 @@ namespace TwentyTwenty.Storage.Google.Test
                 new ServiceAccountCredential(new ServiceAccountCredential.Initializer(Config["GoogleEmail"])
                 {
                     Scopes = new[] {StorageService.Scope.DevstorageFullControl}
-                }.FromPrivateKey(Config["GooglePrivateKey"]));
+                }.FromCertificate(new X509Certificate2(Convert.FromBase64String(Config["GoogleP12PrivateKey"]), "notasecret", X509KeyStorageFlags.Exportable)));
 
             _client = new StorageService(new BaseClientService.Initializer
             {

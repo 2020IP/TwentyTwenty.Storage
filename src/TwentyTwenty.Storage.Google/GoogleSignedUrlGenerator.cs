@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -12,11 +13,11 @@ namespace TwentyTwenty.Storage.Google
         private readonly string _serviceEmail;
         private readonly string _bucket;
 
-        public GoogleSignedUrlGenerator(string keyPath, string serviceEmail, string bucket)
+        public GoogleSignedUrlGenerator(X509Certificate2 cert, string serviceEmail, string bucket)
         {
             _bucket = bucket;
             _serviceEmail = serviceEmail;
-            _cert = new X509Certificate2(keyPath, "notasecret");
+            _cert = cert;
         }
 
         public string GetSignedUrl(string blob, DateTimeOffset expiry, string contentType = null, string fileName = null, string type = "GET")

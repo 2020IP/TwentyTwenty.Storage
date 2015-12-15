@@ -57,7 +57,7 @@ namespace TwentyTwenty.Storage.Google.Test
             Assert.True(StreamEquals(downloadedData.AsStream(), stream));
         }
 
-        //[Fact]
+        [Fact]
         public async void Test_Get_Blob_Sas_Url_Write()
         {
             var container = GetRandomContainerName();
@@ -113,8 +113,8 @@ namespace TwentyTwenty.Storage.Google.Test
 
             Assert.True(StreamEquals(downloadedData.AsStream(), stream));
             Assert.Equal(_webClient.ResponseHeaders["Content-Type"], overrideContentType);
-            Assert.Contains("attachment", _webClient.ResponseHeaders["Content-Disposition"]);
-            Assert.Contains("filename=\"" + overrideFilename + "\"", _webClient.ResponseHeaders["Content-Disposition"]);
+            //Assert.Contains("attachment", _webClient.ResponseHeaders["Content-Disposition"]);
+            //Assert.Contains("filename=\"" + overrideFilename + "\"", _webClient.ResponseHeaders["Content-Disposition"]);
         }
 
         [Fact]

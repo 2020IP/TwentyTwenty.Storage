@@ -28,23 +28,22 @@ namespace TwentyTwenty.Storage.Google
 
         readonly private string _serviceEmail;
 
-        readonly private string _certificatePath;
+        readonly private X509Certificate2 _certificate;
 
         public GoogleStorageProvider(GoogleProviderOptions options)
         {
             _serviceEmail = options.Email;
 
-            _certificatePath = options.CertificatePath;
-
             // TODO: Throw error that private key required
             // TODO: Need to handle exceptions for invalid secerets
-            if (options.PrivateKey != null)
+            if (options.P12PrivateKey != null)
             {
+                _certificate = new X509Certificate2(Convert.FromBase64String(options.P12PrivateKey), "notasecret", X509KeyStorageFlags.Exportable);
                 var credential =
                     new ServiceAccountCredential(new ServiceAccountCredential.Initializer(options.Email)
                     {
                         Scopes = new[] { StorageService.Scope.DevstorageFullControl }
-                    }.FromCertificate(new X509Certificate2(_certificatePath, "notasecret", X509KeyStorageFlags.Exportable)));
+                    }.FromCertificate(_certificate));
 
                 _storageService = new StorageService(new BaseClientService.Initializer
                 {
@@ -133,8 +132,8 @@ namespace TwentyTwenty.Storage.Google
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
             string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
-            return new GoogleSignedUrlGenerator(_certificatePath, _serviceEmail, _bucket)
-                .GetSignedUrl($"{containerName}/{blobName}", expiry, contentType, fileName);
+            return new GoogleSignedUrlGenerator(_certificate, _serviceEmail, _bucket)
+                .GetSignedUrl($"{containerName}/{blobName}", expiry, contentType, fileName, access == BlobUrlAccess.Read ? "GET" : "PUT");
         }
 
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
