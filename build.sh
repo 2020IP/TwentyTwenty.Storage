@@ -12,7 +12,7 @@ fi
 mkdir -p $cachedir
 nugetVersion=latest
 cachePath=$cachedir/nuget.$nugetVersion.exe
-export BUILDCMD_DNX_VERSION=1.0.0-beta8
+export BUILDCMD_DNX_VERSION=1.0.0-rc1-final
 export DNX_FEED=https://www.myget.org/F/aspnetmaster/
 
 url=https://dist.nuget.org/win-x86-commandline/$nugetVersion/nuget.exe
