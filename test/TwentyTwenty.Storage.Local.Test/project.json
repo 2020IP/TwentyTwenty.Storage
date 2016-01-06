@@ -15,9 +15,9 @@
       "test": "xunit.runner.dnx"
   },
   "dependencies": {
-    "TwentyTwenty.Storage": "1.0.0-*",
-    "TwentyTwenty.Storage.Local": "1.0.0-*",
+    "TwentyTwenty.Storage": "1.0.1-*",
+    "TwentyTwenty.Storage.Local": "1.0.1-*",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-beta6-build191"
+    "xunit.runner.dnx": "2.1.0-rc1-build204"
   }
 }

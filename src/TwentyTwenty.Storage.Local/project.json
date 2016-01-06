@@ -15,7 +15,7 @@
     "net45": {}
   },
   "dependencies": {
-    "TwentyTwenty.Storage": "1.0.0-*"
+    "TwentyTwenty.Storage": "1.0.1-*"
   },
   "compilationOptions": {
       "define": [ "DNX" ]

@@ -29,14 +29,23 @@ The functional tests depend on access to actual cloud storage provider accounts.
 Azure:
 ```
 cd test\TwentyTwenty.Storage.Azure.Test
-user-secret set ConnectionString "myreallylongconnectionstring"
+user-secret set ConnectionString "my_really_long_connection_string"
 ```
 Amazon:
 ```
 cd test\TwentyTwenty.Storage.Amazon.Test
-user-secret set PublicKey "mypublickey"
-user-secret set PrivateKey "myprivatekey"
-user-secret set Bucket "mybucketname"
+user-secret set PublicKey "my_public_key"
+user-secret set PrivateKey "my_private_key"
+user-secret set Bucket "my_bucket_name"
+```
+Google:
+```
+cd test\TwentyTwenty.Storage.Google.Test
+user-secret set GoogleEmail "my_google_storage_api_email"
+user-secret set GoogleBucket "my_google_bucket"
+user-secret set GoogleP12PrivateKey "my_base64_encoded_byte_array_google_p12_key"
+
+NOTE: To get the 'GoogleP12PrivateKey' get the byte array from the P12 certificate for your Google Cloud Storage API and base64 encode it
 ```
 Secrets can be listed with:
 ```

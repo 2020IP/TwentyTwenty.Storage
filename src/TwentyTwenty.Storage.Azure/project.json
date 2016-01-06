@@ -24,8 +24,8 @@
     }
   },
   "dependencies": {
-    "WindowsAzure.Storage": "6.1.1-preview",
-    "TwentyTwenty.Storage": "1.0.0-*"
+    "TwentyTwenty.Storage": "1.0.1-*",
+    "WindowsAzure.Storage": "6.1.1-preview"
   },
   "compilationOptions": {
       "define": [ "DNX" ]

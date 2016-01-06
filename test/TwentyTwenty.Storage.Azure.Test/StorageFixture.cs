@@ -1,4 +1,4 @@
-﻿using Microsoft.Framework.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;

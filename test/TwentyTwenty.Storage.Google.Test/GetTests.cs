@@ -58,7 +58,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Sas_Url_Write()
+        public void Test_Get_Blob_Sas_Url_Write()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

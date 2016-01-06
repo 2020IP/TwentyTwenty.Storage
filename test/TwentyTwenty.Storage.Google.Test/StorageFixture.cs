@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Storage.v1;
-using Microsoft.Framework.Configuration;
+using Microsoft.Extensions.Configuration;
 using TwentyTwenty.Storage.Google;
 using System.Security.Cryptography.X509Certificates;
 

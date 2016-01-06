@@ -26,7 +26,7 @@
     "define": [ "DNX" ]
   },
   "dependencies": {
-    "TwentyTwenty.Storage": "1.0.0-*",
+    "TwentyTwenty.Storage": "1.0.1-*",
     "AWSSDK.S3": "3.1.3.5"
   }
 }

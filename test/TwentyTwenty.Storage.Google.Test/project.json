@@ -12,12 +12,12 @@
 
   "dependencies": {
     "TwentyTwenty.Storage": "1.0.1-*",
-    "TwentyTwenty.Storage.Google": "1.0.0-*",
+    "TwentyTwenty.Storage.Google": "1.0.1-*",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-beta6-build191",
-    "Microsoft.Framework.Configuration": "1.0.0-beta8",
-    "Microsoft.Framework.Configuration.UserSecrets": "1.0.0-beta8",
-    "Microsoft.Framework.Configuration.EnvironmentVariables": "1.0.0-beta8",
+    "xunit.runner.dnx": "2.1.0-rc1-build204",
+    "Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc1-final",
     "Google.Apis.Storage.v1": "1.9.2.520",
     "FluentAssertions": "4.0.1",
     "BouncyCastle": "1.7.0",
