@@ -18,7 +18,8 @@ namespace TwentyTwenty.Storage.Local
         {
             try
             {
-                File.Delete($"{_basePath}\\{containerName}\\{blobName}");
+                var path = Path.Combine(_basePath, containerName, blobName);
+                File.Delete(path);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -55,7 +56,8 @@ namespace TwentyTwenty.Storage.Local
         {
             try
             {
-                Directory.Delete($"{_basePath}\\{containerName}", true);
+                var path = Path.Combine(_basePath, containerName);
+                Directory.Delete(path, true);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -86,8 +88,8 @@ namespace TwentyTwenty.Storage.Local
 
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
         {
-            var path = $"{_basePath}\\{containerName}\\{blobName}";
-
+            var path = Path.Combine(_basePath, containerName, blobName);
+            
             try
             {
                 var info = new FileInfo(path);
@@ -119,14 +121,15 @@ namespace TwentyTwenty.Storage.Local
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, 
             bool isDownload = false, string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
-            return $"{_basePath}\\{containerName}\\{blobName}";
+            return Path.Combine(_basePath, containerName, blobName);
         }
 
         public Stream GetBlobStream(string containerName, string blobName)
         {
             try
             {
-                return File.OpenRead($"{_basePath}\\{containerName}\\{blobName}");
+                var path = Path.Combine(_basePath, containerName, blobName);
+                return File.OpenRead(path);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -165,7 +168,7 @@ namespace TwentyTwenty.Storage.Local
 
         public string GetBlobUrl(string containerName, string blobName)
         {
-            return $"{_basePath}\\{containerName}\\{blobName}";
+            return Path.Combine(_basePath, containerName, blobName);
         }
 
         public IList<BlobDescriptor> ListBlobs(string containerName)
@@ -174,7 +177,8 @@ namespace TwentyTwenty.Storage.Local
 
             try
             {
-                var dirInfo = new DirectoryInfo($"{_basePath}\\{containerName}");
+                var dir = Path.Combine(_basePath, containerName);
+                var dirInfo = new DirectoryInfo(dir);
                 var fileInfo = dirInfo.GetFiles();
 
                 foreach (var f in fileInfo)
@@ -208,12 +212,12 @@ namespace TwentyTwenty.Storage.Local
 
         public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null)
         {
-            var dir = $"{_basePath}\\{containerName}";
+            var dir = Path.Combine(_basePath, containerName);
 
             try
             {
                 Directory.CreateDirectory(dir);
-                using (var file = File.Create($"{dir}\\{blobName}"))
+                using (var file = File.Create(Path.Combine(dir, blobName)))
                 {
                     source.CopyTo(file);
                 }
@@ -246,12 +250,12 @@ namespace TwentyTwenty.Storage.Local
 
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null)
         {
-            var dir = $"{_basePath}\\{containerName}";
+            var dir = Path.Combine(_basePath, containerName);
 
             try
             {
                 Directory.CreateDirectory(dir);
-                using (var file = File.Create($"{dir}\\{blobName}"))
+                using (var file = File.Create(Path.Combine(dir, blobName)))
                 {
                     await source.CopyToAsync(file);
                 }
