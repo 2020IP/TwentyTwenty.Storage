@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.1-*",
+  "version": "1.0.2-*",
   "description": "TwentyTwenty.Storage.Google Class Library",
   "authors": [ "Andrew" ],
   "tags": [ "" ],
@@ -7,7 +7,7 @@
   "licenseUrl": "",
 
   "dependencies": {
-    "TwentyTwenty.Storage": "1.0.1-*",
+    "TwentyTwenty.Storage": "1.0.2-*",
     "Google.Apis.Storage.v1": "1.9.2.520",
     "BouncyCastle": "1.7.0",
     "Newtonsoft.Json":  "7.0.1"
