@@ -64,7 +64,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var data = GenerateRandomBlobStream();
             var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
 
-            var writeUrl = _provider.GetBlobSasUrl(container, blobName, expiry, false, null, null, BlobUrlAccess.Write);
+            var writeUrl = _provider.GetBlobSasUrl(container, blobName, expiry, access: BlobUrlAccess.Write);
 
             Assert.NotEmpty(writeUrl);
 
