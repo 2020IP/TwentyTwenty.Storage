@@ -1,5 +1,4 @@
 #20|20 Storage
----
 
 [![Build status](https://ci.appveyor.com/api/projects/status/0ss5kpj5gy739vwx/branch/master?svg=true)](https://ci.appveyor.com/project/2020IP/twentytwenty-storage/branch/master)
 [![Nuget Version](https://img.shields.io/nuget/v/TwentyTwenty.Storage.svg)](https://www.nuget.org/packages/TwentyTwenty.Storage/)
@@ -7,7 +6,6 @@
 <!--TravisCI: [![Build Status](https://travis-ci.org/2020IP/TwentyTwenty.Storage.svg)](https://travis-ci.org/2020IP/TwentyTwenty.Storage)-->
 
 ## Overview
----
 
 20|20 Storage uses the least common denominator of functionality between the supported providers to build a cross-cloud storage solution.
 
@@ -18,7 +16,6 @@ Currently supported providers are:
 * Local File System Storage (Signed URL and Update Properties not implemented)
 
 ## Basic Usage
----
 
 #### Initialization:
 ```
@@ -106,7 +103,6 @@ await _provider.DeleteBlobAsync(containerName, blobName);
 ```
 
 ## Adding Provider Accounts
----
 
 The libary, and the functional tests within it, depends on access to actual cloud storage provider accounts.  Providing these configuration values can be done through environment variables or the user secret store.
 
