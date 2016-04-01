@@ -15,6 +15,8 @@ Currently supported providers are:
 * Google Cloud Storage
 * Local File System Storage (Signed URL and Update Properties not implemented)
 
+#### Featured on .NET Rocks! [Show 1277](https://www.dotnetrocks.com/?show=1277)
+
 ## Basic Usage
 
 #### Initialization:
