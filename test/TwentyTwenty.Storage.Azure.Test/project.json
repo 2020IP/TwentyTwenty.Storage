@@ -13,11 +13,11 @@
   "dependencies": {
     "xunit": "2.1.0",
     "xunit.runner.dnx": "2.1.0-rc1-build204",
+    "xunit.runner.visualstudio": "2.1.0-rc1-build1124",
     "Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc1-final",
-    "WindowsAzure.Storage": "6.1.1-preview",
-    "TwentyTwenty.Storage.Azure": "1.0.1-*"
+    "TwentyTwenty.Storage.Azure": "1.0.3-*"
   },
   "commands": {
     "test": "xunit.runner.dnx"

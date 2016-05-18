@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2-*",
+  "version": "1.0.3-*",
   "title": "2020 Storage - Azure Blob Storage Provider",
   "description": "A cross-cloud storage abstraction",
   "authors": [ "2020IP" ],
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "TwentyTwenty.Storage": "1.0.2-*",
-    "WindowsAzure.Storage": "6.1.1-preview"
+    "WindowsAzure.Storage": "6.2.2-preview"
   },
   "compilationOptions": {
       "define": [ "DNX" ]
