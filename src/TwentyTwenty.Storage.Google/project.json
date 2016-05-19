@@ -1,11 +1,17 @@
 ﻿{
   "version": "1.0.2-*",
   "description": "TwentyTwenty.Storage.Google Class Library",
-  "authors": [ "Andrew" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
-
+  "authors": [ "2020IP" ],
+  "packOptions": {
+    "projectUrl": "https://github.com/2020IP/TwentyTwenty.Storage",
+    "iconUrl": "https://avatars3.githubusercontent.com/u/15891935?v=3&s=64",
+    "tags": [ "storage blob file scalable cloud azure amazon store windows aws s3 local filesystem" ],
+    "licenseUrl": "https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/2020IP/TwentyTwenty.Storage"
+    }
+  },
   "dependencies": {
     "TwentyTwenty.Storage": "1.0.2-*",
     "Google.Apis.Storage.v1": "1.9.2.520",
@@ -14,6 +20,6 @@
   },
 
   "frameworks": {
-    "net46": { }
+    "net45": { }
   }
 }

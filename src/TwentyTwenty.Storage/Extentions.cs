@@ -8,6 +8,13 @@ namespace TwentyTwenty.Storage
 {
     public static class Extentions
     {
+        public static long ToUnixTimeSeconds(this DateTimeOffset dateTimeOffset)
+        {
+            var unixStart = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var unixTimeStampInTicks = (dateTimeOffset.ToUniversalTime() - unixStart).Ticks;
+            return unixTimeStampInTicks / TimeSpan.TicksPerSecond;
+        }
+
         public static StorageError ToStorageError(this int code)
         {
             return errors

@@ -1,33 +1,25 @@
 ﻿{
   "version": "1.0.0-*",
   "description": "TwentyTwenty.Storage.Google.Test Class Library",
-  "authors": [ "Andrew" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "authors": [ "2020IP" ],
   "userSecretsId": "TwentyTwenty.Storage.Google.Test-EFCF7CA3-97B7-45A4-8D19-FAB47939AB03",
   "tooling": {
     "defaultNamespace": "TwentyTwenty.Storage.Google.Test"
   },
-
   "dependencies": {
-    "TwentyTwenty.Storage": "1.0.1-*",
-    "TwentyTwenty.Storage.Google": "1.0.1-*",
+    "TwentyTwenty.Storage.Google": "*",
+    "dotnet-test-xunit": "1.0.0-*",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-rc1-build204",
-    "Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
-    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
-    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-final",
     "Google.Apis.Storage.v1": "1.9.2.520",
     "FluentAssertions": "4.0.1",
     "BouncyCastle": "1.7.0",
-    "Newtonsoft.Json": "7.0.1"
+    "Newtonsoft.Json": "8.0.3"
   },
-  "commands": {
-    "test": "xunit.runner.dnx"
-  },
-
+  "testRunner": "xunit",
   "frameworks": {
-    "dnx46": { }
+    "net46": { }
   }
 }

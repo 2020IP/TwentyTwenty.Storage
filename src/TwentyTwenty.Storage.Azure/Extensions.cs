@@ -42,8 +42,7 @@ namespace TwentyTwenty.Storage.Azure
                         errorCode = StorageErrorCode.InvalidCredentials;
                         break;
                     case HttpStatusCode.NotFound:
-                        var container = storageException.Message.ToLower().Contains("container");
-                        errorCode = container ? StorageErrorCode.InvalidContainerName : StorageErrorCode.InvalidBlobName;
+                        errorCode = StorageErrorCode.InvalidName;
                         break;
                     default:
                         errorCode = StorageErrorCode.GenericException;

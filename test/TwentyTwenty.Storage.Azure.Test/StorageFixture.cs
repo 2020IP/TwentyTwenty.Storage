@@ -14,9 +14,9 @@ namespace TwentyTwenty.Storage.Azure.Test
         public CloudBlobClient _client;
         
         public StorageFixture()
-        {
+        {   
             Config = new ConfigurationBuilder()
-                .SetBasePath(".")
+                .SetBasePath(Environment.CurrentDirectory + "..\\..\\..\\..\\..\\") // TODO: :poop:
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();

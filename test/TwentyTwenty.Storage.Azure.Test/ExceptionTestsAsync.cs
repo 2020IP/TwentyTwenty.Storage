@@ -88,7 +88,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public async void Test_Exception_ListBlobAsync_ContainerName()
         {
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.ListBlobsAsync(GetRandomContainerName()));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidContainerName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.GetBlobStreamAsync(container, "asdf"));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.GetBlobDescriptorAsync(container, "asdf"));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.UpdateBlobPropertiesAsync(container, "asdf", new BlobProperties()));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
     }
 }

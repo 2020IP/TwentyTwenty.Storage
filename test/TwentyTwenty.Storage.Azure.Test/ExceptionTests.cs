@@ -96,7 +96,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 _provider.ListBlobs("asdf");
             });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidContainerName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 _provider.GetBlobStream(container, "asdf");
             });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
 
         [Fact]
@@ -126,7 +126,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 _provider.GetBlobDescriptor(container, "asdf");
             });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = Assert.Throws<StorageException>(() => _provider.UpdateBlobProperties(container, "asdf", new BlobProperties()));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
         }
     }
 }

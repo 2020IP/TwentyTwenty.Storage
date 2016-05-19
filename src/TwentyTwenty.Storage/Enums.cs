@@ -25,8 +25,7 @@ namespace TwentyTwenty.Storage
         GenericException = 1001,
         InvalidAccess = 1002,
         BlobInUse = 1003,
-        InvalidBlobName = 1004,
-        InvalidContainerName = 1005,
+        InvalidName = 1005,
         ErrorOpeningBlob = 1006,
         NoCredentialsProvided = 1007
     }

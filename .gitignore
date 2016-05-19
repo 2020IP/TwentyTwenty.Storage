@@ -210,3 +210,4 @@ FakesAssemblies/
 
 # NuGet exe
 .nuget
+.build/

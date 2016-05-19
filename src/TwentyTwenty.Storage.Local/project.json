@@ -3,21 +3,32 @@
   "title": "2020 Storage - Local Filesystem Provider",
   "description": "A cross-cloud storage abstraction",
   "authors": [ "2020IP" ],
-  "iconUrl": "https://avatars3.githubusercontent.com/u/15891935?v=3&s=64",
-  "tags": [ "storage blob file scalable cloud azure amazon  store windows aws s3 local filesystem" ],
-  "projectUrl": "https://github.com/2020IP/TwentyTwenty.Storage",
-  "licenseUrl": "https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt",
+  "packOptions": {
+    "projectUrl": "https://github.com/2020IP/TwentyTwenty.Storage",
+    "iconUrl": "https://avatars3.githubusercontent.com/u/15891935?v=3&s=64",
+    "tags": [ "storage blob file scalable cloud azure amazon store windows aws s3 local filesystem" ],
+    "licenseUrl": "https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/2020IP/TwentyTwenty.Storage"
+    }
+  },
   "tooling": {
     "defaultNamespace": "TwentyTwenty.Storage.Local"
   },
 
   "frameworks": {
-    "net45": {}
+    "netstandard1.3": {
+      "dependencies": {
+        "System.IO.FileSystem": "4.0.1-*",
+        "System.Runtime.Extensions": "4.1.0-*"
+      }
+    }
   },
   "dependencies": {
     "TwentyTwenty.Storage": "1.0.2-*"
   },
-  "compilationOptions": {
+  "buildOptions": {
       "define": [ "DNX" ]
   }
 }
