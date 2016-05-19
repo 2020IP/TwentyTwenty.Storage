@@ -16,7 +16,7 @@ namespace TwentyTwenty.Storage.Local.Test
                 _provider.DeleteBlob("asdf", "asdf.txt");
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, ex.ErrorCode);
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace TwentyTwenty.Storage.Local.Test
                 _provider.GetBlobStream(container, "asdf.txt");
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidBlobName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, ex.ErrorCode);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace TwentyTwenty.Storage.Local.Test
                 _provider.GetBlobStream("asdf", "asdf.txt");
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, ex.ErrorCode);
         }
     }
 }

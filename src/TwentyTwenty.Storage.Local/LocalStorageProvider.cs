@@ -21,29 +21,9 @@ namespace TwentyTwenty.Storage.Local
                 var path = Path.Combine(_basePath, containerName, blobName);
                 File.Delete(path);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new StorageException(1002.ToStorageError(), ex);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                throw new StorageException(1005.ToStorageError(), ex);
-            }
-            catch (NotSupportedException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (IOException ex)
-            {
-                throw new StorageException(1003.ToStorageError(), ex);
-            }
             catch (Exception ex)
             {
-                throw new StorageException(1001.ToStorageError(), ex);
+                throw ex.ToStorageException();
             }
         }
 
@@ -59,25 +39,9 @@ namespace TwentyTwenty.Storage.Local
                 var path = Path.Combine(_basePath, containerName);
                 Directory.Delete(path, true);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new StorageException(1002.ToStorageError(), ex);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new StorageException(1005.ToStorageError(), ex);
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                throw new StorageException(1005.ToStorageError(), ex);
-            }
-            catch (IOException ex)
-            {
-                throw new StorageException(1003.ToStorageError(), ex);
-            }
             catch (Exception ex)
             {
-                throw new StorageException(1001.ToStorageError(), ex);
+                throw ex.ToStorageException();
             }
         }
 
@@ -131,33 +95,9 @@ namespace TwentyTwenty.Storage.Local
                 var path = Path.Combine(_basePath, containerName, blobName);
                 return File.OpenRead(path);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new StorageException(1002.ToStorageError(), ex);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                throw new StorageException(1005.ToStorageError(), ex);
-            }
-            catch (NotSupportedException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (FileNotFoundException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (IOException ex)
-            {
-                throw new StorageException(1006.ToStorageError(), ex);
-            }
             catch (Exception ex)
             {
-                throw new StorageException(1001.ToStorageError(), ex);
+                throw ex.ToStorageException();
             }
         }
 
@@ -222,29 +162,9 @@ namespace TwentyTwenty.Storage.Local
                     source.CopyTo(file);
                 }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new StorageException(1002.ToStorageError(), ex);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                throw new StorageException(1005.ToStorageError(), ex);
-            }
-            catch (NotSupportedException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (IOException ex)
-            {
-                throw new StorageException(1006.ToStorageError(), ex);
-            }
             catch (Exception ex)
             {
-                throw new StorageException(1001.ToStorageError(), ex);
+                throw ex.ToStorageException();
             }
         }
 
@@ -260,29 +180,9 @@ namespace TwentyTwenty.Storage.Local
                     await source.CopyToAsync(file);
                 }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new StorageException(1002.ToStorageError(), ex);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                throw new StorageException(1005.ToStorageError(), ex);
-            }
-            catch (NotSupportedException ex)
-            {
-                throw new StorageException(1004.ToStorageError(), ex);
-            }
-            catch (IOException ex)
-            {
-                throw new StorageException(1006.ToStorageError(), ex);
-            }
             catch (Exception ex)
             {
-                throw new StorageException(1001.ToStorageError(), ex);
+                throw ex.ToStorageException();
             }
         }
 
