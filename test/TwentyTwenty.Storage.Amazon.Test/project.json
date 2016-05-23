@@ -7,9 +7,10 @@
     "defaultNamespace": "TwentyTwenty.Storage.Amazon.Test"
   },
   "dependencies": {
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027",
     "TwentyTwenty.Storage.Amazon": "*",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-*",
+    "dotnet-test-xunit": "1.0.0-rc3-build10019",
     "Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-final",

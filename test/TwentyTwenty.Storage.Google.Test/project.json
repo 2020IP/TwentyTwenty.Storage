@@ -7,8 +7,9 @@
     "defaultNamespace": "TwentyTwenty.Storage.Google.Test"
   },
   "dependencies": {
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027",
     "TwentyTwenty.Storage.Google": "*",
-    "dotnet-test-xunit": "1.0.0-*",
+    "dotnet-test-xunit": "1.0.0-rc3-build10019",
     "xunit": "2.1.0",
     "Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final",

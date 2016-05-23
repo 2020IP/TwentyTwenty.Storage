@@ -27,8 +27,5 @@
     },
     "net45": {
     }
-  },
-  "buildOptions": {
-      "define": [ "DNX" ]
   }
 }
