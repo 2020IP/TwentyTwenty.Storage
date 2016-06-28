@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.2-*",
+  "version": "1.1.1-*",
   "description": "TwentyTwenty.Storage.Google Class Library",
   "authors": [ "2020IP" ],
   "packOptions": {
@@ -13,10 +13,10 @@
     }
   },
   "dependencies": {
-    "TwentyTwenty.Storage": "1.0.2-*",
+    "TwentyTwenty.Storage": "1.1.1-*",
     "Google.Apis.Storage.v1": "1.9.2.520",
-    "BouncyCastle": "1.7.0",
-    "Newtonsoft.Json":  "7.0.1"
+    "BouncyCastle": "1.8.1",
+    "Newtonsoft.Json":  "9.0.1"
   },
 
   "frameworks": {

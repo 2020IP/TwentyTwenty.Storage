@@ -8,12 +8,12 @@
   },
 
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027",
-    "dotnet-test-xunit": "1.0.0-rc3-build10019",
-    "xunit": "2.1.0",
-    "Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
-    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final",
-    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-final",
+    "Microsoft.NETCore.Platforms": "1.0.1",
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
+    "xunit": "2.2.0-beta3-build3301",
+    "Microsoft.Extensions.Configuration": "1.0.0",
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
     "TwentyTwenty.Storage.Azure": "*"
   },
   "frameworks": {

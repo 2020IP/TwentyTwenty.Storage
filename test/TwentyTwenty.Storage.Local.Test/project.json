@@ -10,10 +10,10 @@
   },
   "testRunner": "xunit",
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027",
+    "Microsoft.NETCore.Platforms": "1.0.1",
     "TwentyTwenty.Storage": "*",
     "TwentyTwenty.Storage.Local": "*",
-    "dotnet-test-xunit": "1.0.0-rc3-build10019",
-    "xunit": "2.1.0"
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
+    "xunit": "2.2.0-beta3-build3301"
   }
 }
