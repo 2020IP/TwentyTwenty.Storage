@@ -18,9 +18,7 @@
   },
 
   "frameworks": {
-    "netstandard1.1": {
-      "imports": [ "dnxcore50", "portable-net45+win8+wp8" ]
-    },
+    "netstandard1.3": { },
     "net45": {
       "dependencies": {
         "System.Runtime": "4.0.0",
@@ -31,6 +29,6 @@
 
   "dependencies": {
     "TwentyTwenty.Storage": "1.1.1-*",
-    "AWSSDK.S3": "3.1.3.5"
+    "AWSSDK.S3": "3.3.0.1"
   }
 }

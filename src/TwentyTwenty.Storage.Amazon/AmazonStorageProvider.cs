@@ -666,6 +666,8 @@ namespace TwentyTwenty.Storage.Amazon
                 MetadataDirective = S3MetadataDirective.REPLACE
             };
 
+            updateRequest.Metadata["Content-Disposition"] = properties.ContentDisposition;
+
             try
             {
                 AsyncHelpers.RunSync(() => _s3Client.CopyObjectAsync(updateRequest));
