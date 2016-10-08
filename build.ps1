@@ -1,67 +1,40 @@
-$ErrorActionPreference = "Stop"
+echo "build: Build started"
 
-function DownloadWithRetry([string] $url, [string] $downloadLocation, [int] $retries)
-{
-    while($true)
-    {
-        try
-        {
-            Invoke-WebRequest $url -OutFile $downloadLocation
-            break
-        }
-        catch
-        {
-            $exceptionMessage = $_.Exception.Message
-            Write-Host "Failed to download '$url': $exceptionMessage"
-            if ($retries -gt 0) {
-                $retries--
-                Write-Host "Waiting 10 seconds before retrying. Retries left: $retries"
-                Start-Sleep -Seconds 10
+Push-Location $PSScriptRoot
 
-            }
-            else
-            {
-                $exception = $_.Exception
-                throw $exception
-            }
-        }
-    }
+if(Test-Path .\artifacts) {
+	echo "build: Cleaning .\artifacts"
+	Remove-Item .\artifacts -Force -Recurse
 }
 
-cd $PSScriptRoot
+& dotnet restore --no-cache
 
-$repoFolder = $PSScriptRoot
-$env:REPO_FOLDER = $repoFolder
+$branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
+$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
+$suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
 
-$koreBuildZip="https://github.com/aspnet/KoreBuild/archive/dev.zip"
-if ($env:KOREBUILD_ZIP)
-{
-    $koreBuildZip=$env:KOREBUILD_ZIP
+echo "build: Version suffix is $suffix"
+
+foreach ($src in ls src/*) {
+    Push-Location $src
+
+	echo "build: Packaging project in $src"
+
+    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix
+    if($LASTEXITCODE -ne 0) { exit 1 }    
+
+    Pop-Location
 }
 
-$buildFolder = ".build"
-$buildFile="$buildFolder\KoreBuild.ps1"
+foreach ($test in ls test/*.Tests) {
+    Push-Location $test
 
-if (!(Test-Path $buildFolder)) {
-    Write-Host "Downloading KoreBuild from $koreBuildZip"
+	echo "build: Testing project in $test"
 
-    $tempFolder=$env:TEMP + "\KoreBuild-" + [guid]::NewGuid()
-    New-Item -Path "$tempFolder" -Type directory | Out-Null
+    & dotnet test -c Release
+    if($LASTEXITCODE -ne 0) { exit 3 }
 
-    $localZipFile="$tempFolder\korebuild.zip"
-
-    DownloadWithRetry -url $koreBuildZip -downloadLocation $localZipFile -retries 6
-
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [System.IO.Compression.ZipFile]::ExtractToDirectory($localZipFile, $tempFolder)
-
-    New-Item -Path "$buildFolder" -Type directory | Out-Null
-    copy-item "$tempFolder\**\build\*" $buildFolder -Recurse
-
-    # Cleanup
-    if (Test-Path $tempFolder) {
-        Remove-Item -Recurse -Force $tempFolder
-    }
+    Pop-Location
 }
 
-&"$buildFile" $args
+Pop-Location

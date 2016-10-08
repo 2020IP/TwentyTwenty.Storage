@@ -1,46 +1,12 @@
-#!/usr/bin/env bash
-repoFolder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $repoFolder
+#!/bin/bash
+dotnet restore
+for path in src/*/project.json; do
+    dirname="$(dirname "${path}")"
+    dotnet build ${dirname} -c Release
+done
 
-koreBuildZip="https://github.com/aspnet/KoreBuild/archive/dev.zip"
-if [ ! -z $KOREBUILD_ZIP ]; then
-    koreBuildZip=$KOREBUILD_ZIP
-fi
-
-buildFolder=".build"
-buildFile="$buildFolder/KoreBuild.sh"
-
-if test ! -d $buildFolder; then
-    echo "Downloading KoreBuild from $koreBuildZip"
-
-    tempFolder="/tmp/KoreBuild-$(uuidgen)"
-    mkdir $tempFolder
-
-    localZipFile="$tempFolder/korebuild.zip"
-
-    retries=6
-    until (wget -O $localZipFile $koreBuildZip 2>/dev/null || curl -o $localZipFile --location $koreBuildZip 2>/dev/null)
-    do
-        echo "Failed to download '$koreBuildZip'"
-        if [ "$retries" -le 0 ]; then
-            exit 1
-        fi
-        retries=$((retries - 1))
-        echo "Waiting 10 seconds before retrying. Retries left: $retries"
-        sleep 10s
-    done
-
-    unzip -q -d $tempFolder $localZipFile
-
-    mkdir $buildFolder
-    cp -r $tempFolder/**/build/** $buildFolder
-
-    chmod +x $buildFile
-
-    # Cleanup
-    if test ! -d $tempFolder; then
-        rm -rf $tempFolder
-    fi
-fi
-
-$buildFile -r $repoFolder "$@"
+for path in test/*/project.json; do
+    dirname="$(dirname "${path}")"
+    dotnet build ${dirname} -f netcoreapp1.0 -c Release
+    dotnet test ${dirname} -f netcoreapp1.0  -c Release
+done
