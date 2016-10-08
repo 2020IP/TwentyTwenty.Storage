@@ -75,7 +75,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 return _exceptionProvider.GetBlobDescriptorAsync(container, blobName);
             });
 
-            Assert.Equal((int)StorageErrorCode.InvalidAccess, ex.ErrorCode);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
