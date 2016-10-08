@@ -226,6 +226,7 @@ namespace TwentyTwenty.Storage.Amazon
                     ETag = objectMetaResponse.ETag,
                     ContentMD5 = objectMetaResponse.ETag,
                     ContentType = objectMetaResponse.Headers.ContentType,
+                    ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
                     LastModified = objectMetaResponse.LastModified,
                     Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private
                 };
@@ -275,8 +276,9 @@ namespace TwentyTwenty.Storage.Amazon
                     ETag = objectMetaResponse.ETag,
                     ContentMD5 = objectMetaResponse.ETag,
                     ContentType = objectMetaResponse.Headers.ContentType,
+                    ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
                     LastModified = objectMetaResponse.LastModified,
-                    Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private
+                    Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
                 };
             }
             catch (AmazonS3Exception asex)
@@ -428,7 +430,8 @@ namespace TwentyTwenty.Storage.Amazon
                             ContentMD5 = entry.ETag,
                             ContentType = objectMetaResponse.Headers.ContentType,
                             LastModified = entry.LastModified,
-                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private
+                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
                         });
                     }
 
@@ -504,7 +507,8 @@ namespace TwentyTwenty.Storage.Amazon
                             ContentMD5 = entry.ETag,
                             ContentType = objectMetaResponse.Headers.ContentType,
                             LastModified = entry.LastModified,
-                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private
+                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition
                         });
                     }
 
@@ -547,6 +551,7 @@ namespace TwentyTwenty.Storage.Amazon
                     ContentType = properties?.ContentType,
                     CannedACL = S3CannedACL.PublicRead
                 };
+                fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
 
                 try
                 {
@@ -575,6 +580,7 @@ namespace TwentyTwenty.Storage.Amazon
                     ContentType = properties?.ContentType,
                     CannedACL = GetCannedACL(properties)
                 };
+                putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
 
                 try
                 {
@@ -607,6 +613,7 @@ namespace TwentyTwenty.Storage.Amazon
                     ContentType = properties?.ContentType,
                     CannedACL = GetCannedACL(properties)
                 };
+                fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
 
                 try
                 {
@@ -634,6 +641,7 @@ namespace TwentyTwenty.Storage.Amazon
                     ContentType = properties?.ContentType,
                     CannedACL = GetCannedACL(properties)
                 };
+                putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
 
                 try
                 {
