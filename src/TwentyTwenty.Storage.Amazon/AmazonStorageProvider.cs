@@ -738,7 +738,9 @@ namespace TwentyTwenty.Storage.Amazon
         private bool IsInvalidAccessException(AmazonS3Exception asex)
         {
             return asex.ErrorCode != null &&
-                        (asex.ErrorCode.Equals("InvalidAccessKeyId") || asex.ErrorCode.Equals("InvalidSecurity"));
+                        (asex.ErrorCode.Equals("InvalidAccessKeyId") 
+                            || asex.ErrorCode.Equals("InvalidSecurity")
+                            || asex.ErrorCode.Equals("Forbidden"));
         }
 
         private string GenerateKeyName(string containerName, string blobName)
