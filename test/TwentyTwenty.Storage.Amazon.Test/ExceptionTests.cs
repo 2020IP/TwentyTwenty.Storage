@@ -20,11 +20,6 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.SaveBlobStream(container, blobName, data);
             });
 
-            if (ex.ErrorCode != (int)StorageErrorCode.InvalidCredentials)
-            {
-                System.Console.WriteLine(ex.InnerException);
-            }
-            
             Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
@@ -80,7 +75,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.GetBlobDescriptor(container, blobName);
             });
 
-            Assert.Equal((int)StorageErrorCode.GenericException, ex.ErrorCode);
+            Assert.Equal((int)StorageErrorCode.InvalidAccess, ex.ErrorCode);
         }
 
         [Fact]

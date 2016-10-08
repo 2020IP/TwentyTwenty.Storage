@@ -20,7 +20,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 return _exceptionProvider.SaveBlobStreamAsync(container, blobName, data);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 return _exceptionProvider.DeleteBlobAsync(container, blobName);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 return _exceptionProvider.DeleteContainerAsync(container);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 return _exceptionProvider.GetBlobStreamAsync(container, blobName);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 return _exceptionProvider.GetBlobDescriptorAsync(container, blobName);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.GenericException);
+            Assert.Equal((int)StorageErrorCode.InvalidAccess, ex.ErrorCode);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 });
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
     }
 }
