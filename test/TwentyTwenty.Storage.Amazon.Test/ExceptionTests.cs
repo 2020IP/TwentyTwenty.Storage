@@ -20,7 +20,12 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.SaveBlobStream(container, blobName, data);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            if (ex.ErrorCode != (int)StorageErrorCode.InvalidCredentials)
+            {
+                System.Console.WriteLine(ex.InnerException);
+            }
+            
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -34,7 +39,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.DeleteBlob(container, blobName);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -47,7 +52,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.DeleteContainer(container);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -61,7 +66,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.GetBlobStream(container, blobName);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
 
         [Fact]
@@ -75,7 +80,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 _exceptionProvider.GetBlobDescriptor(container, blobName);
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.GenericException);
+            Assert.Equal((int)StorageErrorCode.GenericException, ex.ErrorCode);
         }
 
         [Fact]
@@ -94,7 +99,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 });
             });
 
-            Assert.Equal(ex.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, ex.ErrorCode);
         }
     }
 }
