@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using System.IO;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -16,7 +17,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public StorageFixture()
         {
             Config = new ConfigurationBuilder()
-                .SetBasePath(Environment.CurrentDirectory + "..\\..\\..\\..\\..\\") // TODO: :poop:
+                .SetBasePath(Directory.GetCurrentDirectory())// + "..\\..\\..\\..\\..\\") // TODO: :poop:
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();
@@ -25,7 +26,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             {
                 ServiceURL = "https://s3.amazonaws.com"
             };
-
+            
             _client = new AmazonS3Client(Config["PublicKey"], Config["PrivateKey"], S3Config);
         }
 

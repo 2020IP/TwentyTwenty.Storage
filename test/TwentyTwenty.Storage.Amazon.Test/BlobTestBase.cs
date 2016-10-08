@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using System.Threading.Tasks;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -66,7 +67,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             return Guid.NewGuid().ToString("N");
         }
 
-        protected void CreateNewObject(string container, string blobName, Stream data, bool isPublic = false, string contentType = null)
+        protected async Task CreateNewObjectAsync(string container, string blobName, Stream data, bool isPublic = false, string contentType = null)
         {
             var putRequest = new PutObjectRequest()
             {
@@ -77,7 +78,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 ContentType = contentType
             };
 
-            _client.PutObject(putRequest);
+            await _client.PutObjectAsync(putRequest);
         }
 
         protected bool StreamEquals(Stream stream1, Stream stream2)

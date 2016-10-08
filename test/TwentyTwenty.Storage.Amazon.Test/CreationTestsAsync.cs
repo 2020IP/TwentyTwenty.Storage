@@ -21,7 +21,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data);
 
-            var amzObject = _client.GetObject(Bucket, container + "/" + blobName, null);
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
 
             var amzStream = new MemoryStream();
             amzObject.ResponseStream.CopyTo(amzStream);
@@ -41,7 +41,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data);
 
-            var amzObject = _client.GetObject(Bucket, container + "/" + blobName, null);
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
 
             var amzStream = new MemoryStream();
             amzObject.ResponseStream.CopyTo(amzStream);
@@ -61,7 +61,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             await _provider.SaveBlobStreamAsync(container, blobName, data, 
                 new BlobProperties { ContentType = contentType });
 
-            var amzObject = _client.GetObject(Bucket, container + "/" + blobName, null);
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
 
             Assert.Equal(amzObject.ContentLength, dataLength);
             Assert.Equal(amzObject.Headers.ContentType, contentType);

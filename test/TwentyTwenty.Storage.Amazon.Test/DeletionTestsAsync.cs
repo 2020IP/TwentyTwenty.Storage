@@ -1,8 +1,10 @@
-﻿using Amazon.S3.IO;
-using Amazon.S3.Model;
+﻿using Amazon.S3.Model;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using System.Net.Http;
+using System.Net;
+using Amazon.S3;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -19,7 +21,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             await _provider.DeleteContainerAsync(container);
 
@@ -59,13 +61,16 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             await _provider.DeleteBlobAsync(container, blobName);
 
-            var info = new S3FileInfo(_client, Bucket, container + "/" + blobName);
-
-            Assert.False(info.Exists);
+            var ex = await Assert.ThrowsAsync<AmazonS3Exception>(async () =>
+            {
+                await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
+            });
+            
+            Assert.Equal(ex.StatusCode, HttpStatusCode.NotFound);
         }
     }
 }

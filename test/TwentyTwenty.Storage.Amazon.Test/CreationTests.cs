@@ -9,7 +9,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public void Test_Blob_Created()
+        public async void Test_Blob_Created()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -20,7 +20,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             _provider.SaveBlobStream(container, blobName, data);
 
-            var amzObject = _client.GetObject(Bucket, container + "/" + blobName, null);
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
 
             var amzStream = new MemoryStream();
             amzObject.ResponseStream.CopyTo(amzStream);
@@ -29,7 +29,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact, Trait("Category", "Long")]
-        public void Test_Blob_Created_Multipart()
+        public async void Test_Blob_Created_Multipart()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -40,7 +40,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             _provider.SaveBlobStream(container, blobName, data);
 
-            var amzObject = _client.GetObject(Bucket, container + "/" + blobName, null);
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
 
             var amzStream = new MemoryStream();
             amzObject.ResponseStream.CopyTo(amzStream);
@@ -49,7 +49,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public void Test_Blob_Created_ContentType_Set()
+        public async void Test_Blob_Created_ContentType_Set()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -59,7 +59,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             _provider.SaveBlobStream(container, blobName, data, new BlobProperties { ContentType = contentType });
 
-            var amzObject = _client.GetObject(Bucket, container + "/" + blobName, null);
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
 
             Assert.Equal(amzObject.ContentLength, dataLength);
             Assert.Equal(amzObject.Headers.ContentType, contentType);

@@ -19,7 +19,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var newContentType = "image/png";
             var data = GenerateRandomBlobStream();
 
-            CreateNewObject(container, blobName, data, false, contentType);
+            await CreateNewObjectAsync(container, blobName, data, false, contentType);
 
             await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties
             {
@@ -33,7 +33,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 Key = container + "/" + blobName
             };
 
-            var props = _client.GetObjectMetadata(objectMetaRequest);
+            var props = await _client.GetObjectMetadataAsync(objectMetaRequest);
 
             Assert.Equal(props.Headers.ContentType, newContentType);
 
@@ -43,12 +43,37 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 Key = container + "/" + blobName
             };
 
-            var acl = _client.GetACL(objectAclRequest);
+            var acl = await _client.GetACLAsync(objectAclRequest);
 
             var isPublic = acl.AccessControlList.Grants
                 .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
 
             Assert.True(isPublic);
+        }
+
+        [Fact]
+        public async void Test_Blob_ContentDisposition_Updated_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var filename = "testname.jpg";
+            var contentType = "image/jpg";
+            var newContentType = "image/png";
+            var data = GenerateRandomBlobStream();
+
+            await CreateNewObjectAsync(container, blobName, data, false, contentType);
+
+            var newProps = new BlobProperties
+            {
+                ContentType = newContentType,
+                Security = BlobSecurity.Public,                
+            }.WithContentDispositionFilename(filename);
+
+            await _provider.UpdateBlobPropertiesAsync(container, blobName, newProps);
+
+            var meta = await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
+
+            Assert.Equal(newProps.ContentDisposition, meta.Headers.ContentDisposition);
         }
     }
 }

@@ -11,11 +11,12 @@
 
         public string ContentType { get; set; }
 
-        public string ContentDisposition { get; set; }        
+        public string ContentDisposition { get; set; }
 
-        public void SetContentDisposition(string filename)
+        public BlobProperties WithContentDispositionFilename(string filename)
         {
-            ContentDisposition = $"attachment; filename=\"${filename}\"";
+            ContentDisposition = $"attachment; filename=\"{filename}\"";
+            return this;
         }
     }
 }

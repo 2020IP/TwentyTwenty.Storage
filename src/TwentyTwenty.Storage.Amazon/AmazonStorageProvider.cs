@@ -665,8 +665,7 @@ namespace TwentyTwenty.Storage.Amazon
                 CannedACL = GetCannedACL(properties),
                 MetadataDirective = S3MetadataDirective.REPLACE
             };
-
-            updateRequest.Metadata["Content-Disposition"] = properties.ContentDisposition;
+            updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
 
             try
             {
@@ -695,8 +694,9 @@ namespace TwentyTwenty.Storage.Amazon
                 DestinationKey = GenerateKeyName(containerName, blobName),
                 ContentType = properties?.ContentType,
                 CannedACL = GetCannedACL(properties),
-                MetadataDirective = S3MetadataDirective.REPLACE
+                MetadataDirective = S3MetadataDirective.REPLACE,                
             };
+            updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
 
             try
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -11,10 +12,10 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public GetTests(StorageFixture fixture)
             : base(fixture) { }
 
-        readonly WebClient _webClient = new WebClient();
+        readonly HttpClient _httpClient = new HttpClient();
 
         [Fact]
-        public void Test_Get_Blob_Stream()
+        public async void Test_Get_Blob_Stream()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -23,7 +24,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             data.CopyTo(stream);
             stream.Position = 0;
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             using (var blobStream = _provider.GetBlobStream(container, blobName))
             {
@@ -35,7 +36,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public void Test_Get_Blob_Sas_Url_Read()
+        public async void Test_Get_Blob_Sas_Url_Read()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -46,47 +47,45 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             var url = _provider.GetBlobSasUrl(container, blobName, expiry);
 
             Assert.NotEmpty(url);
 
-            var downloadedData = _webClient.DownloadData(url);
-            Assert.True(StreamEquals(downloadedData.AsStream(), stream));
+            var downloadedData = await _httpClient.GetStreamAsync(url);
+            Assert.True(StreamEquals(downloadedData, stream));
         }
 
         [Fact]
-        public void Test_Get_Blob_Sas_Url_Write()
+        public async void Test_Get_Blob_Sas_Url_Write()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
             var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
+            var dataCopy = new MemoryStream();
+            data.CopyTo(dataCopy);
+            data.Seek(0, SeekOrigin.Begin);
 
             var writeUrl = _provider.GetBlobSasUrl(container, blobName, expiry, access: BlobUrlAccess.Write);
 
             Assert.NotEmpty(writeUrl);
 
-            var httpRequest = WebRequest.Create(writeUrl) as HttpWebRequest;
-            httpRequest.Method = "PUT";
-            using (var dataStream = httpRequest.GetRequestStream())
-            {
-                dataStream.Write(data.ToArray(), 0, (int)data.Length);
-            }
-            var response = httpRequest.GetResponse() as HttpWebResponse;
+            var response = await _httpClient.PutAsync(writeUrl, new StreamContent(data));
+
             Assert.Equal(response.StatusCode, HttpStatusCode.OK);
 
             var readUrl = _provider.GetBlobSasUrl(container, blobName, expiry);
 
             Assert.NotEmpty(readUrl);
 
-            var downloadedData = _webClient.DownloadData(readUrl);
-            Assert.True(StreamEquals(downloadedData.AsStream(), data));
+            var downloadedData = await _httpClient.GetStreamAsync(readUrl);
+            Assert.True(StreamEquals(downloadedData, dataCopy));
         }
 
         [Fact]
-        public void Test_Get_Blob_Sas_Url_Options()
+        public async void Test_Get_Blob_Sas_Url_Options()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -99,21 +98,23 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             var url = _provider.GetBlobSasUrl(container, blobName, expiry, true, overrideFilename, overrideContentType);
 
             Assert.NotEmpty(url);
 
-            var downloadedData = _webClient.DownloadData(url);
-            Assert.True(StreamEquals(downloadedData.AsStream(), stream));
-            Assert.Equal(_webClient.ResponseHeaders["Content-Type"], overrideContentType);
-            Assert.Contains("attachment", _webClient.ResponseHeaders["Content-Disposition"]);
-            Assert.Contains("filename=\"" + overrideFilename + "\"", _webClient.ResponseHeaders["Content-Disposition"]);
+            var response = await _httpClient.GetAsync(url);            
+            Assert.Equal(response.Content.Headers.ContentType.MediaType, overrideContentType);
+            Assert.Contains("attachment", response.Content.Headers.ContentDisposition.DispositionType);
+            Assert.Contains(overrideFilename, response.Content.Headers.ContentDisposition.FileName);
+
+            var contentStream = await response.Content.ReadAsStreamAsync();
+            Assert.True(StreamEquals(contentStream, stream));            
         }
 
         [Fact]
-        public void Test_Get_Blob_Url()
+        public async void Test_Get_Blob_Url()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -124,19 +125,19 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             var expiry = DateTimeOffset.UtcNow.AddMinutes(5);
 
-            CreateNewObject(container, blobName, data, true);
+            await CreateNewObjectAsync(container, blobName, data, true);
 
             var url = _provider.GetBlobUrl(container, blobName);
 
             Assert.NotEmpty(url);
 
-            var downloadedData = _webClient.DownloadData(url);
+            var downloadedData = await _httpClient.GetStreamAsync(url);
             
-            Assert.True(StreamEquals(downloadedData.AsStream(), stream));
+            Assert.True(StreamEquals(downloadedData, stream));
         }
 
         [Fact]
-        public void Test_Get_Blob_Descriptor()
+        public async void Test_Get_Blob_Descriptor()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -144,7 +145,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var data = GenerateRandomBlobStream(datalength);
             var contentType = "image/png";
 
-            CreateNewObject(container, blobName, data, true, contentType);
+            await CreateNewObjectAsync(container, blobName, data, true, contentType);
 
             var descriptor = _provider.GetBlobDescriptor(container, blobName);
 
@@ -159,13 +160,13 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public void Test_Get_Blob_List()
+        public async void Test_Get_Blob_List()
         {
             var container = GetRandomContainerName();
 
-            CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png");
-            CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg");
-            CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain");
 
             foreach (var blob in _provider.ListBlobs(container))
             {

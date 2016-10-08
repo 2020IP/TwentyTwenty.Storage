@@ -8,6 +8,8 @@ namespace TwentyTwenty.Storage
 
         public string ContentMD5 { get; set; }
 
+        public string ContentDisposition { get; set; }
+
         public string ETag { get; set; }
 
         public long Length { get; set; }

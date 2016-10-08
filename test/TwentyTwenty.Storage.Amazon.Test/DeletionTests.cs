@@ -1,8 +1,10 @@
-﻿using Amazon.S3.IO;
-using Amazon.S3.Model;
+﻿using Amazon.S3.Model;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using System.Net.Http;
+using System.Net;
+using Amazon.S3;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -13,13 +15,13 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public void Test_Container_Deleted()
+        public async void Test_Container_Deleted()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             _provider.DeleteContainer(container);
 
@@ -53,19 +55,22 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public void Test_Blob_Deleted()
+        public async void Test_Blob_Deleted()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             _provider.DeleteBlob(container, blobName);
 
-            var info = new S3FileInfo(_client, Bucket, container + "/" + blobName);
-
-            Assert.False(info.Exists);
+            var ex = await Assert.ThrowsAsync<AmazonS3Exception>(async () =>
+            {
+                await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
+            });
+            
+            Assert.Equal(ex.StatusCode, HttpStatusCode.NotFound);
         }
     }
 }

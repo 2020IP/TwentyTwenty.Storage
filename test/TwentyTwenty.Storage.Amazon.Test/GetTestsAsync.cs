@@ -10,8 +10,6 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public GetTestsAsync(StorageFixture fixture)
             : base(fixture) { }
 
-        private WebClient _webClient = new WebClient();
-
         [Fact]
         public async void Test_Get_Blob_Stream_Async()
         {
@@ -22,7 +20,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             data.CopyTo(stream);
             stream.Position = 0;
 
-            CreateNewObject(container, blobName, data);
+            await CreateNewObjectAsync(container, blobName, data);
 
             using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
             {
@@ -42,7 +40,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var data = GenerateRandomBlobStream(datalength);
             var contentType = "image/png";
 
-            CreateNewObject(container, blobName, data, true, contentType);
+            await CreateNewObjectAsync(container, blobName, data, true, contentType);
 
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
 
@@ -61,9 +59,9 @@ namespace TwentyTwenty.Storage.Amazon.Test
         {
             var container = GetRandomContainerName();
 
-            CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png");
-            CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg");
-            CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain");
 
             foreach (var blob in await _provider.ListBlobsAsync(container))
             {
