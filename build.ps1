@@ -26,7 +26,7 @@ foreach ($src in ls src/*) {
     Pop-Location
 }
 
-foreach ($test in ls test/*.Tests) {
+foreach ($test in ls test/*.Test) {
     Push-Location $test
 
 	echo "build: Testing project in $test"
