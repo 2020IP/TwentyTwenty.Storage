@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -65,6 +67,28 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             Assert.Equal(amzObject.ContentLength, dataLength);
             Assert.Equal(amzObject.Headers.ContentType, contentType);
+        }
+
+        [Fact]
+        public async void Test_Blob_Created_Metadata_Set_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();            
+            var dataLength = 256;
+            var data = GenerateRandomBlobStream(dataLength);
+            var meta = new Dictionary<string, string>
+            {
+                { "key1", "val1" },
+                { "key2", "val2" },
+            };
+
+            await _provider.SaveBlobStreamAsync(container, blobName, data, 
+                new BlobProperties { Metadata = meta });
+
+            var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
+
+            Assert.Equal(amzObject.ContentLength, dataLength);
+            Assert.Equal(meta, amzObject.Metadata.ToMetadata());
         }
     }
 }

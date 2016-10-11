@@ -27,6 +27,7 @@ namespace TwentyTwenty.Storage
         BlobInUse = 1003,
         InvalidName = 1005,
         ErrorOpeningBlob = 1006,
-        NoCredentialsProvided = 1007
+        NoCredentialsProvided = 1007,
+        NotFound = 1008
     }
 }

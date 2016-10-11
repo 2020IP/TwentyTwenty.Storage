@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TwentyTwenty.Storage
 {
@@ -23,5 +24,7 @@ namespace TwentyTwenty.Storage
         public string Container { get; set; }
 
         public string Url { get; set; }
+
+        public IDictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
     }
 }

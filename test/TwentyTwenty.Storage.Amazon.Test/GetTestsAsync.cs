@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Net;
+﻿using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -39,8 +39,13 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var datalength = 256;
             var data = GenerateRandomBlobStream(datalength);
             var contentType = "image/png";
+            var meta = new Dictionary<string, string>
+            {
+                { "key1", "val1" },
+                { "key2", "val2" },
+            };
 
-            await CreateNewObjectAsync(container, blobName, data, true, contentType);
+            await CreateNewObjectAsync(container, blobName, data, true, contentType, meta);
 
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
 
@@ -52,19 +57,27 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.Equal(descriptor.Length, datalength);
             Assert.Equal(descriptor.Name, blobName);
             Assert.Equal(descriptor.Security, BlobSecurity.Public);
+            Assert.Equal(descriptor.Metadata, meta);
         }
 
         [Fact]
         public async void Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
+            var meta = new Dictionary<string, string>
+            {
+                { "key1", "val1" },
+                { "key2", "val2" },
+            };
 
-            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png");
-            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg");
-            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain");
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png", meta);
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg", meta);
+            await CreateNewObjectAsync(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain", meta);
 
             foreach (var blob in await _provider.ListBlobsAsync(container))
             {
+                Assert.Equal(meta, blob.Metadata);
+
                 var descriptor = await _provider.GetBlobDescriptorAsync(container, blob.Name);
 
                 Assert.Equal(descriptor.Container, container);

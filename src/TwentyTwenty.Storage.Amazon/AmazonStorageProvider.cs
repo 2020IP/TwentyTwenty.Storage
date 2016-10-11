@@ -228,7 +228,8 @@ namespace TwentyTwenty.Storage.Amazon
                     ContentType = objectMetaResponse.Headers.ContentType,
                     ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
                     LastModified = objectMetaResponse.LastModified,
-                    Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private
+                    Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                    Metadata = objectMetaResponse.Metadata.ToMetadata(),
                 };
             }
             catch (AmazonS3Exception asex)
@@ -279,6 +280,7 @@ namespace TwentyTwenty.Storage.Amazon
                     ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
                     LastModified = objectMetaResponse.LastModified,
                     Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                    Metadata = objectMetaResponse.Metadata.ToMetadata(),                    
                 };
             }
             catch (AmazonS3Exception asex)
@@ -432,6 +434,7 @@ namespace TwentyTwenty.Storage.Amazon
                             LastModified = entry.LastModified,
                             Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
                             ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
+                            Metadata = objectMetaResponse.Metadata.ToMetadata(),
                         });
                     }
 
@@ -508,7 +511,8 @@ namespace TwentyTwenty.Storage.Amazon
                             ContentType = objectMetaResponse.Headers.ContentType,
                             LastModified = entry.LastModified,
                             Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
-                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition
+                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
+                            Metadata = objectMetaResponse.Metadata.ToMetadata(),
                         });
                     }
 
@@ -542,16 +546,7 @@ namespace TwentyTwenty.Storage.Amazon
         {
             if (source.Length >= 100000000)
             {
-                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-                {
-                    BucketName = _bucket,
-                    InputStream = source,
-                    PartSize = 6291456,
-                    Key = GenerateKeyName(containerName, blobName),
-                    ContentType = properties?.ContentType,
-                    CannedACL = S3CannedACL.PublicRead
-                };
-                fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties);
 
                 try
                 {
@@ -572,15 +567,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             else
             {
-                var putRequest = new PutObjectRequest()
-                {
-                    BucketName = _bucket,
-                    Key = GenerateKeyName(containerName, blobName),
-                    InputStream = source,
-                    ContentType = properties?.ContentType,
-                    CannedACL = GetCannedACL(properties)
-                };
-                putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+                var putRequest = CreateUpload(containerName, blobName, source, properties);
 
                 try
                 {
@@ -604,16 +591,7 @@ namespace TwentyTwenty.Storage.Amazon
         {
             if (source.Length >= 100000000)
             {
-                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-                {
-                    BucketName = _bucket,
-                    InputStream = source,
-                    PartSize = 6291456,
-                    Key = GenerateKeyName(containerName, blobName),
-                    ContentType = properties?.ContentType,
-                    CannedACL = GetCannedACL(properties)
-                };
-                fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties);
 
                 try
                 {
@@ -633,15 +611,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             else
             {
-                var putRequest = new PutObjectRequest()
-                {
-                    BucketName = _bucket,
-                    Key = GenerateKeyName(containerName, blobName),
-                    InputStream = source,
-                    ContentType = properties?.ContentType,
-                    CannedACL = GetCannedACL(properties)
-                };
-                putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+                var putRequest = CreateUpload(containerName, blobName, source, properties);
 
                 try
                 {
@@ -663,17 +633,7 @@ namespace TwentyTwenty.Storage.Amazon
 
         public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
         {
-            var updateRequest = new CopyObjectRequest()
-            {
-                SourceBucket = _bucket,
-                SourceKey = GenerateKeyName(containerName, blobName),
-                DestinationBucket = _bucket,
-                DestinationKey = GenerateKeyName(containerName, blobName),
-                ContentType = properties?.ContentType,
-                CannedACL = GetCannedACL(properties),
-                MetadataDirective = S3MetadataDirective.REPLACE
-            };
-            updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
+            var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
 
             try
             {
@@ -694,17 +654,7 @@ namespace TwentyTwenty.Storage.Amazon
 
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
-            var updateRequest = new CopyObjectRequest()
-            {
-                SourceBucket = _bucket,
-                SourceKey = GenerateKeyName(containerName, blobName),
-                DestinationBucket = _bucket,
-                DestinationKey = GenerateKeyName(containerName, blobName),
-                ContentType = properties?.ContentType,
-                CannedACL = GetCannedACL(properties),
-                MetadataDirective = S3MetadataDirective.REPLACE,                
-            };
-            updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
+            var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
 
             try
             {
@@ -746,6 +696,57 @@ namespace TwentyTwenty.Storage.Amazon
         private string GenerateKeyName(string containerName, string blobName)
         {
             return $"{containerName}/{blobName}";
+        }
+
+        private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
+        {
+            var updateRequest = new CopyObjectRequest()
+            {
+                SourceBucket = _bucket,
+                SourceKey = GenerateKeyName(containerName, blobName),
+                DestinationBucket = _bucket,
+                DestinationKey = GenerateKeyName(containerName, blobName),
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties),
+                MetadataDirective = S3MetadataDirective.REPLACE,                
+            };
+            updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
+            updateRequest.Metadata.AddMetadata(properties?.Metadata);
+
+            return updateRequest;
+        }
+
+        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, BlobProperties properties)
+        {
+            var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                InputStream = source,
+                PartSize = 6291456,
+                Key = GenerateKeyName(containerName, blobName),
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties)
+            };
+            fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+            fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
+
+            return fileTransferUtilityRequest;
+        }
+
+        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, BlobProperties properties)
+        {
+            var putRequest = new PutObjectRequest()
+            {
+                BucketName = _bucket,
+                Key = GenerateKeyName(containerName, blobName),
+                InputStream = source,
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties)
+            };
+            putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+            putRequest.Metadata.AddMetadata(properties?.Metadata);
+
+            return putRequest;
         }
     }
 }

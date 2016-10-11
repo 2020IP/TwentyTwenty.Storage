@@ -1,4 +1,6 @@
-﻿namespace TwentyTwenty.Storage
+﻿using System.Collections.Generic;
+
+namespace TwentyTwenty.Storage
 {
     public class BlobProperties
     {
@@ -18,5 +20,7 @@
             ContentDisposition = $"attachment; filename=\"{filename}\"";
             return this;
         }
+
+        public IDictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
     }
 }

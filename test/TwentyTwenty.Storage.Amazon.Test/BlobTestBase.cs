@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -67,7 +68,8 @@ namespace TwentyTwenty.Storage.Amazon.Test
             return Guid.NewGuid().ToString("N");
         }
 
-        protected async Task CreateNewObjectAsync(string container, string blobName, Stream data, bool isPublic = false, string contentType = null)
+        protected async Task CreateNewObjectAsync(string container, string blobName, Stream data, 
+            bool isPublic = false, string contentType = null, IDictionary<string, string> metadata = null)
         {
             var putRequest = new PutObjectRequest()
             {
@@ -77,6 +79,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 CannedACL = isPublic ? S3CannedACL.PublicRead : S3CannedACL.Private,
                 ContentType = contentType
             };
+            putRequest.Metadata.AddMetadata(metadata);
 
             await _client.PutObjectAsync(putRequest);
         }
