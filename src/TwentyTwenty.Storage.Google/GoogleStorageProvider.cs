@@ -68,7 +68,7 @@ namespace TwentyTwenty.Storage.Google
             _bucket = options.Bucket;
         }
 
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null)
+        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
             try
             {
