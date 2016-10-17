@@ -16,7 +16,7 @@ namespace TwentyTwenty.Storage.Local.Test
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            await _provider.SaveBlobStreamAsync(container, blobName, data);
+            await _provider.SaveBlobStreamAsync(container, blobName, data, closeStream: false);
 
             using (var file = File.OpenRead($"{BasePath}\\{container}\\{blobName}"))
             {
