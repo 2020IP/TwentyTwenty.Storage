@@ -7,9 +7,9 @@ namespace TwentyTwenty.Storage
 {
     public interface IStorageProvider
     {
-        void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null);
+        void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true);
 
-        Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null);
+        Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true);
 
         Stream GetBlobStream(string containerName, string blobName);
 

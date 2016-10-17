@@ -220,12 +220,12 @@ namespace TwentyTwenty.Storage.Azure
             return list;
         }
 
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null)
+        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
-            AsyncHelpers.RunSync(() => SaveBlobStreamAsync(containerName, blobName, source, properties));
+            AsyncHelpers.RunSync(() => SaveBlobStreamAsync(containerName, blobName, source, properties, closeStream));
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
             var container = _blobClient.GetContainerReference(containerName);
             var props = properties ?? BlobProperties.Empty;
@@ -236,16 +236,28 @@ namespace TwentyTwenty.Storage.Azure
                 var created = await container.CreateIfNotExistsAsync(security, _requestOptions, _context).ConfigureAwait(false);
 
                 var blob = container.GetBlockBlobReference(blobName);
-                blob.Properties.ContentType = props.ContentType;
+                blob.Properties.ContentType = props.ContentType;                
+                blob.Properties.ContentDisposition = props.ContentDisposition;                
+
+                if (props.Metadata != null)
+                {
+                    blob.Metadata.SetMetadata(props.Metadata);
+                }
 
                 await blob.UploadFromStreamAsync(source, null, _requestOptions, _context).ConfigureAwait(false);
+
+                // Hack to deal with issue https://github.com/Azure/azure-storage-net/issues/353
+                if (!string.IsNullOrEmpty(props.ContentDisposition))
+                {
+                    await blob.SetPropertiesAsync(null, _requestOptions, _context);
+                }
 
                 // Check if container permission elevation is necessary
                 if (!created)
                 {
                     var perms = await container.GetPermissionsAsync(null, _requestOptions, _context).ConfigureAwait(false);
 
-                    if (properties.Security == BlobSecurity.Public && perms.PublicAccess == BlobContainerPublicAccessType.Off)
+                    if (props.Security == BlobSecurity.Public && perms.PublicAccess == BlobContainerPublicAccessType.Off)
                     {
                         await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = security }, null, _requestOptions, _context).ConfigureAwait(false);
                     }
@@ -258,6 +270,13 @@ namespace TwentyTwenty.Storage.Azure
                     throw e.Convert();
                 }
                 throw;
+            }
+            finally
+            {
+                if (closeStream)
+                {
+                    source.Dispose();                    
+                }
             }
         }
 
@@ -275,9 +294,16 @@ namespace TwentyTwenty.Storage.Azure
             {
                 await blob.FetchAttributesAsync(null, _requestOptions, _context).ConfigureAwait(false);
                 blob.Properties.ContentType = properties.ContentType;
+                blob.Properties.ContentDisposition = properties.ContentDisposition;
 
                 await blob.SetPropertiesAsync(null, _requestOptions, _context).ConfigureAwait(false);
 
+                if (properties.Metadata != null)
+                {
+                    blob.Metadata.SetMetadata(properties.Metadata);
+                    await blob.SetMetadataAsync();
+                }
+                
                 var perms = await container.GetPermissionsAsync(null, _requestOptions, _context).ConfigureAwait(false);
 
                 // Elevate container permissions if necessary.

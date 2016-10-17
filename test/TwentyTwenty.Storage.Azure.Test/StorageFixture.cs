@@ -2,8 +2,8 @@
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -16,7 +16,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public StorageFixture()
         {   
             Config = new ConfigurationBuilder()
-                .SetBasePath(Environment.CurrentDirectory + "..\\..\\..\\..\\..\\") // TODO: :poop:
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();

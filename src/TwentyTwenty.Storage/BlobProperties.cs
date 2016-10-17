@@ -21,6 +21,6 @@ namespace TwentyTwenty.Storage
             return this;
         }
 
-        public IDictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, string> Metadata { get; set; }
     }
 }

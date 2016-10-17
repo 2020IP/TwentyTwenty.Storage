@@ -66,7 +66,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             var data = GenerateRandomBlobStream();
             var stream = new MemoryStream();
 
-            _provider.SaveBlobStream(container, blobName, data);
+            _provider.SaveBlobStream(container, blobName, data, closeStream: false);
             await _client.GetContainerReference(container)
                 .GetBlockBlobReference(blobName)
                 .DownloadToStreamAsync(stream);

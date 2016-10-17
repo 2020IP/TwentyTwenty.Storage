@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿using System.Collections.Generic;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Azure.Test
@@ -46,6 +47,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var contentType = "image/jpg";
+            var contentDisposition = "attachment; filename=\"muhFile.jpg\"";
             var data = GenerateRandomBlobStream();
 
             var containerRef = _client.GetContainerReference(container);
@@ -55,11 +57,56 @@ namespace TwentyTwenty.Storage.Azure.Test
             blobRef.Properties.ContentType = "image/png";
 
             await blobRef.UploadFromStreamAsync(data);
-            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties { ContentType = contentType });
+            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties 
+            { 
+                ContentType = contentType,
+                ContentDisposition = contentDisposition,
+            });
             
             await blobRef.FetchAttributesAsync();
             
             Assert.Equal(contentType, blobRef.Properties.ContentType);
+            Assert.Equal(contentDisposition, blobRef.Properties.ContentDisposition);
+        }
+
+        [Fact]
+        public async void Test_Blob_Metadata_Updated_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+            var meta = new Dictionary<string, string>
+            {
+                { "key1", "val1" },
+                { "key2", "val2" },
+            };
+
+            var containerRef = _client.GetContainerReference(container);
+            var blobRef = containerRef.GetBlockBlobReference(blobName);
+
+            await containerRef.CreateAsync();
+
+            foreach (var kvp in meta)
+            {            
+                blobRef.Metadata.Add(kvp.Key, kvp.Value);
+            }
+
+            await blobRef.UploadFromStreamAsync(data);
+
+            meta = new Dictionary<string, string>
+            {
+                { "key1", "somenewvalue" },
+                { "key3", "val3" },
+            };
+
+            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties 
+            { 
+                Metadata = meta,
+            });
+            
+            await blobRef.FetchAttributesAsync();
+            
+            Assert.Equal(meta, blobRef.Metadata);
         }
     }
 }

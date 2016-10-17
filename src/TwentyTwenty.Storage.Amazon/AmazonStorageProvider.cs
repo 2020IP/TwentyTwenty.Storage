@@ -542,11 +542,11 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null)
+        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
             if (source.Length >= 100000000)
             {
-                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties);
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
 
                 try
                 {
@@ -567,7 +567,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             else
             {
-                var putRequest = CreateUpload(containerName, blobName, source, properties);
+                var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
 
                 try
                 {
@@ -587,11 +587,11 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
             if (source.Length >= 100000000)
             {
-                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties);
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
 
                 try
                 {
@@ -611,7 +611,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             else
             {
-                var putRequest = CreateUpload(containerName, blobName, source, properties);
+                var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
 
                 try
                 {
@@ -716,7 +716,7 @@ namespace TwentyTwenty.Storage.Amazon
             return updateRequest;
         }
 
-        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, BlobProperties properties)
+        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
         {
             var fileTransferUtilityRequest = new TransferUtilityUploadRequest
             {
@@ -725,7 +725,8 @@ namespace TwentyTwenty.Storage.Amazon
                 PartSize = 6291456,
                 Key = GenerateKeyName(containerName, blobName),
                 ContentType = properties?.ContentType,
-                CannedACL = GetCannedACL(properties)
+                CannedACL = GetCannedACL(properties),
+                AutoCloseStream = closeStream,
             };
             fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
             fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
@@ -733,7 +734,7 @@ namespace TwentyTwenty.Storage.Amazon
             return fileTransferUtilityRequest;
         }
 
-        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, BlobProperties properties)
+        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
         {
             var putRequest = new PutObjectRequest()
             {
@@ -741,7 +742,8 @@ namespace TwentyTwenty.Storage.Amazon
                 Key = GenerateKeyName(containerName, blobName),
                 InputStream = source,
                 ContentType = properties?.ContentType,
-                CannedACL = GetCannedACL(properties)
+                CannedACL = GetCannedACL(properties),
+                AutoCloseStream = closeStream,
             };
             putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
             putRequest.Metadata.AddMetadata(properties?.Metadata);

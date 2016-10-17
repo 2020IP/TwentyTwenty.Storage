@@ -90,5 +90,20 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.Equal(amzObject.ContentLength, dataLength);
             Assert.Equal(meta, amzObject.Metadata.ToMetadata());
         }
+
+        [Fact]
+        public async void Test_Blob_Created_Stream_Close()
+        {
+            var container = GetRandomContainerName();            
+            var dataLength = 256;
+            var data = GenerateRandomBlobStream(dataLength);
+
+            await _provider.SaveBlobStreamAsync(container, GenerateRandomName(), data, closeStream: true);
+            Assert.False(data.CanRead);
+
+            data = GenerateRandomBlobStream(dataLength);
+            await _provider.SaveBlobStreamAsync(container, GenerateRandomName(), data, closeStream: false);
+            Assert.True(data.CanRead);
+        }
     }
 }

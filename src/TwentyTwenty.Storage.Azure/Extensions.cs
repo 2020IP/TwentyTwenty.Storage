@@ -58,5 +58,18 @@ namespace TwentyTwenty.Storage.Azure
         {
             return e is AzureStorageException || e.InnerException is AzureStorageException;
         }
+
+        public static void SetMetadata(this IDictionary<string, string> azureMeta, IDictionary<string, string> meta)
+        {
+            azureMeta.Clear();
+
+            if (meta != null)
+            {
+                foreach (var kvp in meta)
+                {
+                    azureMeta[kvp.Key] = kvp.Value;
+                }
+            }
+        }
     }
 }

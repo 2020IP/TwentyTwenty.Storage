@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
 using Xunit;
+using System.Collections.Generic;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -66,7 +67,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             var data = GenerateRandomBlobStream();
             var stream = new MemoryStream();
 
-            await _provider.SaveBlobStreamAsync(container, blobName, data);
+            await _provider.SaveBlobStreamAsync(container, blobName, data, closeStream: false);
             await _client.GetContainerReference(container)
                 .GetBlockBlobReference(blobName)
                 .DownloadToStreamAsync(stream);
@@ -87,10 +88,69 @@ namespace TwentyTwenty.Storage.Azure.Test
 
             var blob = _client.GetContainerReference(container)
                 .GetBlockBlobReference(blobName);
+                
             await blob.FetchAttributesAsync();
             
             Assert.Equal(dataLength, blob.Properties.Length);
             Assert.Equal(contentType, blob.Properties.ContentType);
+        }
+
+        [Fact]
+        public async void Test_Blob_Created_ContentDisposition_Set_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var filename = "testFile.jpg";
+            var dataLength = 256;            
+            var data = GenerateRandomBlobStream(dataLength);
+            var prop = new BlobProperties().WithContentDispositionFilename(filename);
+            
+            await _provider.SaveBlobStreamAsync(container, blobName, data, prop);
+
+            var blob = _client.GetContainerReference(container)
+                .GetBlockBlobReference(blobName);
+
+            await blob.FetchAttributesAsync();
+
+            Assert.Equal(dataLength, blob.Properties.Length);
+            Assert.Equal($"attachment; filename=\"{filename}\"", blob.Properties.ContentDisposition);
+        }
+
+        [Fact]
+        public async void Test_Blob_Created_Metadata_Set_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();            
+            var dataLength = 256;
+            var data = GenerateRandomBlobStream(dataLength);
+            var meta = new Dictionary<string, string>
+            {
+                { "key1", "val1" },
+                { "key2", "val2" },
+            };
+
+            await _provider.SaveBlobStreamAsync(container, blobName, data, 
+                new BlobProperties { Metadata = meta });
+
+            var b = _client.GetContainerReference(container).GetBlockBlobReference(blobName);
+            await b.FetchAttributesAsync();
+            
+            Assert.Equal(meta, b.Metadata);
+        }
+
+        [Fact]
+        public async void Test_Blob_Created_Stream_Close()
+        {
+            var container = GetRandomContainerName();            
+            var dataLength = 256;
+            var data = GenerateRandomBlobStream(dataLength);
+
+            await _provider.SaveBlobStreamAsync(container, GenerateRandomName(), data, closeStream: true);
+            Assert.False(data.CanRead);
+
+            data = GenerateRandomBlobStream(dataLength);
+            await _provider.SaveBlobStreamAsync(container, GenerateRandomName(), data, closeStream: false);
+             Assert.True(data.CanRead);
         }
     }
 }

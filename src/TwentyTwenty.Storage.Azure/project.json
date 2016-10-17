@@ -24,13 +24,13 @@
         "System.Threading.Tasks": "4.0.0"
       }
     },
-    "netstandard1.1": {
-      "imports": [ "dnxcore50", "portable-net45+win8" ]
+    "netstandard1.3": {
+      "imports": [ "dnxcore50", "portable-net451+win8" ]
     }
   },
 
   "dependencies": {
     "TwentyTwenty.Storage": "1.1.1-*",
-    "WindowsAzure.Storage": "6.2.2-preview"
+    "WindowsAzure.Storage": "7.2.1"
   }
 }
