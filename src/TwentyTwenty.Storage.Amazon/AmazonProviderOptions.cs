@@ -7,5 +7,7 @@
         public string SecretKey { get; set; }
 
         public string Bucket { get; set; }
+
+        public string ServiceUrl { get; set; }
     }
 }
