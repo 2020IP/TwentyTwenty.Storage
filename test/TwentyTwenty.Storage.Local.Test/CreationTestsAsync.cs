@@ -18,7 +18,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, closeStream: false);
 
-            using (var file = File.OpenRead($"{BasePath}\\{container}\\{blobName}"))
+            using (var file = File.OpenRead(Path.Combine(BasePath, container, blobName)))
             {
                 Assert.True(StreamEquals(data, file));
             }

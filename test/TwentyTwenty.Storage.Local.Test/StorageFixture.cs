@@ -5,7 +5,7 @@ namespace TwentyTwenty.Storage.Local.Test
 {
     public class StorageFixture : IDisposable
     {
-        public const string BasePath = "C:\\temp";
+        public static readonly string BasePath = Path.GetTempPath();
         public const string ContainerPrefix = "storagetest-";
 
         public StorageFixture()
@@ -14,12 +14,11 @@ namespace TwentyTwenty.Storage.Local.Test
 
         public void Dispose()
         {
-            foreach (var d in Directory.GetDirectories(BasePath))
+            var baseDir = new DirectoryInfo(BasePath);
+
+            foreach (var d in baseDir.GetDirectories($"{ContainerPrefix}*"))
             {
-                if (d.Replace($"{BasePath}\\", "").StartsWith(ContainerPrefix))
-                {
-                    Directory.Delete(d, true);
-                }
+                d.Delete(true);
             }
         }
     }

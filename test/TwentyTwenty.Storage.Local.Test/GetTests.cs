@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
@@ -10,8 +9,6 @@ namespace TwentyTwenty.Storage.Local.Test
     {
         public GetTests(StorageFixture fixture)
             : base(fixture) { }
-
-        readonly WebClient _webClient = new WebClient();
 
         [Fact]
         public void Test_Get_Blob_Stream()
