@@ -1,4 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
@@ -257,7 +257,7 @@ namespace TwentyTwenty.Storage.Azure
                 {
                     var perms = await container.GetPermissionsAsync(null, _requestOptions, _context).ConfigureAwait(false);
 
-                    if (props.Security == BlobSecurity.Public && perms.PublicAccess == BlobContainerPublicAccessType.Off)
+                    if (properties != null && properties.Security == BlobSecurity.Public && perms.PublicAccess == BlobContainerPublicAccessType.Off)
                     {
                         await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = security }, null, _requestOptions, _context).ConfigureAwait(false);
                     }
