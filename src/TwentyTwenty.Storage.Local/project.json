@@ -27,6 +27,6 @@
   },
 
   "dependencies": {
-    "TwentyTwenty.Storage": "1.1.1-*"
+    "TwentyTwenty.Storage": "1.2.0-*"
   }
 }
