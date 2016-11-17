@@ -20,7 +20,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
             await _provider.DeleteContainerAsync(container);
 
-            Assert.False(Directory.Exists($"{BasePath}\\{container}"));
+            Assert.False(Directory.Exists(Path.Combine(BasePath, container)));
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
             await _provider.DeleteBlobAsync(container, blobName);
 
-            Assert.False(File.Exists($"{BasePath}\\{container}\\{blobName}"));
+            Assert.False(File.Exists(Path.Combine(BasePath, container, blobName)));
         }
     }
 }

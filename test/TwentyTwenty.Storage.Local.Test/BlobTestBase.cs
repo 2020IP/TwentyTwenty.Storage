@@ -47,9 +47,9 @@ namespace TwentyTwenty.Storage.Local.Test
 
         protected void CreateNewFile(string containerName, string blobName, Stream source)
         {
-            var dir = $"{BasePath}\\{containerName}";
+            var dir = Path.Combine(BasePath, containerName);
             Directory.CreateDirectory(dir);
-            using (var file = File.Create($"{dir}\\{blobName}"))
+            using (var file = File.Create(Path.Combine(dir, blobName)))
             {
                 source.CopyTo(file);
             }

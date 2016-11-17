@@ -16,11 +16,13 @@ namespace TwentyTwenty.Storage.Local
 
         public void DeleteBlob(string containerName, string blobName)
         {
-            try
+            var path = Path.Combine(_basePath, containerName, blobName);
+
+            if (!File.Exists(path))
             {
-                var path = Path.Combine(_basePath, containerName, blobName);
-                File.Delete(path);
+                throw new StorageException(StorageErrorCode.InvalidName.ToStorageError(), null);
             }
+            try { File.Delete(path); }
             catch (Exception ex)
             {
                 throw ex.ToStorageException();
