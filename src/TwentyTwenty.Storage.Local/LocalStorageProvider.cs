@@ -7,7 +7,7 @@ namespace TwentyTwenty.Storage.Local
 {
     public class LocalStorageProvider : IStorageProvider
     {
-        readonly string _basePath;
+        private readonly string _basePath;
 
         public LocalStorageProvider(string basePath)
         {

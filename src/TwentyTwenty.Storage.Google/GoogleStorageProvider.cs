@@ -68,24 +68,6 @@ namespace TwentyTwenty.Storage.Google
             _bucket = options.Bucket;
         }
 
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
-        {
-            try
-            {
-                var response = SaveRequest(containerName, blobName, source, properties).Upload();
-
-                //Google's errors are all generic, so there's really no way that I currently know to detect what went wrong exactly.
-                if (response.Status == UploadStatus.Failed)
-                {
-                    throw Error(response.Exception as GoogleApiException, message: "There was an error uploading to Google Cloud Storage");
-                }
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
         {
             try
@@ -96,18 +78,6 @@ namespace TwentyTwenty.Storage.Google
                 {
                     throw Error(response.Exception as GoogleApiException, message: "There was an error uploading to Google Cloud Storage");
                 }
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
-        public Stream GetBlobStream(string containerName, string blobName)
-        {
-            try
-            {
-                return AsyncHelpers.RunSync(() => _storageService.HttpClient.GetStreamAsync(GetBlob(containerName, blobName).MediaLink));
             }
             catch (GoogleApiException gae)
             {
@@ -151,35 +121,11 @@ namespace TwentyTwenty.Storage.Google
             return $"https://storage.googleapis.com/{_bucket}/{containerName}/{blobName}?GoogleAccessId={_serviceEmail}&Expires={expiration}&Signature={WebUtility.UrlEncode(urlSignature)}";
         }
 
-        public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
-        {
-            try
-            {
-                return GetBlobDescriptor(GetBlob(containerName, blobName));
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
         {
             try
             {
                 return GetBlobDescriptor(await GetBlobAsync(containerName, blobName));
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
-        public IList<BlobDescriptor> ListBlobs(string containerName)
-        {
-            try
-            {
-                return GetListBlobsRequest(containerName).Execute().Items.SelectToListOrEmpty(GetBlobDescriptor);
             }
             catch (GoogleApiException gae)
             {
@@ -199,43 +145,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public void DeleteBlob(string containerName, string blobName)
-        {
-            try
-            {
-                _storageService.Objects.Delete(_bucket, $"{containerName}/{blobName}").Execute();
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
         public async Task DeleteBlobAsync(string containerName, string blobName)
         {
             try
             {
                 await _storageService.Objects.Delete(_bucket, $"{containerName}/{blobName}").ExecuteAsync();
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
-        public void DeleteContainer(string containerName)
-        {
-            try
-            {
-                var batch = new BatchRequest(_storageService);
-
-                foreach (var blob in ListBlobs(containerName))
-                {
-                    batch.Queue<string>(_storageService.Objects.Delete(_bucket, $"{blob.Container}/{blob.Name}"), 
-                        (content, error, i, message) => { });
-                }
-
-                AsyncHelpers.RunSync(() => batch.ExecuteAsync());
             }
             catch (GoogleApiException gae)
             {
@@ -256,18 +170,6 @@ namespace TwentyTwenty.Storage.Google
                 }
 
                 await batch.ExecuteAsync();
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
-
-        public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
-        {
-            try
-            {
-                UpdateRequest(containerName, blobName, properties).Execute();
             }
             catch (GoogleApiException gae)
             {

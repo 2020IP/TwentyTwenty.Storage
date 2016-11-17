@@ -35,7 +35,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var keys = new List<KeyVersion>();
             do
             {
-                var objectsResponse = AsyncHelpers.RunSync(() => _client.ListObjectsAsync(objectsRequest));
+                var objectsResponse = await _client.ListObjectsAsync(objectsRequest);
 
                 keys.AddRange(objectsResponse.S3Objects
                     .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));

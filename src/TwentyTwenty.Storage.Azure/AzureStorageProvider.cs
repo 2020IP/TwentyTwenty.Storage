@@ -23,11 +23,6 @@ namespace TwentyTwenty.Storage.Azure
             _context = new OperationContext();
         }
 
-        public void DeleteBlob(string containerName, string blobName)
-        {
-            AsyncHelpers.RunSync(() => DeleteBlobAsync(containerName, blobName));
-        }
-
         public async Task DeleteBlobAsync(string containerName, string blobName)
         {
             try
@@ -47,11 +42,6 @@ namespace TwentyTwenty.Storage.Azure
             }
         }
 
-        public void DeleteContainer(string containerName)
-        {
-            AsyncHelpers.RunSync(() => DeleteContainerAsync(containerName));
-        }
-
         public async Task DeleteContainerAsync(string containerName)
         {
             try
@@ -67,11 +57,6 @@ namespace TwentyTwenty.Storage.Azure
                 }
                 throw;
             }
-        }
-
-        public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
-        {
-            return AsyncHelpers.RunSync(() => GetBlobDescriptorAsync(containerName, blobName));
         }
 
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
@@ -106,11 +91,6 @@ namespace TwentyTwenty.Storage.Azure
                 }
                 throw;
             }
-        }
-
-        public Stream GetBlobStream(string containerName, string blobName)
-        {
-            return AsyncHelpers.RunSync(() => GetBlobStreamAsync(containerName, blobName));
         }
 
         public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
@@ -169,11 +149,6 @@ namespace TwentyTwenty.Storage.Azure
             return builder.Uri.ToString();
         }
 
-        public IList<BlobDescriptor> ListBlobs(string containerName)
-        {
-            return AsyncHelpers.RunSync(() => ListBlobsAsync(containerName));
-        }
-
         public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
             var list = new List<BlobDescriptor>();
@@ -218,11 +193,6 @@ namespace TwentyTwenty.Storage.Azure
             }
 
             return list;
-        }
-
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
-        {
-            AsyncHelpers.RunSync(() => SaveBlobStreamAsync(containerName, blobName, source, properties, closeStream));
         }
 
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
@@ -278,11 +248,6 @@ namespace TwentyTwenty.Storage.Azure
                     source.Dispose();                    
                 }
             }
-        }
-
-        public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
-        {
-            AsyncHelpers.RunSync(() => UpdateBlobPropertiesAsync(containerName, blobName, properties));
         }
 
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)

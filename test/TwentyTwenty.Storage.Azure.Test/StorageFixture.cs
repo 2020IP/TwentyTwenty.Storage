@@ -16,7 +16,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public StorageFixture()
         {   
             Config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();

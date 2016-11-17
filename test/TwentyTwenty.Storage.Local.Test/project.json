@@ -6,14 +6,20 @@
     "defaultNamespace": "TwentyTwenty.Storage.Local.Test"
   },
   "frameworks": {
-    "net46": { }
+      "netcoreapp1.0": {
+          "dependencies": {
+              "Microsoft.NETCore.App": {
+                  "version": "1.0.0",
+                  "type": "platform"
+              }
+          }
+      }
   },
   "testRunner": "xunit",
   "dependencies": {
     "Microsoft.NETCore.Platforms": "1.0.1",
-    "TwentyTwenty.Storage": "*",
-    "TwentyTwenty.Storage.Local": "*",
-    "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "xunit": "2.2.0-beta3-build3301"
+    "TwentyTwenty.Storage.Local": { "target": "project" },
+    "dotnet-test-xunit": "2.2.0-*",
+    "xunit": "2.2.0-*"
   }
 }
