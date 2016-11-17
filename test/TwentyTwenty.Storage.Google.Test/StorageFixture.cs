@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Storage.v1;
 using Microsoft.Extensions.Configuration;
-using TwentyTwenty.Storage.Google;
 using System.Security.Cryptography.X509Certificates;
 
 namespace TwentyTwenty.Storage.Google.Test
@@ -19,7 +16,7 @@ namespace TwentyTwenty.Storage.Google.Test
         public StorageFixture()
         {
             Config = new ConfigurationBuilder()
-                .SetBasePath(Environment.CurrentDirectory + "..\\..\\..\\..\\..\\") // TODO: :poop:
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."))
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();
@@ -40,12 +37,12 @@ namespace TwentyTwenty.Storage.Google.Test
 
         public void Dispose()
         {
-            var blobsToDelete = AsyncHelpers.RunSync(() => _client.Objects.List(Config["GoogleBucket"]).ExecuteAsync()).Items
+            var blobsToDelete = _client.Objects.List(Config["GoogleBucket"]).Execute().Items
                 .WhereToListOrEmpty(b => b.Name.StartsWith(ContainerPrefix));
 
             foreach (var blob in blobsToDelete)
             {
-                AsyncHelpers.RunSync(() => _client.Objects.Delete(Config["GoogleBucket"], blob.Name).ExecuteAsync());
+                _client.Objects.Delete(Config["GoogleBucket"], blob.Name).Execute();
             }
         }
     }

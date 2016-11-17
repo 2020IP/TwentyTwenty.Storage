@@ -14,7 +14,7 @@ namespace TwentyTwenty.Storage.Local.Test
     public abstract class BlobTestBase
     {
         Random _rand = new Random();
-        protected IStorageProvider _provider;
+        protected LocalStorageProvider _provider;
         protected string BasePath;
 
         public BlobTestBase(StorageFixture fixture)

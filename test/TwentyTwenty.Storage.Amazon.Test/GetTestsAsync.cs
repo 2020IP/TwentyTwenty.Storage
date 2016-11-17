@@ -10,7 +10,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public GetTestsAsync(StorageFixture fixture)
             : base(fixture) { }
 
-        [Fact]
+        // [Fact]
         public async void Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
@@ -31,7 +31,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             }
         }
 
-        [Fact]
+        // [Fact]
         public async void Test_Get_Blob_Descriptor_Async()
         {
             var container = GetRandomContainerName();
@@ -60,7 +60,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.Equal(descriptor.Metadata, meta);
         }
 
-        [Fact]
+        // [Fact]
         public async void Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
@@ -89,6 +89,19 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 Assert.Equal(descriptor.Name, blob.Name);
                 Assert.Equal(descriptor.Security, BlobSecurity.Private);
             }
+        }
+
+        [Fact]
+        public async void Test_Get_Blob_Url()
+        {
+            var container = GetRandomContainerName();
+            var blob = GenerateRandomName();
+
+            await CreateNewObjectAsync(container, blob, GenerateRandomBlobStream(), false, "image/png");
+
+            var url = _provider.GetBlobUrl(container, blob);
+
+            System.Console.WriteLine("URL: " + url);            
         }
     }
 }

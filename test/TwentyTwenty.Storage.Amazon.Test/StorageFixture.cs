@@ -16,8 +16,8 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
         public StorageFixture()
         {
-            Config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())// + "..\\..\\..\\..\\..\\") // TODO: :poop:
+                Config = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();
@@ -44,7 +44,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var keys = new List<KeyVersion>();
             do
             {
-                var objectsResponse = AsyncHelpers.RunSync(() => _client.ListObjectsAsync(objectsRequest));
+                var objectsResponse = _client.ListObjectsAsync(objectsRequest).Result;
 
                 keys.AddRange(objectsResponse.S3Objects
                     .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
@@ -68,7 +68,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                     Objects = keys
                 };
 
-                AsyncHelpers.RunSync(() => _client.DeleteObjectsAsync(objectsDeleteRequest));
+                _client.DeleteObjectsAsync(objectsDeleteRequest).Wait();
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.Runtime;
 
 namespace TwentyTwenty.Storage.Amazon
 {
@@ -33,33 +34,6 @@ namespace TwentyTwenty.Storage.Amazon
             _s3Client = new AmazonS3Client(options.PublicKey, options.SecretKey, S3Config);
         }
 
-        public void DeleteBlob(string containerName, string blobName)
-        {
-            var key = GenerateKeyName(containerName, blobName);
-
-            var objectDeleteRequest = new DeleteObjectRequest()
-            {
-                BucketName = _bucket,
-                Key = key
-            };
-
-            try
-            {
-                AsyncHelpers.RunSync(() => _s3Client.DeleteObjectAsync(objectDeleteRequest));
-            }
-            catch (AmazonS3Exception asex)
-            {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
-            }
-        }
-
         public async Task DeleteBlobAsync(string containerName, string blobName)
         {
             var key = GenerateKeyName(containerName, blobName);
@@ -76,69 +50,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
-            }
-        }
-
-        public void DeleteContainer(string containerName)
-        {
-            var objectsRequest = new ListObjectsRequest
-            {
-                BucketName = _bucket,
-                Prefix = containerName,
-                MaxKeys = 100000
-            };
-
-            var keys = new List<KeyVersion>();
-
-            try
-            {
-                do
-                {
-                    var objectsResponse = AsyncHelpers.RunSync(() => _s3Client.ListObjectsAsync(objectsRequest));
-
-                    keys.AddRange(objectsResponse.S3Objects
-                        .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
-
-                    // If response is truncated, set the marker to get the next set of keys.
-                    if (objectsResponse.IsTruncated)
-                    {
-                        objectsRequest.Marker = objectsResponse.NextMarker;
-                    }
-                    else
-                    {
-                        objectsRequest = null;
-                    }
-                } while (objectsRequest != null);
-
-                if (keys.Count > 0)
-                {
-                    var objectsDeleteRequest = new DeleteObjectsRequest()
-                    {
-                        BucketName = _bucket,
-                        Objects = keys
-                    };
-
-                    AsyncHelpers.RunSync(() => _s3Client.DeleteObjectsAsync(objectsDeleteRequest));
-                }
-            }
-            catch (AmazonS3Exception asex)
-            {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -186,65 +98,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
-            }
-        }
-
-        public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
-        {
-            var key = GenerateKeyName(containerName, blobName);
-
-            try
-            {
-                var objectMetaRequest = new GetObjectMetadataRequest()
-                {
-                    BucketName = _bucket,
-                    Key = key
-                };
-
-                var objectMetaResponse = AsyncHelpers.RunSync(() => _s3Client.GetObjectMetadataAsync(objectMetaRequest));
-
-                var objectAclRequest = new GetACLRequest()
-                {
-                    BucketName = _bucket,
-                    Key = key
-                };
-
-                var objectAclResponse = AsyncHelpers.RunSync(() => _s3Client.GetACLAsync(objectAclRequest));
-                var isPublic = objectAclResponse.AccessControlList.Grants
-                    .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
-
-                return new BlobDescriptor
-                {
-                    Name = blobName,
-                    Container = containerName,
-                    Length = objectMetaResponse.Headers.ContentLength,
-                    ETag = objectMetaResponse.ETag,
-                    ContentMD5 = objectMetaResponse.ETag,
-                    ContentType = objectMetaResponse.Headers.ContentType,
-                    ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
-                    LastModified = objectMetaResponse.LastModified,
-                    Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
-                    Metadata = objectMetaResponse.Metadata.ToMetadata(),
-                };
-            }
-            catch (AmazonS3Exception asex)
-            {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -269,8 +123,7 @@ namespace TwentyTwenty.Storage.Amazon
                 };
 
                 var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                var isPublic = objectAclResponse.AccessControlList.Grants
-                    .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
+                var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
                 return new BlobDescriptor
                 {
@@ -288,34 +141,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
-            }
-        }
-
-        public Stream GetBlobStream(string containerName, string blobName)
-        {
-            try
-            {
-                return AsyncHelpers.RunSync(() =>
-                    _s3Client.GetObjectStreamAsync(_bucket, GenerateKeyName(containerName, blobName), null));
-            }
-            catch (AmazonS3Exception asex)
-            {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -327,14 +153,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -378,92 +197,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
-            }
-        }
-
-        public IList<BlobDescriptor> ListBlobs(string containerName)
-        {
-            var descriptors = new List<BlobDescriptor>();
-
-            var objectsRequest = new ListObjectsRequest
-            {
-                BucketName = _bucket,
-                Prefix = containerName,
-                MaxKeys = 100000
-            };
-
-            try
-            {
-                do
-                {
-                    var objectsResponse = AsyncHelpers.RunSync(() => _s3Client.ListObjectsAsync(objectsRequest));
-
-                    foreach (S3Object entry in objectsResponse.S3Objects)
-                    {
-                        var objectMetaRequest = new GetObjectMetadataRequest()
-                        {
-                            BucketName = _bucket,
-                            Key = entry.Key
-                        };
-
-                        var objectMetaResponse = AsyncHelpers.RunSync(() => _s3Client.GetObjectMetadataAsync(objectMetaRequest));
-
-                        var objectAclRequest = new GetACLRequest()
-                        {
-                            BucketName = _bucket,
-                            Key = entry.Key
-                        };
-
-                        var objectAclResponse = AsyncHelpers.RunSync(() => _s3Client.GetACLAsync(objectAclRequest));
-                        var isPublic = objectAclResponse.AccessControlList.Grants
-                            .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
-
-                        descriptors.Add(new BlobDescriptor
-                        {
-                            Name = entry.Key.Remove(0, containerName.Length + 1),
-                            Container = containerName,
-                            Length = entry.Size,
-                            ETag = entry.ETag,
-                            ContentMD5 = entry.ETag,
-                            ContentType = objectMetaResponse.Headers.ContentType,
-                            LastModified = entry.LastModified,
-                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
-                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
-                            Metadata = objectMetaResponse.Metadata.ToMetadata(),
-                        });
-                    }
-
-                    // If response is truncated, set the marker to get the next set of keys.
-                    if (objectsResponse.IsTruncated)
-                    {
-                        objectsRequest.Marker = objectsResponse.NextMarker;
-                    }
-                    else
-                    {
-                        objectsRequest = null;
-                    }
-                } while (objectsRequest != null);
-
-                return descriptors;
-            }
-            catch (AmazonS3Exception asex)
-            {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -501,8 +235,7 @@ namespace TwentyTwenty.Storage.Amazon
                         };
 
                         var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                        var isPublic = objectAclResponse.AccessControlList.Grants
-                            .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
+                        var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
                         descriptors.Add(new BlobDescriptor
                         {
@@ -534,59 +267,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
-            }
-        }
-
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
-        {
-            if (source.Length >= 100000000)
-            {
-                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
-
-                try
-                {
-                    AsyncHelpers.RunSync(() => new TransferUtility(_s3Client).UploadAsync(fileTransferUtilityRequest));
-                }
-                catch (AmazonS3Exception asex)
-                {
-                    if (IsInvalidAccessException(asex))
-                    {
-                        throw new StorageException(1000.ToStorageError(), asex);
-                    }
-                    else
-                    {
-                        throw new StorageException(1001.ToStorageError(), asex);
-                    }
-                }
-
-            }
-            else
-            {
-                var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
-
-                try
-                {
-                    AsyncHelpers.RunSync(() => _s3Client.PutObjectAsync(putRequest));
-                }
-                catch (AmazonS3Exception asex)
-                {
-                    if (IsInvalidAccessException(asex))
-                    {
-                        throw new StorageException(1000.ToStorageError(), asex);
-                    }
-                    else
-                    {
-                        throw new StorageException(1001.ToStorageError(), asex);
-                    }
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -602,14 +283,7 @@ namespace TwentyTwenty.Storage.Amazon
                 }
                 catch (AmazonS3Exception asex)
                 {
-                    if (IsInvalidAccessException(asex))
-                    {
-                        throw new StorageException(1000.ToStorageError(), asex);
-                    }
-                    else
-                    {
-                        throw new StorageException(1001.ToStorageError(), asex);
-                    }
+                    throw asex.ToStorageException();
                 }
             }
             else
@@ -622,35 +296,7 @@ namespace TwentyTwenty.Storage.Amazon
                 }
                 catch (AmazonS3Exception asex)
                 {
-                    if (IsInvalidAccessException(asex))
-                    {
-                        throw new StorageException(1000.ToStorageError(), asex);
-                    }
-                    else
-                    {
-                        throw new StorageException(1001.ToStorageError(), asex);
-                    }
-                }
-            }
-        }
-
-        public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
-        {
-            var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
-
-            try
-            {
-                AsyncHelpers.RunSync(() => _s3Client.CopyObjectAsync(updateRequest));
-            }
-            catch (AmazonS3Exception asex)
-            {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
+                    throw asex.ToStorageException();
                 }
             }
         }
@@ -665,41 +311,14 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
         private S3CannedACL GetCannedACL(BlobProperties properties)
-        {
-            if (properties?.Security == BlobSecurity.Public)
-            {
-                return S3CannedACL.PublicRead;
-            }
-            else
-            {
-                return S3CannedACL.Private;
-            }
-        }
+            => properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
 
-        private bool IsInvalidAccessException(AmazonS3Exception asex)
-        {
-            return asex.ErrorCode != null &&
-                        (asex.ErrorCode.Equals("InvalidAccessKeyId") 
-                            || asex.ErrorCode.Equals("InvalidSecurity")
-                            || asex.ErrorCode.Equals("Forbidden"));
-        }
-
-        private string GenerateKeyName(string containerName, string blobName)
-        {
-            return $"{containerName}/{blobName}";
-        }
+        private static string GenerateKeyName(string containerName, string blobName) => $"{containerName}/{blobName}";
 
         private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
         {

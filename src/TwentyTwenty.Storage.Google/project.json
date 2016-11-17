@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.1.3-*",
+  "version": "2.0.0-*",
   "description": "TwentyTwenty.Storage.Google Class Library",
   "authors": [ "2020IP" ],
   "packOptions": {
@@ -10,10 +10,11 @@
     "repository": {
       "type": "git",
       "url": "git://github.com/2020IP/TwentyTwenty.Storage"
-    }
+    },
+      "releaseNotes": "Version 2.0 drops support for the synchronous API and provides a better footing for adding new features."
   },
   "dependencies": {
-    "TwentyTwenty.Storage": "1.2.0-*",
+    "TwentyTwenty.Storage": "2.0.0-*",
     "Google.Apis.Storage.v1": "1.9.2.520",
     "BouncyCastle": "1.8.1",
     "Newtonsoft.Json":  "9.0.1"
