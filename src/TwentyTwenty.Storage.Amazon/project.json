@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0-*",
+  "version": "2.0.0-*",
   "title": "2020 Storage - Amazon S3 Provider",
   "description": "A cross-cloud storage abstraction",
   "authors": [ "2020IP" ],
@@ -11,7 +11,8 @@
     "repository": {
       "type": "git",
       "url": "git://github.com/2020IP/TwentyTwenty.Storage"
-    }
+    },
+    "releaseNotes": "Version 2.0 drops support for the synchronous API and provides a better footing for adding new features."
   },
   "tooling": {
     "defaultNamespace": "TwentyTwenty.Storage.Amazon"
@@ -28,7 +29,7 @@
   },
 
   "dependencies": {
-    "TwentyTwenty.Storage": "1.2.0-*",
+    "TwentyTwenty.Storage": "2.0.0-*",
     "AWSSDK.S3": "3.3.0.1"
   }
 }
