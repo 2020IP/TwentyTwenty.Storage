@@ -20,7 +20,7 @@ namespace TwentyTwenty.Storage.Google.Test
         public StorageFixture()
         {
             Config = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."))
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
                 .Build();
