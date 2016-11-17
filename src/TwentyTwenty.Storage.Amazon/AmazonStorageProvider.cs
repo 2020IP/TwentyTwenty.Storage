@@ -50,14 +50,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -105,14 +98,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -137,8 +123,7 @@ namespace TwentyTwenty.Storage.Amazon
                 };
 
                 var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                var isPublic = objectAclResponse.AccessControlList.Grants
-                    .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
+                var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
                 return new BlobDescriptor
                 {
@@ -156,14 +141,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -175,14 +153,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -226,14 +197,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -271,8 +235,7 @@ namespace TwentyTwenty.Storage.Amazon
                         };
 
                         var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                        var isPublic = objectAclResponse.AccessControlList.Grants
-                            .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
+                        var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
                         descriptors.Add(new BlobDescriptor
                         {
@@ -304,14 +267,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
@@ -327,14 +283,7 @@ namespace TwentyTwenty.Storage.Amazon
                 }
                 catch (AmazonS3Exception asex)
                 {
-                    if (IsInvalidAccessException(asex))
-                    {
-                        throw new StorageException(1000.ToStorageError(), asex);
-                    }
-                    else
-                    {
-                        throw new StorageException(1001.ToStorageError(), asex);
-                    }
+                    throw asex.ToStorageException();
                 }
             }
             else
@@ -347,14 +296,7 @@ namespace TwentyTwenty.Storage.Amazon
                 }
                 catch (AmazonS3Exception asex)
                 {
-                    if (IsInvalidAccessException(asex))
-                    {
-                        throw new StorageException(1000.ToStorageError(), asex);
-                    }
-                    else
-                    {
-                        throw new StorageException(1001.ToStorageError(), asex);
-                    }
+                    throw asex.ToStorageException();
                 }
             }
         }
@@ -369,25 +311,12 @@ namespace TwentyTwenty.Storage.Amazon
             }
             catch (AmazonS3Exception asex)
             {
-                if (IsInvalidAccessException(asex))
-                {
-                    throw new StorageException(1000.ToStorageError(), asex);
-                }
-                else
-                {
-                    throw new StorageException(1001.ToStorageError(), asex);
-                }
+                throw asex.ToStorageException();
             }
         }
 
         private S3CannedACL GetCannedACL(BlobProperties properties)
             => properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
-
-        private static bool IsInvalidAccessException(AmazonServiceException asex)
-            => asex.ErrorCode != null &&
-                (asex.ErrorCode.Equals("InvalidAccessKeyId")
-                    || asex.ErrorCode.Equals("InvalidSecurity")
-                    || asex.ErrorCode.Equals("Forbidden"));
 
         private static string GenerateKeyName(string containerName, string blobName) => $"{containerName}/{blobName}";
 

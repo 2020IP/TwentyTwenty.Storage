@@ -13,5 +13,12 @@ namespace TwentyTwenty.Storage
             ErrorCode = error.Code;
             ProviderMessage = ex?.Message;
         }
+
+        public StorageException(StorageErrorCode errorCode, Exception ex)
+            : base(errorCode.ToStorageError().Message, ex)
+        {
+            ErrorCode = (int) errorCode;
+            ProviderMessage = ex?.Message;
+        }
     }
 }

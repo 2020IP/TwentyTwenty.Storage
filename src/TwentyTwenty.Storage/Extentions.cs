@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TwentyTwenty.Storage
 {
@@ -16,70 +14,61 @@ namespace TwentyTwenty.Storage
         }
 
         public static StorageError ToStorageError(this int code)
-        {
-            return errors
-                .Where(x => x.Key == code)
-                .Select(x => new StorageError() { Code = x.Key, Message = x.Value })
-                .FirstOrDefault();
-        }
+            => ((StorageErrorCode) code).ToStorageError();
 
         public static StorageError ToStorageError(this StorageErrorCode code)
         {
-            return errors
-                .Where(x => x.Key == (int)code)
-                .Select(x => new StorageError() { Code = x.Key, Message = x.Value })
+            var error = Errors
+                .Where(x => x.Key == code)
+                .Select(x => new StorageError() {Code = (int) x.Key, Message = x.Value})
                 .FirstOrDefault();
+
+            return error ?? new StorageError
+                   {
+                       Code = (int) StorageErrorCode.GenericException,
+                       Message = "Generic provider exception occurred",
+                   };
         }
 
         public static List<T2> SelectToListOrEmpty<T1, T2>(this IEnumerable<T1> e, Func<T1, T2> f)
-        {
-            if (e == null)
-            {
-                return new List<T2>();
-            }
-
-            return e.Select(f).ToList();
-        }
+            => e == null ? new List<T2>() : e.Select(f).ToList();
 
         public static List<T1> WhereToListOrEmpty<T1>(this IEnumerable<T1> e, Func<T1, bool> f)
-        {
-            if (e == null)
-            {
-                return new List<T1>();
-            }
+            => e == null ? new List<T1>() : e.Where(f).ToList();
 
-            return e.Where(f).ToList();
-        }
-
-        static Dictionary<int, string> errors = new Dictionary<int, string>
+        private static readonly Dictionary<StorageErrorCode, string> Errors = new Dictionary<StorageErrorCode, string>
         {
             {
-                1000,
+                StorageErrorCode.InvalidCredentials,
                 "Invalid security credentials"
             },
             {
-                1001,
+                StorageErrorCode.GenericException,
                 "Generic provider exception occurred"
             },
             {
-                1002,
+                StorageErrorCode.InvalidAccess,
                 "Invalid access permissions."
             },
             {
-                1003,
+                StorageErrorCode.BlobInUse,
                 "Blob in use."
             },
             {
-                1004,
-                "Invalid blob and container name."
+                StorageErrorCode.InvalidName,
+                "Invalid blob or container name."
             },
             {
-                1005,
-                "Invalid container name."
-            },
-            {
-                1006,
+                StorageErrorCode.ErrorOpeningBlob,
                 "Error opening blob."
+            },
+            {
+                StorageErrorCode.NoCredentialsProvided,
+                "No credentials provided."
+            },
+            {
+                StorageErrorCode.NotFound,
+                "Blob or container not found."
             }
         };
     }
