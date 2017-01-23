@@ -77,7 +77,7 @@ namespace TwentyTwenty.Storage.Local
 
             File.Copy(sourcePath, destPath, true);
 
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
