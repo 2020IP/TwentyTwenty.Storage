@@ -29,7 +29,7 @@
   },
 
   "dependencies": {
-    "TwentyTwenty.Storage": "2.0.0-*",
+    "TwentyTwenty.Storage": "2.1.0-*",
     "AWSSDK.S3": "3.3.0.1"
   }
 }
