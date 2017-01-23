@@ -16,18 +16,12 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
-            var stream = new MemoryStream();
-            data.CopyTo(stream);
-            stream.Position = 0;
 
             await CreateNewObjectAsync(container, blobName, data);
 
             using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
             {
-                var amzStream = new MemoryStream();
-                blobStream.CopyTo(amzStream);
-
-                Assert.True(StreamEquals(amzStream, stream));
+                Assert.True(StreamEquals(blobStream, data));
             }
         }
 
