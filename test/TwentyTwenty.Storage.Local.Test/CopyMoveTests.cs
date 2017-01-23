@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Amazon.S3;
+﻿using System.IO;
+using Newtonsoft.Json;
 using Xunit;
 
-namespace TwentyTwenty.Storage.Amazon.Test
+namespace TwentyTwenty.Storage.Local.Test
 {
-    [Trait("Category", "Amazon")]
-    public sealed class MoveTests : BlobTestBase
+    [Trait("Category", "Local")]
+    public sealed class CopyMoveTests : BlobTestBase
     {
-        public MoveTests(StorageFixture fixture)
+        public CopyMoveTests(StorageFixture fixture)
             : base(fixture) { }
 
         [Fact]
@@ -20,18 +18,18 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var destContainer = GetRandomContainerName();
             var data = GenerateRandomBlobStream();
 
-            await CreateNewObjectAsync(sourceContainer, sourceName, data);
+            CreateNewFile(sourceContainer, sourceName, data);
 
             await _provider.MoveBlobAsync(sourceContainer, sourceName, destContainer);
 
             // Make sure destination now exists and contains original data.
-            var amzObject = await _client.GetObjectAsync(Bucket, destContainer + "/" + sourceName, null);
-            Assert.True(StreamEquals(amzObject.ResponseStream, data));
+            using (var file = File.OpenRead(Path.Combine(BasePath, destContainer, sourceName)))
+            {
+                Assert.True(StreamEquals(data, file));
+            }
 
             // Make sure source no longer exists
-            var ex = await Assert.ThrowsAsync<AmazonS3Exception>(() => _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null));
-
-            Assert.Equal("NoSuchKey", ex.ErrorCode);
+            Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, sourceName)));
         }
 
         [Fact]
@@ -43,18 +41,18 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var destName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            await CreateNewObjectAsync(sourceContainer, sourceName, data);
+            CreateNewFile(sourceContainer, sourceName, data);
 
             await _provider.MoveBlobAsync(sourceContainer, sourceName, destContainer, destName);
 
             // Make sure destination now exists and contains original data.
-            var amzObject = await _client.GetObjectAsync(Bucket, destContainer + "/" + destName, null);
-            Assert.True(StreamEquals(amzObject.ResponseStream, data));
+            using (var file = File.OpenRead(Path.Combine(BasePath, destContainer, destName)))
+            {
+                Assert.True(StreamEquals(data, file));
+            }
 
             // Make sure source no longer exists
-            var ex = await Assert.ThrowsAsync<AmazonS3Exception>(() => _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null));
-
-            Assert.Equal("NoSuchKey", ex.ErrorCode);
+            Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, sourceName)));
         }
 
         [Fact]
@@ -65,17 +63,22 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var destContainer = GetRandomContainerName();
             var data = GenerateRandomBlobStream();
 
-            await CreateNewObjectAsync(sourceContainer, sourceName, data);
+            CreateNewFile(sourceContainer, sourceName, data);
 
             await _provider.CopyBlobAsync(sourceContainer, sourceName, destContainer);
 
+            data.ToString();
             // Make sure destination now exists and contains original data.
-            var amzObject = await _client.GetObjectAsync(Bucket, destContainer + "/" + sourceName, null);
-            Assert.True(StreamEquals(amzObject.ResponseStream, data));
+            using (var file = File.OpenRead(Path.Combine(BasePath, destContainer, sourceName)))
+            {
+                Assert.True(StreamEquals(data, file));
+            }
 
             // Make sure source still exists
-            amzObject = await _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null);
-            Assert.True(StreamEquals(amzObject.ResponseStream, data));
+            using (var file = File.OpenRead(Path.Combine(BasePath, sourceContainer, sourceName)))
+            {
+                Assert.True(StreamEquals(data, file));
+            }
         }
 
         [Fact]
@@ -87,17 +90,21 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var destName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            await CreateNewObjectAsync(sourceContainer, sourceName, data);
+            CreateNewFile(sourceContainer, sourceName, data);
 
             await _provider.CopyBlobAsync(sourceContainer, sourceName, destContainer, destName);
 
             // Make sure destination now exists and contains original data.
-            var amzObject = await _client.GetObjectAsync(Bucket, destContainer + "/" + destName, null);
-            Assert.True(StreamEquals(amzObject.ResponseStream, data));
+            using (var file = File.OpenRead(Path.Combine(BasePath, destContainer, destName)))
+            {
+                Assert.True(StreamEquals(data, file));
+            }
 
             // Make sure source still exists
-            amzObject = await _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null);
-            Assert.True(StreamEquals(amzObject.ResponseStream, data));
+            using (var file = File.OpenRead(Path.Combine(BasePath, sourceContainer, sourceName)))
+            {
+                Assert.True(StreamEquals(data, file));
+            }
         }
     }
 }

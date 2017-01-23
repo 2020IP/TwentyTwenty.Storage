@@ -49,7 +49,10 @@ namespace TwentyTwenty.Storage.Local.Test
         {
             var dir = Path.Combine(BasePath, containerName);
             Directory.CreateDirectory(dir);
-            using (var file = File.Create(Path.Combine(dir, blobName)))
+
+            var path = Path.Combine(dir, blobName);
+
+            using (var file = File.Create(path))
             {
                 source.CopyTo(file);
             }

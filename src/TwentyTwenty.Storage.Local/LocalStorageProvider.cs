@@ -73,7 +73,11 @@ namespace TwentyTwenty.Storage.Local
             }
 
             var sourcePath = Path.Combine(_basePath, sourceContainerName, sourceBlobName);
-            var destPath = Path.Combine(_basePath, destinationContainerName, destinationContainerName ?? sourceContainerName);
+
+            var destDir = Path.Combine(_basePath, destinationContainerName);
+            Directory.CreateDirectory(destDir);
+
+            var destPath = Path.Combine(destDir, destinationBlobName ?? sourceBlobName);
 
             File.Copy(sourcePath, destPath, true);
 
