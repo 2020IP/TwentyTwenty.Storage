@@ -13,6 +13,12 @@ namespace TwentyTwenty.Storage
         Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName);
         Task DeleteBlobAsync(string containerName, string blobName);
         Task DeleteContainerAsync(string containerName);
+
+        Task CopyBlobAsync(string sourceContainerName, string sourceBlobName,
+            string destinationContainerName, string destinationBlobName = null);
+        Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, 
+            string destinationContainerName, string destinationBlobName = null);
+
         Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties);
 
         string GetBlobUrl(string containerName, string blobName);

@@ -16,7 +16,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
         public StorageFixture()
         {
-                Config = new ConfigurationBuilder()
+            Config = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
                 .AddEnvironmentVariables()
                 .AddUserSecrets()
