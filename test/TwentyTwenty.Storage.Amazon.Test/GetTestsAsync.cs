@@ -10,7 +10,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public GetTestsAsync(StorageFixture fixture)
             : base(fixture) { }
 
-        // [Fact]
+        [Fact]
         public async void Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
@@ -31,7 +31,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             }
         }
 
-        // [Fact]
+        [Fact]
         public async void Test_Get_Blob_Descriptor_Async()
         {
             var container = GetRandomContainerName();
@@ -60,7 +60,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.Equal(descriptor.Metadata, meta);
         }
 
-        // [Fact]
+        [Fact]
         public async void Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();

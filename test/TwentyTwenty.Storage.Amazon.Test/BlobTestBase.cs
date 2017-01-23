@@ -71,11 +71,14 @@ namespace TwentyTwenty.Storage.Amazon.Test
         protected async Task CreateNewObjectAsync(string container, string blobName, Stream data, 
             bool isPublic = false, string contentType = null, IDictionary<string, string> metadata = null)
         {
+            var stream = new MemoryStream();
+            data.CopyTo(stream);
+
             var putRequest = new PutObjectRequest()
             {
                 BucketName = Bucket,
                 Key = container + "/" + blobName,
-                InputStream = data,
+                InputStream = stream,
                 CannedACL = isPublic ? S3CannedACL.PublicRead : S3CannedACL.Private,
                 ContentType = contentType
             };

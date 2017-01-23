@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon.Runtime;
+using System.Net;
 
 namespace TwentyTwenty.Storage.Amazon
 {
@@ -52,6 +52,59 @@ namespace TwentyTwenty.Storage.Amazon
             {
                 throw asex.ToStorageException();
             }
+        }
+
+        public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName,
+            string destinationContainerName, string destinationBlobName = null)
+        {
+            if (string.IsNullOrEmpty(sourceContainerName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceContainerName)}");
+            }
+            if (string.IsNullOrEmpty(sourceBlobName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceBlobName)}");
+            }
+            if (string.IsNullOrEmpty(destinationContainerName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationContainerName)}");
+            }
+            if (destinationBlobName == string.Empty)
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationBlobName)}");
+            }
+
+            var sourceKey = GenerateKeyName(sourceContainerName, sourceBlobName);
+            var destinationKey = GenerateKeyName(destinationContainerName, destinationBlobName ?? sourceBlobName);
+
+            try
+            {
+                var request = new CopyObjectRequest
+                {
+                    SourceBucket = _bucket,
+                    SourceKey = sourceKey,
+                    DestinationBucket = _bucket,
+                    DestinationKey = destinationKey,
+                };
+
+                var response = await _s3Client.CopyObjectAsync(request);
+
+                if (response.HttpStatusCode != HttpStatusCode.OK)
+                {
+                    throw new StorageException(StorageErrorCode.GenericException, "Copy failed.");
+                }
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
+
+        public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, 
+            string destinationContainerName, string destinationBlobName = null)
+        {
+            await CopyBlobAsync(sourceContainerName, sourceBlobName, destinationContainerName, destinationBlobName);
+            await DeleteBlobAsync(sourceContainerName, sourceBlobName);
         }
 
         public async Task DeleteContainerAsync(string containerName)
