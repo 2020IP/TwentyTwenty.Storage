@@ -59,6 +59,18 @@ namespace TwentyTwenty.Storage.Azure
             }
         }
 
+        public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
         {
             var container = _blobClient.GetContainerReference(containerName);

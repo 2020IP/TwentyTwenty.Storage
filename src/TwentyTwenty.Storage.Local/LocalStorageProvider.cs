@@ -52,6 +52,41 @@ namespace TwentyTwenty.Storage.Local
             return Task.Run(() => DeleteContainer(containerName));
         }
 
+        public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            if (string.IsNullOrEmpty(sourceContainerName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceContainerName)}");
+            }
+            if (string.IsNullOrEmpty(sourceBlobName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceBlobName)}");
+            }
+            if (string.IsNullOrEmpty(destinationContainerName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationContainerName)}");
+            }
+            if (destinationBlobName == string.Empty)
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationBlobName)}");
+            }
+
+            var sourcePath = Path.Combine(_basePath, sourceContainerName, sourceBlobName);
+            var destPath = Path.Combine(_basePath, destinationContainerName, destinationContainerName ?? sourceContainerName);
+
+            File.Copy(sourcePath, destPath, true);
+
+            return Task.CompletedTask;
+        }
+
+        public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            await CopyBlobAsync(sourceContainerName, sourceBlobName, destinationContainerName, destinationBlobName);
+            await DeleteBlobAsync(sourceContainerName, sourceBlobName);
+        }
+
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
         {
             var path = Path.Combine(_basePath, containerName, blobName);

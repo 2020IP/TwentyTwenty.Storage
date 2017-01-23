@@ -177,6 +177,18 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
+        public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
             try
