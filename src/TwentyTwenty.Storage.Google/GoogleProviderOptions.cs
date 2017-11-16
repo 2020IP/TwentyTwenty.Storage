@@ -9,5 +9,6 @@ namespace TwentyTwenty.Storage.Google
         public string Bucket { get; set; }
 
         public string P12PrivateKey { get; set; }
+        
     }
 }

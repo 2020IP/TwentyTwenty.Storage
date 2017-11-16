@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>TwentyTwenty.Storage.Google.Test Class Library</Description>
+    <Authors>2020IP</Authors>
+    <TargetFramework>net46</TargetFramework>
+    <AssemblyName>TwentyTwenty.Storage.Google.Test</AssemblyName>
+    <PackageId>TwentyTwenty.Storage.Google.Test</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <UserSecretsId>TwentyTwenty.Storage.Google.Test-EFCF7CA3-97B7-45A4-8D19-FAB47939AB03</UserSecretsId>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/TwentyTwenty.Storage.Google/TwentyTwenty.Storage.Google.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="1.0.2" />
+    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.0.2" />
+    <PackageReference Include="Google.Apis.Storage.v1" Version="1.9.2.520" />
+    <PackageReference Include="FluentAssertions" Version="4.0.1" />
+    <PackageReference Include="BouncyCastle" Version="1.8.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

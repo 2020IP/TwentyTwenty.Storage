@@ -16,6 +16,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net;
+using Google.Cloud.Storage.V1;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -23,12 +24,12 @@ namespace TwentyTwenty.Storage.Google
     {
         private const string BlobNameRegex = @"(?<Container>[^/]+)/(?<Blob>.+)";
         private const string DefaultContentType = "application/octet-stream";
-        private readonly StorageService _storageService;
+        private readonly StorageClient _storageService;
         private readonly string _bucket;
         private readonly string _serviceEmail;
         private readonly X509Certificate2 _certificate;
 
-        public GoogleStorageProvider(GoogleProviderOptions options)
+        public GoogleStorageProvider(GoogleProviderOptions options, GoogleCredential credential)
         {
             if (options.P12PrivateKey == null)
             {
@@ -40,29 +41,7 @@ namespace TwentyTwenty.Storage.Google
                 }, null);
             }
 
-            try
-            {
-                _certificate = new X509Certificate2(Convert.FromBase64String(options.P12PrivateKey), "notasecret", X509KeyStorageFlags.Exportable);
-                var credential =
-                    new ServiceAccountCredential(new ServiceAccountCredential.Initializer(options.Email)
-                    {
-                        Scopes = new[] { StorageService.Scope.DevstorageFullControl }
-                    }.FromCertificate(_certificate));
-
-                _storageService = new StorageService(new BaseClientService.Initializer
-                {
-                    HttpClientInitializer = credential
-                });
-            }
-            catch (Exception ex)
-            {
-                throw new StorageException(new StorageError
-                {
-                    Code = 1000,
-                    Message = "Invalid P12 private key.",
-                    ProviderMessage = ex.Message
-                }, ex);
-            }
+            _storageService = StorageClient.Create(credential);
 
             _serviceEmail = options.Email;
             _bucket = options.Bucket;
@@ -89,7 +68,11 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                return await _storageService.HttpClient.GetStreamAsync(GetBlob(containerName, blobName).MediaLink);
+                var stream = new MemoryStream();
+                await _storageService.DownloadObjectAsync(_bucket, 
+                    ObjectName(containerName, blobName), stream);
+
+                return stream;
             }
             catch (GoogleApiException gae)
             {
@@ -101,6 +84,8 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
+                var obj = _storageService.GetObject(_bucket, ObjectName(containerName, blobName));
+                obj.MediaLink;
                 return GetBlob(containerName, blobName).MediaLink;
             }
             catch (GoogleApiException gae)
@@ -137,6 +122,7 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
+                _storageService.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { }
                 return (await GetListBlobsRequest(containerName).ExecuteAsync()).Items.SelectToListOrEmpty(GetBlobDescriptor);
             }
             catch (GoogleApiException gae)
@@ -145,11 +131,11 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public async Task DeleteBlobAsync(string containerName, string blobName)
+        public Task DeleteBlobAsync(string containerName, string blobName)
         {
             try
             {
-                await _storageService.Objects.Delete(_bucket, $"{containerName}/{blobName}").ExecuteAsync();
+                return _storageService.DeleteObjectAsync(_bucket, ObjectName(containerName, blobName));
             }
             catch (GoogleApiException gae)
             {
@@ -234,40 +220,8 @@ namespace TwentyTwenty.Storage.Google
             };
         }
 
-        private Task<Blob> GetBlobAsync(string containerName, string blobName)
-        {
-            var req = _storageService.Objects.Get(_bucket, $"{containerName}/{blobName}");
-            req.Projection = ObjectsResource.GetRequest.ProjectionEnum.Full;
-
-            try
-            {
-                return req.ExecuteAsync();
-            }
-            catch (GoogleApiException e)
-            {
-                if (e.Message.Contains("404"))
-                {
-                    return null;
-                }
-
-                throw;
-            }
-        }
-
-        private Blob GetBlob(string containerName, string blobName)
-        {
-            var req = _storageService.Objects.Get(_bucket, $"{containerName}/{blobName}");
-            req.Projection = ObjectsResource.GetRequest.ProjectionEnum.Full;
-
-            try
-            {
-                return req.Execute();
-            }
-            catch (GoogleApiException gae)
-            {
-                throw Error(gae);
-            }
-        }
+        private string ObjectName(string containerName, string blobName)
+            => $"{containerName}/{blobName}";
 
         private BlobDescriptor GetBlobDescriptor(Blob blob)
         {

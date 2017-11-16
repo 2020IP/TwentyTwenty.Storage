@@ -1,7 +1,7 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26114.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B2CFCB1B-913A-421E-B765-DB507D6A35CB}"
 EndProject
@@ -10,26 +10,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.yml = appveyor.yml
 		build.cmd = build.cmd
 		build.sh = build.sh
-		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Amazon.Test", "test\TwentyTwenty.Storage.Amazon.Test\TwentyTwenty.Storage.Amazon.Test.xproj", "{B24FEFAD-0FEE-4466-A7B7-96F6475A3F20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Amazon.Test", "test\TwentyTwenty.Storage.Amazon.Test\TwentyTwenty.Storage.Amazon.Test.csproj", "{B24FEFAD-0FEE-4466-A7B7-96F6475A3F20}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Azure.Test", "test\TwentyTwenty.Storage.Azure.Test\TwentyTwenty.Storage.Azure.Test.xproj", "{8BF141AA-5BF0-41F7-8394-05D8DD8BF91F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Azure.Test", "test\TwentyTwenty.Storage.Azure.Test\TwentyTwenty.Storage.Azure.Test.csproj", "{8BF141AA-5BF0-41F7-8394-05D8DD8BF91F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Local.Test", "test\TwentyTwenty.Storage.Local.Test\TwentyTwenty.Storage.Local.Test.xproj", "{C4A5DCA4-D7D5-4165-929E-7DB701158FAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Local.Test", "test\TwentyTwenty.Storage.Local.Test\TwentyTwenty.Storage.Local.Test.csproj", "{C4A5DCA4-D7D5-4165-929E-7DB701158FAB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage", "src\TwentyTwenty.Storage\TwentyTwenty.Storage.xproj", "{FA840BCF-0A57-4605-8B99-9058B5CB7195}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage", "src\TwentyTwenty.Storage\TwentyTwenty.Storage.csproj", "{FA840BCF-0A57-4605-8B99-9058B5CB7195}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Amazon", "src\TwentyTwenty.Storage.Amazon\TwentyTwenty.Storage.Amazon.xproj", "{F3EDB2B3-B0B1-4B48-9450-DD94E2270D09}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Amazon", "src\TwentyTwenty.Storage.Amazon\TwentyTwenty.Storage.Amazon.csproj", "{F3EDB2B3-B0B1-4B48-9450-DD94E2270D09}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Azure", "src\TwentyTwenty.Storage.Azure\TwentyTwenty.Storage.Azure.xproj", "{6B86C0AC-918F-4399-BECE-F80020DC86E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Azure", "src\TwentyTwenty.Storage.Azure\TwentyTwenty.Storage.Azure.csproj", "{6B86C0AC-918F-4399-BECE-F80020DC86E6}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Local", "src\TwentyTwenty.Storage.Local\TwentyTwenty.Storage.Local.xproj", "{6ECD92C6-7BFF-431D-AE3F-C52DFA370EC0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Local", "src\TwentyTwenty.Storage.Local\TwentyTwenty.Storage.Local.csproj", "{6ECD92C6-7BFF-431D-AE3F-C52DFA370EC0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Google", "src\TwentyTwenty.Storage.Google\TwentyTwenty.Storage.Google.xproj", "{1931F007-25DF-4DEE-86F6-C6EBEF192C0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Google", "src\TwentyTwenty.Storage.Google\TwentyTwenty.Storage.Google.csproj", "{1931F007-25DF-4DEE-86F6-C6EBEF192C0B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TwentyTwenty.Storage.Google.Test", "test\TwentyTwenty.Storage.Google.Test\TwentyTwenty.Storage.Google.Test.xproj", "{2F3AFB47-27FE-47B4-BF4B-C370F1E51320}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwentyTwenty.Storage.Google.Test", "test\TwentyTwenty.Storage.Google.Test\TwentyTwenty.Storage.Google.Test.csproj", "{2F3AFB47-27FE-47B4-BF4B-C370F1E51320}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
