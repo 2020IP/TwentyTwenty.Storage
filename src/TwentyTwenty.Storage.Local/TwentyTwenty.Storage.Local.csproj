@@ -1,34 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Description>A cross-cloud storage abstraction</Description>
-    <AssemblyTitle>2020 Storage - Local Filesystem Provider</AssemblyTitle>
-    <VersionPrefix>2.1.0</VersionPrefix>
-    <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
-    <AssemblyName>TwentyTwenty.Storage.Local</AssemblyName>
-    <PackageId>TwentyTwenty.Storage.Local</PackageId>
-    <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
-    <PackageReleaseNotes>Version 2.0 drops support for the synchronous API and provides a better footing for adding new features.</PackageReleaseNotes>
-    <PackageIconUrl>https://avatars3.githubusercontent.com/u/15891935?v=3&amp;s=64</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/2020IP/TwentyTwenty.Storage</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/2020IP/TwentyTwenty.Storage</RepositoryUrl>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Description>A cross-cloud storage abstraction</Description>
+		<AssemblyTitle>2020 Storage - Local Filesystem Provider</AssemblyTitle>
+		<VersionPrefix>3.0.0</VersionPrefix>
+		<Authors>2020IP</Authors>
+		<TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+		<AssemblyName>TwentyTwenty.Storage.Local</AssemblyName>
+		<PackageId>TwentyTwenty.Storage.Local</PackageId>
+		<PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
+		<PackageReleaseNotes>Version 2.0 drops support for the synchronous API and provides a better footing for adding new features.</PackageReleaseNotes>
+		<PackageIconUrl>https://avatars3.githubusercontent.com/u/15891935?v=3&amp;s=64</PackageIconUrl>
+		<PackageProjectUrl>https://github.com/2020IP/TwentyTwenty.Storage</PackageProjectUrl>
+		<PackageLicenseUrl>https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt</PackageLicenseUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>git://github.com/2020IP/TwentyTwenty.Storage</RepositoryUrl>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TwentyTwenty.Storage\TwentyTwenty.Storage.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\TwentyTwenty.Storage\TwentyTwenty.Storage.csproj" />
+	</ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
-  </ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+		<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+		<PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
+	</ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+		<Reference Include="System" />
+		<Reference Include="Microsoft.CSharp" />
+	</ItemGroup>
 
 </Project>
