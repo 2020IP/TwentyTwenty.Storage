@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>A cross-cloud storage abstraction</Description>
+    <AssemblyTitle>2020 Storage</AssemblyTitle>
+    <VersionPrefix>3.0.0</VersionPrefix>
+    <Authors>2020IP</Authors>
+    <TargetFrameworks>netstandard1.0;net45</TargetFrameworks>
+    <AssemblyName>TwentyTwenty.Storage</AssemblyName>
+    <PackageId>TwentyTwenty.Storage</PackageId>
+    <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
+    <PackageReleaseNotes>Version 2.0 drops support for the synchronous API and provides a better footing for adding new features.</PackageReleaseNotes>
+    <PackageIconUrl>https://avatars3.githubusercontent.com/u/15891935?v=3&amp;s=64</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/2020IP/TwentyTwenty.Storage</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>git://github.com/2020IP/TwentyTwenty.Storage</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.0' ">
+    <PackageReference Include="System.Linq" Version="4.3.0" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.IO" Version="4.3.0" />
+    <PackageReference Include="System.Threading" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>

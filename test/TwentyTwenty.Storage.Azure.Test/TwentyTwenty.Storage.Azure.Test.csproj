@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp2.0</TargetFramework>
+		<AssemblyName>TwentyTwenty.Storage.Azure.Test</AssemblyName>
+		<PackageId>TwentyTwenty.Storage.Azure.Test</PackageId>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<UserSecretsId>TwentyTwenty.Storage.Azure.Test-C9E3EB7B-4203-4571-842A-D6086C466F68</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\TwentyTwenty.Storage.Azure\TwentyTwenty.Storage.Azure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="xunit" Version="2.3.1" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+		<DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+	</ItemGroup>
+
+</Project>

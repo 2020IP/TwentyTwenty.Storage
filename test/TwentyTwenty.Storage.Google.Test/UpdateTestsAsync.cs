@@ -32,7 +32,9 @@ namespace TwentyTwenty.Storage.Google.Test
             });
 
             var blob = await _client.Objects.Get(Bucket, container + "/" + blobName).ExecuteAsync();
-            blob.Acl = (await _client.ObjectAccessControls.List(Bucket, blob.Name).ExecuteAsync()).Items.SelectToListOrEmpty(o => ((JObject)o).ToObject<ObjectAccessControl>());
+	        blob.Acl = (await _client.ObjectAccessControls.List(Bucket, blob.Name)
+			        .ExecuteAsync())
+					.Items;
 
             blob.Should().NotBeNull();
             blob.ContentType.Should().Be(newContentType);
