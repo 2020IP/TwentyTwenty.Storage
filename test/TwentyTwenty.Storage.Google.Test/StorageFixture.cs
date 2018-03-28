@@ -18,7 +18,7 @@ namespace TwentyTwenty.Storage.Google.Test
             Config = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."))
                 .AddEnvironmentVariables()
-                .AddUserSecrets()
+                .AddUserSecrets<BaseCollection>()
                 .Build();
 
             var credential =
