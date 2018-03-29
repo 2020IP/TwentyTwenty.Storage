@@ -19,7 +19,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Config = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
                 .AddEnvironmentVariables()
-                .AddUserSecrets()
+                .AddUserSecrets<StorageFixture>()
                 .Build();
 
             var S3Config = new AmazonS3Config

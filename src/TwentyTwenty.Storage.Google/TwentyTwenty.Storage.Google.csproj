@@ -4,8 +4,8 @@
     <Description>TwentyTwenty.Storage.Google Class Library</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>2020IP</Authors>
-    <!-- <TargetFrameworks>net45;netstandard1.3</TargetFrameworks> -->
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Google</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Google</PackageId>
     <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Cloud.Storage.V1" Version="2.0.0" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="2.1.0" />
   </ItemGroup>
 
 </Project>

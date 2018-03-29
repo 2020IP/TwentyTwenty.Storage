@@ -5,7 +5,8 @@
     <AssemblyTitle>2020 Storage - Local Filesystem Provider</AssemblyTitle>
     <VersionPrefix>2.1.0</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Local</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Local</PackageId>
     <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>

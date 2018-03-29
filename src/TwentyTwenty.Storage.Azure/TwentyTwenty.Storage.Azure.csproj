@@ -5,7 +5,8 @@
     <AssemblyTitle>2020 Storage - Azure Blob Storage Provider</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Azure</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Azure</PackageId>
     <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>

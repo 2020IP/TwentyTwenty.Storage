@@ -5,7 +5,8 @@
     <AssemblyTitle>2020 Storage - Amazon S3 Provider</AssemblyTitle>
     <VersionPrefix>2.1.0</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Amazon</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Amazon</PackageId>
     <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
@@ -22,6 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="3.3.9" />
+    <PackageReference Include="AWSSDK.S3" Version="3.3.17.1" />
   </ItemGroup>
 </Project>

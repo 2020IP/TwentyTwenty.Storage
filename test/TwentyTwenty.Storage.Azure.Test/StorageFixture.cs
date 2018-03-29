@@ -18,7 +18,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             Config = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
                 .AddEnvironmentVariables()
-                .AddUserSecrets()
+                .AddUserSecrets<StorageFixture>()
                 .Build();
             
             _client = CloudStorageAccount.Parse(Config["ConnectionString"]).CreateCloudBlobClient();
