@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Google;
-using Google.Apis.Storage.v1;
 using Google.Apis.Upload;
 using Google.Apis.Services;
 using Google.Apis.Auth.OAuth2;
@@ -24,64 +23,52 @@ namespace TwentyTwenty.Storage.Google
     {
         private const string BlobNameRegex = @"(?<Container>[^/]+)/(?<Blob>.+)";
         private const string DefaultContentType = "application/octet-stream";
-        private readonly StorageClient _storageService;
+        private readonly StorageClient _client;
         private readonly string _bucket;
         private readonly string _serviceEmail;
         private readonly X509Certificate2 _certificate;
 
-        public GoogleStorageProvider(GoogleProviderOptions options, GoogleCredential credential)
+        public GoogleStorageProvider(GoogleCredential credential, GoogleProviderOptions options)
         {
-            // if (options.P12PrivateKey == null)
-            // {
-            //     throw new StorageException(new StorageError
-            //     {
-            //         Code = 1007,
-            //         Message = "P12 private key is required.",
-            //         ProviderMessage = "P12 private key is required."
-            //     }, null);
-            // }
-
-            _storageService = StorageClient.Create(credential);
+            _client = StorageClient.Create(credential);
 
             _serviceEmail = options.Email;
             _bucket = options.Bucket;
         }
 
-        // public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
-        // {
-        //     try
-        //     {
-        //         var response = await SaveRequest(containerName, blobName, source, properties).UploadAsync();
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        {
+            try
+            {
+                await _client.UploadObjectAsync(_bucket, ObjectName(containerName, blobName), properties?.ContentType, source);
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
+        }
 
-        //         if (response.Status == UploadStatus.Failed)
-        //         {
-        //             throw Error(response.Exception as GoogleApiException, message: "There was an error uploading to Google Cloud Storage");
-        //         }
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
-        // }
+        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        {
+            try
+            {
+                var stream = new MemoryStream();
+                await _client.DownloadObjectAsync(_bucket, 
+                    ObjectName(containerName, blobName), stream);
+                
+                stream.Seek(0, SeekOrigin.Begin);
+                
+                return stream;
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
+        }
 
-        // public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
-        // {
-        //     try
-        //     {
-        //         var stream = new MemoryStream();
-        //         await _storageService.DownloadObjectAsync(_bucket, 
-        //             ObjectName(containerName, blobName), stream);
-
-        //         return stream;
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
-        // }
-
-        // public string GetBlobUrl(string containerName, string blobName)
-        // {
+        public string GetBlobUrl(string containerName, string blobName)
+        {
+            throw new NotImplementedException();
         //     try
         //     {
         //         var obj = _storageService.GetObject(_bucket, ObjectName(containerName, blobName));
@@ -92,22 +79,24 @@ namespace TwentyTwenty.Storage.Google
         //     {
         //         throw Error(gae);
         //     }
-        // }
+        }
 
         // // TODO: Currently google only support adding a content disposition when uploading
-        // public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
-        //     string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
-        // {
+        public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
+            string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
+        {
+            throw new NotImplementedException();
         //     var expiration = expiry.ToUnixTimeSeconds();
         //     //var disp = fileName != null ? "content-disposition:attachment;filename=\"" + fileName +"\"" : string.Empty;
         //     var verb = access == BlobUrlAccess.Read ? "GET" : "PUT";
         //     var urlSignature = SignString($"{verb}\n\n{contentType}\n{expiration}\n/{_bucket}/{containerName}/{blobName}");
 
         //     return $"https://storage.googleapis.com/{_bucket}/{containerName}/{blobName}?GoogleAccessId={_serviceEmail}&Expires={expiration}&Signature={WebUtility.UrlEncode(urlSignature)}";
-        // }
+        }
 
-        // public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
-        // {
+        public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
+        {
+            throw new NotImplementedException();
         //     try
         //     {
         //         return GetBlobDescriptor(await GetBlobAsync(containerName, blobName));
@@ -116,10 +105,11 @@ namespace TwentyTwenty.Storage.Google
         //     {
         //         throw Error(gae);
         //     }
-        // }
+        }
 
-        // public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
-        // {
+        public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
+        {
+            throw new NotImplementedException();
         //     try
         //     {
         //         // _storageService.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { }
@@ -129,10 +119,11 @@ namespace TwentyTwenty.Storage.Google
         //     {
         //         throw Error(gae);
         //     }
-        // }
+        }
 
-        // public Task DeleteBlobAsync(string containerName, string blobName)
-        // {
+        public Task DeleteBlobAsync(string containerName, string blobName)
+        {
+            throw new NotImplementedException();
         //     try
         //     {
         //         return _storageService.DeleteObjectAsync(_bucket, ObjectName(containerName, blobName));
@@ -141,10 +132,11 @@ namespace TwentyTwenty.Storage.Google
         //     {
         //         throw Error(gae);
         //     }
-        // }
+        }
 
-        // public async Task DeleteContainerAsync(string containerName)
-        // {
+        public async Task DeleteContainerAsync(string containerName)
+        {
+            throw new NotImplementedException();
         //     try
         //     {
         //         var batch = new BatchRequest(_storageService);
@@ -161,22 +153,23 @@ namespace TwentyTwenty.Storage.Google
         //     {
         //         throw Error(gae);
         //     }
-        // }
+        }
 
-        // public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
-        //     string destinationBlobName = null)
-        // {
-        //     throw new NotImplementedException();
-        // }
+        public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            throw new NotImplementedException();
+        }
 
-        // public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
-        //     string destinationBlobName = null)
-        // {
-        //     throw new NotImplementedException();
-        // }
+        public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+            string destinationBlobName = null)
+        {
+            throw new NotImplementedException();
+        }
 
-        // public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
-        // {
+        public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
+        {
+            throw new NotImplementedException();
         //     try
         //     {
         //         await UpdateRequest(containerName, blobName, properties).ExecuteAsync();
@@ -185,7 +178,7 @@ namespace TwentyTwenty.Storage.Google
         //     {
         //         throw Error(gae);
         //     }
-        // }
+        }
 
         // #region Helpers
 
@@ -211,17 +204,17 @@ namespace TwentyTwenty.Storage.Google
         //     return req;
         // }
 
-        // private Blob CreateBlob(string containerName, string blobName, BlobProperties properties = null)
-        // {
-        //     return new Blob
-        //     {
-        //         Name = $"{containerName}/{blobName}",
-        //         ContentType = properties?.ContentType ?? DefaultContentType
-        //     };
-        // }
+        private Blob CreateBlob(string containerName, string blobName, BlobProperties properties = null)
+        {
+            return new Blob
+            {
+                Name = $"{containerName}/{blobName}",
+                ContentType = properties?.ContentType ?? DefaultContentType
+            };
+        }
 
-        // private string ObjectName(string containerName, string blobName)
-        //     => $"{containerName}/{blobName}";
+        private string ObjectName(string containerName, string blobName)
+            => $"{containerName}/{blobName}";
 
         // private BlobDescriptor GetBlobDescriptor(Blob blob)
         // {
@@ -255,16 +248,16 @@ namespace TwentyTwenty.Storage.Google
         //     return req;
         // }
 
-        // private StorageException Error(GoogleApiException gae, int code = 1001, string message = null)
-        // {
-        //     return new StorageException(new StorageError
-        //     {
-        //         Code = code,
-        //         Message =
-        //             message ?? "Encountered an error when making a request to Google's Cloud API.",
-        //         ProviderMessage = gae?.Message
-        //     }, gae);
-        // }
+        private StorageException Error(GoogleApiException gae, int code = 1001, string message = null)
+        {
+            return new StorageException(new StorageError
+            {
+                Code = code,
+                Message =
+                    message ?? "Encountered an error when making a request to Google's Cloud API.",
+                ProviderMessage = gae?.Message
+            }, gae);
+        }
 
         // private string SignString(string stringToSign)
         // {

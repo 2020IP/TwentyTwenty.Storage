@@ -6,7 +6,6 @@
     <PackageId>TwentyTwenty.Storage.Azure.Test</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <UserSecretsId>TwentyTwenty.Storage.Azure.Test-C9E3EB7B-4203-4571-842A-D6086C466F68</UserSecretsId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;portable-net451+win8</PackageTargetFallback>
     <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
   </PropertyGroup>
 

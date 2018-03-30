@@ -6,10 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Http;
-using Google.Apis.Services;
-using Google.Apis.Storage.v1;
-using Google.Apis.Storage.v1.Data;
+using Google.Cloud.Storage.V1;
 using TwentyTwenty.Storage;
 using TwentyTwenty.Storage.Google;
 using Xunit;
@@ -26,36 +23,32 @@ namespace TwentyTwenty.Storage.Google.Test
     public abstract class BlobTestBase : IClassFixture<StorageFixture>
     {
         protected static readonly Random _rand = new Random();
-        protected StorageService _client;
+        protected StorageClient _client; 
         protected IStorageProvider _provider;
         protected string Bucket;
         protected string ContainerPrefix;
-
-        /// <summary>
-        /// {0} - Container name
-        /// {1} - Blob name
-        /// </summary>
-        private const string ContainerBlobFormat = @"{0}/{1}";
 
         private const string DefaultContentType = "application/octet-stream";
 
         /// <summary>
         /// For blobs which have a "public" ACL.
         /// </summary>
-        private readonly ObjectAccessControl PublicAcl = new ObjectAccessControl {Entity = "allUsers", Role = "READER"};
+        // private readonly ObjectAccessControl PublicAcl = new ObjectAccessControl {Entity = "allUsers", Role = "READER"};
 
         public BlobTestBase(StorageFixture fixture)
         {
             Bucket = fixture.Config["GoogleBucket"];
+
             _client = fixture._client;
-            _provider =
-                new GoogleStorageProvider(new GoogleProviderOptions
-                {
-                    Email = fixture.Config["GoogleEmail"],
-                    Bucket = Bucket,
-                    P12PrivateKey = fixture.Config["GoogleP12PrivateKey"]
-                });
+            _provider = new GoogleStorageProvider(fixture._credential, new GoogleProviderOptions
+            {
+                Email = fixture.Config["GoogleEmail"],
+                Bucket = Bucket,
+            });
         }
+
+        public string GetObjectName(string container, string blobName)
+            => $"{container}/{blobName}";
 
         public byte[] GenerateRandomBlob(int length = 256)
         {
@@ -79,23 +72,23 @@ namespace TwentyTwenty.Storage.Google.Test
             return Guid.NewGuid().ToString("N");
         }
 
-        protected async Task CreateNewObject(string container, string blobName, Stream data, bool isPublic = false,
-            string contentType = null)
-        {
-            var blob = new Blob
-            {
-                Name = string.Format(ContainerBlobFormat, container, blobName),
-                //TODO:  Figure out how the hell ACL has got to be tweaked to actually work.  Currently this does not do it, and the .NET api does not expose the ability to set the query parameter "predefinedAcl" which would be perfect for our needs here.
-                ContentType = contentType ?? DefaultContentType
-            };
+        // protected async Task CreateNewObject(string container, string blobName, Stream data, bool isPublic = false,
+        //     string contentType = null)
+        // {
+        //     var blob = new Blob
+        //     {
+        //         Name = string.Format(ContainerBlobFormat, container, blobName),
+        //         //TODO:  Figure out how the hell ACL has got to be tweaked to actually work.  Currently this does not do it, and the .NET api does not expose the ability to set the query parameter "predefinedAcl" which would be perfect for our needs here.
+        //         ContentType = contentType ?? DefaultContentType
+        //     };
 
-            await _client.Objects.Insert(blob, Bucket, data, contentType ?? DefaultContentType).UploadAsync();
+        //     await _client.Objects.Insert(blob, Bucket, data, contentType ?? DefaultContentType).UploadAsync();
 
-            if (isPublic)
-            {
-                await _client.ObjectAccessControls.Insert(PublicAcl, Bucket, blob.Name).ExecuteAsync();
-            }
-        }
+        //     if (isPublic)
+        //     {
+        //         await _client.ObjectAccessControls.Insert(PublicAcl, Bucket, blob.Name).ExecuteAsync();
+        //     }
+        // }
 
         protected bool StreamEquals(Stream stream1, Stream stream2)
         {

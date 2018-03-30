@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Text;
+using System.Linq;
+using Google.Cloud.Storage.V1;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Services;
-using Google.Apis.Storage.v1;
 using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography.X509Certificates;
 
@@ -11,38 +12,33 @@ namespace TwentyTwenty.Storage.Google.Test
     public class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
-        public readonly StorageService _client;
+        public readonly StorageClient _client;
+        public readonly GoogleCredential _credential;
 
         public StorageFixture()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."))
                 .AddEnvironmentVariables()
-                .AddUserSecrets()
+                .AddUserSecrets<StorageFixture>()
                 .Build();
 
-            var credential =
-                new ServiceAccountCredential(new ServiceAccountCredential.Initializer(Config["GoogleEmail"])
-                {
-                    Scopes = new[] {StorageService.Scope.DevstorageFullControl}
-                }.FromCertificate(new X509Certificate2(Convert.FromBase64String(Config["GoogleP12PrivateKey"]), "notasecret", X509KeyStorageFlags.Exportable)));
+            var credJsonBytes = Convert.FromBase64String(Config["GoogleCredJsonBase64"]);
+            var credJson = Encoding.UTF8.GetString(credJsonBytes);
+            _credential = GoogleCredential.FromJson(credJson);
 
-            _client = new StorageService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential
-            });
+            _client = StorageClient.Create(_credential);
         }
 
         public IConfiguration Config { get; private set; }
 
         public void Dispose()
         {
-            var blobsToDelete = _client.Objects.List(Config["GoogleBucket"]).Execute().Items
-                .WhereToListOrEmpty(b => b.Name.StartsWith(ContainerPrefix));
+            var objectsToDelete = _client.ListObjects(Config["GoogleBucket"], ContainerPrefix);
 
-            foreach (var blob in blobsToDelete)
+            foreach (var obj in objectsToDelete)
             {
-                _client.Objects.Delete(Config["GoogleBucket"], blob.Name).Execute();
+                _client.DeleteObject(Config["GoogleBucket"], obj.Name);
             }
         }
     }
