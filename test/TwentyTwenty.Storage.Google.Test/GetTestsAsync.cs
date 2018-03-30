@@ -62,51 +62,58 @@ namespace TwentyTwenty.Storage.Google.Test
             }
         }
 
-        // [Fact]
-        // public async void Test_Get_Blob_Descriptor_Async()
-        // {
-        //     var container = GetRandomContainerName();
-        //     var blobName = GenerateRandomName();
-        //     var datalength = 256;
-        //     var data = GenerateRandomBlobStream(datalength);
-        //     var contentType = "image/png";
+        [Fact]
+        public async void Test_Get_Blob_Descriptor_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var datalength = 256;
+            var data = GenerateRandomBlobStream(datalength);
+            var contentType = "image/png";
 
-        //     await CreateNewObject(container, blobName, data, false, contentType);
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), contentType, data);
 
-        //     var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
+            var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
 
-        //     Assert.Equal(descriptor.Container, container);
-        //     Assert.NotEmpty(descriptor.ContentMD5);
-        //     Assert.Equal(descriptor.ContentType, contentType);
-        //     Assert.NotEmpty(descriptor.ETag);
-        //     Assert.NotNull(descriptor.LastModified);
-        //     Assert.Equal(descriptor.Length, datalength);
-        //     Assert.Equal(descriptor.Name, blobName);
-        //     Assert.Equal(descriptor.Security, BlobSecurity.Private);
-        // }
+            Assert.Equal(descriptor.Container, container);
+            Assert.NotEmpty(descriptor.ContentMD5);
+            Assert.Equal(descriptor.ContentType, contentType);
+            Assert.NotEmpty(descriptor.ETag);
+            Assert.NotNull(descriptor.LastModified);
+            Assert.Equal(descriptor.Length, datalength);
+            Assert.Equal(descriptor.Name, blobName);
+            Assert.Equal(descriptor.Security, BlobSecurity.Private);
+        }
 
-        // [Fact]
-        // public async void Test_Get_Blob_List_Async()
-        // {
-        //     var container = GetRandomContainerName();
+        [Fact]
+        public async void Test_Get_Blob_List_Async()
+        {
+            var container = GetRandomContainerName();
 
-        //     await CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/png");
-        //     await CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "image/jpg");
-        //     await CreateNewObject(container, GenerateRandomName(), GenerateRandomBlobStream(), false, "text/plain");
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
+                "image/png", GenerateRandomBlobStream());
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
+                "image/jpg", GenerateRandomBlobStream());
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
+                "text/plain", GenerateRandomBlobStream());
 
-        //     foreach (var blob in await _provider.ListBlobsAsync(container))
-        //     {
-        //         var descriptor = await _provider.GetBlobDescriptorAsync(container, blob.Name);
+            var list = await _provider.ListBlobsAsync(container);
 
-        //         Assert.Equal(descriptor.Container, container);
-        //         Assert.NotEmpty(descriptor.ContentMD5);
-        //         Assert.Equal(descriptor.ContentType, blob.ContentType);
-        //         Assert.NotEmpty(descriptor.ETag);
-        //         Assert.NotNull(descriptor.LastModified);
-        //         Assert.Equal(descriptor.Length, blob.Length);
-        //         Assert.Equal(descriptor.Name, blob.Name);
-        //         Assert.Equal(descriptor.Security, BlobSecurity.Private);
-        //     }
-        // }
+            Assert.Equal(3, list.Count);
+
+            foreach (var blob in list)
+            {
+                var descriptor = await _provider.GetBlobDescriptorAsync(container, blob.Name);
+
+                Assert.Equal(descriptor.Container, container);
+                Assert.NotEmpty(descriptor.ContentMD5);
+                Assert.Equal(descriptor.ContentType, blob.ContentType);
+                Assert.NotEmpty(descriptor.ETag);
+                Assert.NotNull(descriptor.LastModified);
+                Assert.Equal(descriptor.Length, blob.Length);
+                Assert.Equal(descriptor.Name, blob.Name);
+                Assert.Equal(descriptor.Security, BlobSecurity.Private);
+            }
+        }
     }
 }

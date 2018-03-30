@@ -40,7 +40,8 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                await _client.UploadObjectAsync(_bucket, ObjectName(containerName, blobName), properties?.ContentType, source);
+                await _client.UploadObjectAsync(_bucket, 
+                    ObjectName(containerName, blobName), properties?.ContentType, source);
             }
             catch (GoogleApiException gae)
             {
@@ -96,29 +97,30 @@ namespace TwentyTwenty.Storage.Google
 
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
         {
-            throw new NotImplementedException();
-        //     try
-        //     {
-        //         return GetBlobDescriptor(await GetBlobAsync(containerName, blobName));
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
+            try
+            {
+                var obj = await _client.GetObjectAsync(_bucket, ObjectName(containerName, blobName));
+
+                return GetBlobDescriptor(obj);
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
         }
 
         public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
-            throw new NotImplementedException();
-        //     try
-        //     {
-        //         // _storageService.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { }
-        //         return (await GetListBlobsRequest(containerName).ExecuteAsync()).Items.SelectToListOrEmpty(GetBlobDescriptor);
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
+            try
+            {
+                return await _client.ListObjectsAsync(_bucket, containerName)
+                    .Select(GetBlobDescriptor)
+                    .ToList();
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
         }
 
         public Task DeleteBlobAsync(string containerName, string blobName)
@@ -216,30 +218,30 @@ namespace TwentyTwenty.Storage.Google
         private string ObjectName(string containerName, string blobName)
             => $"{containerName}/{blobName}";
 
-        // private BlobDescriptor GetBlobDescriptor(Blob blob)
-        // {
-        //     var match = Regex.Match(blob.Name, BlobNameRegex);
-        //     if (!match.Success)
-        //     {
-        //         throw new InvalidOperationException("Unable to match blob name with regex; all blob names");
-        //     }
+        private BlobDescriptor GetBlobDescriptor(Blob blob)
+        {
+            var match = Regex.Match(blob.Name, BlobNameRegex);
+            if (!match.Success)
+            {
+                throw new InvalidOperationException("Unable to match blob name with regex; all blob names");
+            }
 
-        //     var blobDescriptor = new BlobDescriptor
-        //     {
-        //         Container = match.Groups["Container"].Value,
-        //         ContentMD5 = blob.Md5Hash,
-        //         ContentType = blob.ContentType,
-        //         ETag = blob.ETag,
-        //         LastModified = DateTimeOffset.Parse(blob.UpdatedRaw),
-        //         Length = Convert.ToInt64(blob.Size),
-        //         Name = match.Groups["Blob"].Value,
-        //         Security = blob.Acl != null 
-        //             && blob.Acl.Any(acl => acl.Entity.ToLowerInvariant() == "allusers") ? BlobSecurity.Public : BlobSecurity.Private,
-        //         Url = blob.MediaLink
-        //     };
+            var blobDescriptor = new BlobDescriptor
+            {
+                Container = match.Groups["Container"].Value,
+                ContentMD5 = blob.Md5Hash,
+                ContentType = blob.ContentType,
+                ETag = blob.ETag,
+                LastModified = blob.Updated,
+                Length = (long)blob.Size.GetValueOrDefault(),
+                Name = match.Groups["Blob"].Value,
+                Security = blob.Acl != null 
+                    && blob.Acl.Any(acl => acl.Entity.ToLowerInvariant() == "allusers") ? BlobSecurity.Public : BlobSecurity.Private,
+                Url = blob.MediaLink
+            };
 
-        //     return blobDescriptor;
-        // }
+            return blobDescriptor;
+        }
 
         // private ObjectsResource.ListRequest GetListBlobsRequest(string containerName)
         // {
