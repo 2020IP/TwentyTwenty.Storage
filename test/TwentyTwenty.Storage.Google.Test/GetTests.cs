@@ -8,43 +8,10 @@ using GoogleCredential = Google.Apis.Auth.OAuth2.GoogleCredential;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
-    public class TestTestsTest
-    {
-        // [Fact]
-        public void Test_Get_Blob_Stream2_Async()
-        {
-            try
-            {
-                var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."))
-                .AddEnvironmentVariables()
-                .AddUserSecrets<StorageFixture>()
-                .Build();
-
-                var credBytes = Convert.FromBase64String(config["GoogleCredJsonBase64"]);
-                var credJson = System.Text.Encoding.UTF8.GetString(credBytes);
-                var cred = GoogleCredential.FromJson(credJson);
-
-                var client = StorageClient.Create(cred);
-
-                var d = System.Text.Encoding.UTF8.GetBytes("Quack Data");
-                var s = new MemoryStream(d);
-
-                client.UploadObject("2020-storage-test1", "muh-object2", null, s);
-            }
-            catch (System.Exception e)
-            {
-                
-                Console.WriteLine(e);
-            }
-        }
-    }
-
-
     [Trait("Category", "Google")]
-    public sealed class GetTestsAsync : BlobTestBase
+    public sealed class GetTests : BlobTestBase
     {
-        public GetTestsAsync(StorageFixture fixture)
+        public GetTests(StorageFixture fixture)
             : base(fixture) { }
 
         [Fact]
@@ -80,9 +47,9 @@ namespace TwentyTwenty.Storage.Google.Test
             Assert.Equal(descriptor.ContentType, contentType);
             Assert.NotEmpty(descriptor.ETag);
             Assert.NotNull(descriptor.LastModified);
-            Assert.Equal(descriptor.Length, datalength);
-            Assert.Equal(descriptor.Name, blobName);
-            Assert.Equal(descriptor.Security, BlobSecurity.Private);
+            Assert.Equal(datalength, descriptor.Length);
+            Assert.Equal(blobName, descriptor.Name);
+            Assert.Equal(BlobSecurity.Private, descriptor.Security);
         }
 
         [Fact]
@@ -112,7 +79,7 @@ namespace TwentyTwenty.Storage.Google.Test
                 Assert.NotNull(descriptor.LastModified);
                 Assert.Equal(descriptor.Length, blob.Length);
                 Assert.Equal(descriptor.Name, blob.Name);
-                Assert.Equal(descriptor.Security, BlobSecurity.Private);
+                Assert.Equal(BlobSecurity.Private, descriptor.Security);
             }
         }
     }
