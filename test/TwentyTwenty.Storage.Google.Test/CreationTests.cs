@@ -24,7 +24,7 @@ namespace TwentyTwenty.Storage.Google.Test
             StreamEquals(data, stream);
         }
 
-        //[Fact, Trait("Category", "Long")]
+        [Fact, Trait("Category", "Long")]
         public async void Test_Blob_Created_Resumable_Async()
         {
             var container = GetRandomContainerName();

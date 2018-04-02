@@ -123,38 +123,36 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public Task DeleteBlobAsync(string containerName, string blobName)
+        public async Task DeleteBlobAsync(string containerName, string blobName)
         {
-            throw new NotImplementedException();
-        //     try
-        //     {
-        //         return _storageService.DeleteObjectAsync(_bucket, ObjectName(containerName, blobName));
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
+            try
+            {
+                await _client.DeleteObjectAsync(_bucket, ObjectName(containerName, blobName));
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
         }
 
         public async Task DeleteContainerAsync(string containerName)
         {
-            throw new NotImplementedException();
-        //     try
-        //     {
-        //         var batch = new BatchRequest(_storageService);
+            try
+            {
+                var batch = new BatchRequest(_client.Service);
 
-        //         foreach (var blob in await ListBlobsAsync(containerName))
-        //         {
-        //             batch.Queue<string>(_storageService.Objects.Delete(_bucket, $"{blob.Container}/{blob.Name}"),
-        //                 (content, error, i, message) => { });
-        //         }
+                foreach (var blob in await ListBlobsAsync(containerName))
+                {
+                    batch.Queue<string>(_client.Service.Objects.Delete(_bucket, ObjectName(blob.Container, blob.Name)),
+                        (content, error, i, message) => { });
+                }
 
-        //         await batch.ExecuteAsync();
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
+                await batch.ExecuteAsync();
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
         }
 
         public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
