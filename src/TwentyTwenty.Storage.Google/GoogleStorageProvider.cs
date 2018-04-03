@@ -16,6 +16,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Net;
 using Google.Cloud.Storage.V1;
+using BlobObject = Google.Apis.Storage.v1.Data.Object;
+using Google.Apis.Storage.v1.Data;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -26,7 +28,6 @@ namespace TwentyTwenty.Storage.Google
         private readonly StorageClient _client;
         private readonly string _bucket;
         private readonly string _serviceEmail;
-        private readonly X509Certificate2 _certificate;
 
         public GoogleStorageProvider(GoogleCredential credential, GoogleProviderOptions options)
         {
@@ -99,7 +100,8 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                var obj = await _client.GetObjectAsync(_bucket, ObjectName(containerName, blobName));
+                var obj = await _client.GetObjectAsync(_bucket, ObjectName(containerName, blobName),
+                    new GetObjectOptions { Projection = Projection.Full });
 
                 return GetBlobDescriptor(obj);
             }
@@ -113,7 +115,7 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                return await _client.ListObjectsAsync(_bucket, containerName)
+                return await _client.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { Projection = Projection.Full })
                     .Select(GetBlobDescriptor)
                     .ToList();
             }
@@ -169,15 +171,30 @@ namespace TwentyTwenty.Storage.Google
 
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
-            throw new NotImplementedException();
-        //     try
-        //     {
-        //         await UpdateRequest(containerName, blobName, properties).ExecuteAsync();
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
+            try
+            {
+                await _client.UpdateObjectAsync(new BlobObject
+                {
+                    Bucket = _bucket,
+                    Name = ObjectName(containerName, blobName),
+                    ContentType = properties.ContentType,
+                    ContentDisposition = properties.ContentDisposition,
+                    Metadata = properties.Metadata,
+                }, new UpdateObjectOptions 
+                {
+                    PredefinedAcl = properties.Security == BlobSecurity.Public ?
+                        PredefinedObjectAcl.PublicRead : PredefinedObjectAcl.Private,
+                });
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
         }
 
         // #region Helpers
@@ -216,6 +233,16 @@ namespace TwentyTwenty.Storage.Google
         private string ObjectName(string containerName, string blobName)
             => $"{containerName}/{blobName}";
 
+        private List<ObjectAccessControl> GetPublicAcl()
+            => new List<ObjectAccessControl>
+            {
+                new ObjectAccessControl
+                {
+                    Role = "OWNER",
+                    Entity = "allUsers"
+                }
+            };
+
         private BlobDescriptor GetBlobDescriptor(Blob blob)
         {
             var match = Regex.Match(blob.Name, BlobNameRegex);
@@ -240,13 +267,6 @@ namespace TwentyTwenty.Storage.Google
 
             return blobDescriptor;
         }
-
-        // private ObjectsResource.ListRequest GetListBlobsRequest(string containerName)
-        // {
-        //     var req = _storageService.Objects.List(_bucket);
-        //     req.Prefix = containerName;
-        //     return req;
-        // }
 
         private StorageException Error(GoogleApiException gae, int code = 1001, string message = null)
         {

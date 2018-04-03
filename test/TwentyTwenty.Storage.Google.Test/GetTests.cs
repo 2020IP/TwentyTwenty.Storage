@@ -60,7 +60,7 @@ namespace TwentyTwenty.Storage.Google.Test
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
                 "image/png", GenerateRandomBlobStream());
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
-                "image/jpg", GenerateRandomBlobStream());
+                "image/jpg", GenerateRandomBlobStream(), new UploadObjectOptions { PredefinedAcl = PredefinedObjectAcl.PublicRead });
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
                 "text/plain", GenerateRandomBlobStream());
 
@@ -79,8 +79,22 @@ namespace TwentyTwenty.Storage.Google.Test
                 Assert.NotNull(descriptor.LastModified);
                 Assert.Equal(descriptor.Length, blob.Length);
                 Assert.Equal(descriptor.Name, blob.Name);
-                Assert.Equal(BlobSecurity.Private, descriptor.Security);
+                Assert.Equal(descriptor.Security, blob.Security);
             }
+        }
+
+        [Fact]
+        public async void Test_Get_Blob_Security_Public()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data,
+                new UploadObjectOptions { PredefinedAcl = PredefinedObjectAcl.PublicRead });
+
+            var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
+            Assert.Equal(BlobSecurity.Public, descriptor.Security);
         }
     }
 }

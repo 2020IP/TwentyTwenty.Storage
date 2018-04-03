@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Storage.v1.Data;
 using Google.Cloud.Storage.V1;
 using TwentyTwenty.Storage;
 using TwentyTwenty.Storage.Google;
@@ -70,6 +71,18 @@ namespace TwentyTwenty.Storage.Google.Test
         public string GenerateRandomName()
         {
             return Guid.NewGuid().ToString("N");
+        }
+
+        protected void PrintAcl(IList<ObjectAccessControl> acl)
+        {
+            if (acl != null)
+            {
+                Console.WriteLine("ACL:");
+                foreach(var oac in acl)
+                {
+                    Console.WriteLine("Entity: {0}, Role: {1}", oac.Entity, oac.Role);
+                }
+            }
         }
 
         // protected async Task CreateNewObject(string container, string blobName, Stream data, bool isPublic = false,
