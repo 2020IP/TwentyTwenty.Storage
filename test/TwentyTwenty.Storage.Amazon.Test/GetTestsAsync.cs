@@ -94,8 +94,9 @@ namespace TwentyTwenty.Storage.Amazon.Test
             await CreateNewObjectAsync(container, blob, GenerateRandomBlobStream(), false, "image/png");
 
             var url = _provider.GetBlobUrl(container, blob);
+            Assert.NotEmpty(url);
 
-            System.Console.WriteLine("URL: " + url);            
+            System.Console.WriteLine("URL: " + url);
         }
     }
 }

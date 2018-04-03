@@ -96,5 +96,35 @@ namespace TwentyTwenty.Storage.Google.Test
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
             Assert.Equal(BlobSecurity.Public, descriptor.Security);
         }
+
+        [Fact]
+        public async void Test_Get_Blob_Url()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
+
+            var url = _provider.GetBlobUrl(container, blobName);
+            Assert.NotEmpty(url);
+
+            System.Console.WriteLine("URL: " + url);
+        }
+
+        [Fact]
+        public async void Test_Get_Blob_Sas_Url()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
+
+            var url = _provider.GetBlobSasUrl(container, blobName, DateTimeOffset.Now.AddHours(1), contentType: "text/plain" );
+            Assert.NotEmpty(url);
+
+            System.Console.WriteLine("SAS URL: " + url);
+        }
     }
 }

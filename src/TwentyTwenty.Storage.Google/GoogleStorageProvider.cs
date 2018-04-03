@@ -18,6 +18,7 @@ using System.Net;
 using Google.Cloud.Storage.V1;
 using BlobObject = Google.Apis.Storage.v1.Data.Object;
 using Google.Apis.Storage.v1.Data;
+using System.Net.Http;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -26,15 +27,25 @@ namespace TwentyTwenty.Storage.Google
         private const string BlobNameRegex = @"(?<Container>[^/]+)/(?<Blob>.+)";
         private const string DefaultContentType = "application/octet-stream";
         private readonly StorageClient _client;
+        private readonly UrlSigner _urlSigner = null;
         private readonly string _bucket;
         private readonly string _serviceEmail;
 
         public GoogleStorageProvider(GoogleCredential credential, GoogleProviderOptions options)
         {
-            _client = StorageClient.Create(credential);
+            if (credential == null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
 
+            _client = StorageClient.Create(credential);
             _serviceEmail = options.Email;
             _bucket = options.Bucket;
+
+            if (credential.UnderlyingCredential is ServiceAccountCredential cred)
+            {
+                _urlSigner = UrlSigner.FromServiceAccountCredential(cred);
+            }
         }
 
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
@@ -70,30 +81,48 @@ namespace TwentyTwenty.Storage.Google
 
         public string GetBlobUrl(string containerName, string blobName)
         {
-            throw new NotImplementedException();
-        //     try
-        //     {
-        //         var obj = _storageService.GetObject(_bucket, ObjectName(containerName, blobName));
-                
-        //         return GetBlob(containerName, blobName).MediaLink;
-        //     }
-        //     catch (GoogleApiException gae)
-        //     {
-        //         throw Error(gae);
-        //     }
+            try
+            {
+                return _client.GetObject(_bucket, ObjectName(containerName, blobName)).MediaLink;
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
         }
 
-        // // TODO: Currently google only support adding a content disposition when uploading
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
             string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
-            throw new NotImplementedException();
-        //     var expiration = expiry.ToUnixTimeSeconds();
-        //     //var disp = fileName != null ? "content-disposition:attachment;filename=\"" + fileName +"\"" : string.Empty;
-        //     var verb = access == BlobUrlAccess.Read ? "GET" : "PUT";
-        //     var urlSignature = SignString($"{verb}\n\n{contentType}\n{expiration}\n/{_bucket}/{containerName}/{blobName}");
+            if (_urlSigner == null)
+            {
+                throw new StorageException(StorageErrorCode.InvalidCredentials, "URL Signer requires ServiceAccountCredentials");
+            }
 
-        //     return $"https://storage.googleapis.com/{_bucket}/{containerName}/{blobName}?GoogleAccessId={_serviceEmail}&Expires={expiration}&Signature={WebUtility.UrlEncode(urlSignature)}";
+            var headers = new Dictionary<string, IEnumerable<string>>();
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                var header = $"filename=\"{fileName}\"";
+
+                headers["Content-Disposition"] = new[] { isDownload ? "attachment; " + header : header };
+            }
+            else if (isDownload)
+            {
+                headers["Content-Disposition"] = new[] { "attachment;" };
+            }
+
+            if (!string.IsNullOrEmpty(contentType))
+            {
+                headers["Content-Type"] = new[] { contentType };
+            }
+            
+            return _urlSigner.Sign(
+                _bucket,
+                ObjectName(containerName, blobName),
+                expiry,
+                access == BlobUrlAccess.Read ? HttpMethod.Get : HttpMethod.Put,
+                headers);
         }
 
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
@@ -160,7 +189,8 @@ namespace TwentyTwenty.Storage.Google
         public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
             string destinationBlobName = null)
         {
-            throw new NotImplementedException();
+            return _client.CopyObjectAsync(_bucket, ObjectName(sourceContainerName, sourceBlobName),
+                _bucket, ObjectName(destinationContainerName, destinationBlobName ?? sourceBlobName));
         }
 
         public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
@@ -197,29 +227,7 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        // #region Helpers
-
-        // private ObjectsResource.InsertMediaUpload SaveRequest(string containerName, string blobName, Stream source, BlobProperties properties)
-        // {
-        //     var blob = CreateBlob(containerName, blobName, properties);
-
-        //     var req = _storageService.Objects.Insert(blob, _bucket, source,
-        //         properties?.ContentType ?? DefaultContentType);
-
-        //     req.PredefinedAcl = properties?.Security == BlobSecurity.Public ? PredefinedAcl.PublicRead : PredefinedAcl.Private__;
-            
-        //     return req;
-        // }
-
-        // private ObjectsResource.UpdateRequest UpdateRequest(string containerName, string blobName, BlobProperties properties)
-        // {
-        //     var blob = CreateBlob(containerName, blobName, properties);
-        //     var req = _storageService.Objects.Update(blob, _bucket, $"{containerName}/{blobName}");
-        //     req.PredefinedAcl = properties?.Security == BlobSecurity.Public ? 
-        //         ObjectsResource.UpdateRequest.PredefinedAclEnum.PublicRead : 
-        //         ObjectsResource.UpdateRequest.PredefinedAclEnum.Private__;
-        //     return req;
-        // }
+        #region Helpers
 
         private Blob CreateBlob(string containerName, string blobName, BlobProperties properties = null)
         {
@@ -279,21 +287,6 @@ namespace TwentyTwenty.Storage.Google
             }, gae);
         }
 
-        // private string SignString(string stringToSign)
-        // {
-        //     if (_certificate == null)
-        //     {
-        //         throw new Exception("Certificate not initialized");
-        //     }
-
-        //     var cp = new CspParameters(24, "Microsoft Enhanced RSA and AES Cryptographic Provider",
-        //             ((RSACryptoServiceProvider)_certificate.PrivateKey).CspKeyContainerInfo.KeyContainerName);
-        //     var provider = new RSACryptoServiceProvider(cp);
-        //     var buffer = Encoding.UTF8.GetBytes(stringToSign);
-        //     var signature = provider.SignData(buffer, "SHA256");
-        //     return Convert.ToBase64String(signature);
-        // }
-
-        // #endregion
+        #endregion
     }
 }

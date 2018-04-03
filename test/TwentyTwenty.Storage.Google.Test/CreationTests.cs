@@ -4,9 +4,9 @@ using Xunit;
 namespace TwentyTwenty.Storage.Google.Test
 {
     [Trait("Category", "Google")]
-    public sealed class CreationTestsAsync : BlobTestBase
+    public sealed class CreationTests : BlobTestBase
     {
-        public CreationTestsAsync(StorageFixture fixture)
+        public CreationTests(StorageFixture fixture)
             : base(fixture)
         { }
 
@@ -54,6 +54,31 @@ namespace TwentyTwenty.Storage.Google.Test
             Assert.NotEmpty(blob.MediaLink);
             Assert.Equal(contentType, blob.ContentType);
             Assert.Equal((ulong)dataLength, blob.Size);
+        }
+
+        [Fact]
+        public async void Test_Blob_Copy()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var container2 = GetRandomContainerName();
+            var blobName2 = GenerateRandomName();
+            var dataLength = 256;
+            var data = GenerateRandomBlobStream(dataLength);
+
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
+
+            await _provider.CopyBlobAsync(container, blobName, container2, blobName2);
+                        
+            var blob = await _client.GetObjectAsync(Bucket, GetObjectName(container, blobName));
+            Assert.NotNull(blob);
+            Assert.NotEmpty(blob.MediaLink);
+            Assert.Equal((ulong)dataLength, blob.Size);
+
+            var blob2 = await _client.GetObjectAsync(Bucket, GetObjectName(container2, blobName2));
+            Assert.NotNull(blob2);
+            Assert.NotEmpty(blob2.MediaLink);
+            Assert.Equal((ulong)dataLength, blob2.Size);
         }
     }
 }
