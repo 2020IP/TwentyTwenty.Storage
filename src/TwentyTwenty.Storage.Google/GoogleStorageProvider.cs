@@ -193,10 +193,11 @@ namespace TwentyTwenty.Storage.Google
                 _bucket, ObjectName(destinationContainerName, destinationBlobName ?? sourceBlobName));
         }
 
-        public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+        public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
             string destinationBlobName = null)
         {
-            throw new NotImplementedException();
+            await CopyBlobAsync(sourceContainerName, sourceBlobName, destinationContainerName, destinationBlobName);
+            await DeleteBlobAsync(sourceContainerName, sourceBlobName);
         }
 
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)

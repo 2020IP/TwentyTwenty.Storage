@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Net;
+using Google;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Google.Test
@@ -79,6 +81,29 @@ namespace TwentyTwenty.Storage.Google.Test
             Assert.NotNull(blob2);
             Assert.NotEmpty(blob2.MediaLink);
             Assert.Equal((ulong)dataLength, blob2.Size);
+        }
+
+        [Fact]
+        public async void Test_Blob_Move()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var container2 = GetRandomContainerName();
+            var blobName2 = GenerateRandomName();
+            var dataLength = 256;
+            var data = GenerateRandomBlobStream(dataLength);
+
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
+
+            await _provider.MoveBlobAsync(container, blobName, container2, blobName2);
+
+            var blob = await _client.GetObjectAsync(Bucket, GetObjectName(container2, blobName2));
+            Assert.NotNull(blob);
+            Assert.NotEmpty(blob.MediaLink);
+            Assert.Equal((ulong)dataLength, blob.Size);
+
+            var ex = await Assert.ThrowsAsync<GoogleApiException>(() => _client.GetObjectAsync(Bucket, GetObjectName(container, blobName)));
+            Assert.Equal(HttpStatusCode.NotFound, ex.HttpStatusCode);
         }
     }
 }
