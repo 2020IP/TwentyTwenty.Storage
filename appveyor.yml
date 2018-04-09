@@ -5,8 +5,23 @@ configuration: Release
 build_script:
 - ps: ./Build.ps1
 test: off
-artifacts:
-- path: artifacts/*.nupkg
+deploy:
+  - provider: NuGet
+    api_key:
+      secure: 6LqavZsVwaAsuw6SK7XKQRuMzqb9pedzqVK7AI0+j3w51bN1FOu7Fi2l2Fj6bmu/
+    artifact: /.*\.nupkg/
+    on:
+      appveyor_repo_tag: true
+
+  - provider: GitHub
+    release: v$(GitVersion_SemVer)
+    description: 'TwentyTwenty.Storage'
+    auth_token:
+      secure: fd/+7iqe48Pb5+TSjRLgl4uEP4FvKjAv8xs0MI+cgYPJ3QX2/cBdfJt2E6fbwHFr
+    artifact: /.*\.nupkg/
+    draft: true
+    on:    
+      appveyor_repo_tag: true        # deploy on tag push only
 environment:
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
