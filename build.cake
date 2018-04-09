@@ -45,9 +45,22 @@ Task("Build")
             ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
         });
     });
+Task("Test")
+    .IsDependentOn("Build")
+    .Does(() => {
+        var testProjects = GetFiles("./test/**/*.csproj");
+        foreach(var proj in testProjects)
+        {
+            DotNetCoreTest(proj.FullPath, new DotNetCoreTestSettings
+            {
+                Configuration = configuration,
+                NoBuild = true,
+            });
+        }
+    });
 
 Task("Package")
-    .IsDependentOn("Build")
+    .IsDependentOn("Test")
     .Does(() => {
         var settings = new DotNetCorePackSettings
         {
