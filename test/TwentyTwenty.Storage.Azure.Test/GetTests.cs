@@ -5,9 +5,9 @@ using Xunit;
 namespace TwentyTwenty.Storage.Azure.Test
 {
     [Trait("Category", "Azure")]
-    public sealed class GetTestsAsync : BlobTestBase
+    public sealed class GetTests : BlobTestBase
     {
-        public GetTestsAsync(StorageFixture fixture)
+        public GetTests(StorageFixture fixture)
             : base(fixture)
         { }
 
@@ -75,6 +75,26 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 await AssertBlobDescriptor(blob, containerRef.GetBlockBlobReference(blob.Name));
             }
+        }
+
+        // Test for bug #12
+        [Fact]
+        public async void Test_Get_Big_Blob_List_Async()
+        {
+            var count = 150;
+            var container = GetRandomContainerName();
+
+            var containerRef = _client.GetContainerReference(container);
+            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
+
+            for (int i = 0; i < count; i++)
+            {
+                var blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
+                await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+            }
+
+            var list = await _provider.ListBlobsAsync(container);
+            Assert.Equal(count, list.Count);
         }
     }
 }

@@ -69,16 +69,16 @@ namespace TwentyTwenty.Storage.Azure
             var destContainer = _blobClient.GetContainerReference(destinationContainerName);
 
             await destContainer.CreateIfNotExistsAsync(sourceContainer.Properties.PublicAccess ?? 
-                BlobContainerPublicAccessType.Off, _requestOptions, _context);
+                BlobContainerPublicAccessType.Off, _requestOptions, _context).ConfigureAwait(false);
 
             var destBlob = destContainer.GetBlockBlobReference(destinationBlobName ?? sourceBlobName);
 
-            await destBlob.StartCopyAsync(sourceBlob);
+            await destBlob.StartCopyAsync(sourceBlob).ConfigureAwait(false);
             
             while (destBlob.CopyState.Status == CopyStatus.Pending)
             {
-                await Task.Delay(500);
-                await destBlob.FetchAttributesAsync();
+                await Task.Delay(500).ConfigureAwait(false);
+                await destBlob.FetchAttributesAsync().ConfigureAwait(false);
             }
 
             if (destBlob.CopyState.Status != CopyStatus.Success)
@@ -199,6 +199,8 @@ namespace TwentyTwenty.Storage.Azure
                     var results = await container
                         .ListBlobsSegmentedAsync(null, true, BlobListingDetails.Metadata, 100, token, _requestOptions, _context)
                         .ConfigureAwait(false);
+                    
+                    token = results.ContinuationToken;
 
                     list.AddRange(results.Results.OfType<CloudBlockBlob>().Select(blob =>
                     {
