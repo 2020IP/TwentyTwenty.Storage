@@ -5,9 +5,9 @@ using Xunit;
 namespace TwentyTwenty.Storage.Local.Test
 {
     [Trait("Category", "Local")]
-    public sealed class GetTestsAsync : BlobTestBase
+    public sealed class GetTests : BlobTestBase
     {
-        public GetTestsAsync(StorageFixture fixture)
+        public GetTests(StorageFixture fixture)
             : base(fixture) { }
 
         [Fact]
@@ -38,11 +38,11 @@ namespace TwentyTwenty.Storage.Local.Test
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
 
             Assert.Equal(descriptor.Container, container);
-            Assert.Equal(descriptor.ContentType, "application/json");
+            Assert.Equal("application/json", descriptor.ContentType);
             Assert.NotNull(descriptor.LastModified);
             Assert.Equal(descriptor.Length, datalength);
             Assert.Equal(descriptor.Name, blobName);
-            Assert.Equal(descriptor.Security, BlobSecurity.Private);
+            Assert.Equal(BlobSecurity.Private, descriptor.Security);
         }
 
         [Fact]
@@ -63,8 +63,22 @@ namespace TwentyTwenty.Storage.Local.Test
                 Assert.NotNull(descriptor.LastModified);
                 Assert.Equal(descriptor.Length, blob.Length);
                 Assert.Equal(descriptor.Name, blob.Name);
-                Assert.Equal(descriptor.Security, BlobSecurity.Private);
+                Assert.Equal(BlobSecurity.Private, descriptor.Security);
             }
+        }
+
+        // Test for #13
+        [Fact]
+        public async void Test_Get_Deep_Blob_List()
+        {
+            var container = GetRandomContainerName();
+
+            CreateNewFile(container, GenerateRandomName() + ".json", GenerateRandomBlobStream());
+            CreateNewFile(container, GenerateRandomName() + "/myfile.txt", GenerateRandomBlobStream());
+            CreateNewFile(container, GenerateRandomName(), GenerateRandomBlobStream());
+
+            var list = await _provider.ListBlobsAsync(container);
+            Assert.Equal(3, list.Count);
         }
     }
 }

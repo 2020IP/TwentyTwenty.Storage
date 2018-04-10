@@ -47,10 +47,10 @@ namespace TwentyTwenty.Storage.Local.Test
 
         protected void CreateNewFile(string containerName, string blobName, Stream source)
         {
-            var dir = Path.Combine(BasePath, containerName);
-            Directory.CreateDirectory(dir);
+            var path = Path.Combine(BasePath, containerName, blobName);
 
-            var path = Path.Combine(dir, blobName);
+            var dir = Path.GetDirectoryName(path);            
+            Directory.CreateDirectory(dir);
 
             using (var file = File.Create(path))
             {
