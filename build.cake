@@ -74,6 +74,7 @@ Task("Package")
         DotNetCorePack("src/TwentyTwenty.Storage.Amazon/", settings);
         DotNetCorePack("src/TwentyTwenty.Storage.Azure/", settings);
         DotNetCorePack("src/TwentyTwenty.Storage.Google/", settings);
+        DotNetCorePack("src/TwentyTwenty.Storage.Local/", settings);
 
         if (AppVeyor.IsRunningOnAppVeyor)
         {

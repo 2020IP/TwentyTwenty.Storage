@@ -12,7 +12,6 @@ deploy:
     artifact: /.*\.nupkg/
     on:
       appveyor_repo_tag: true
-
   - provider: GitHub
     release: v$(GitVersion_SemVer)
     description: 'TwentyTwenty.Storage'
