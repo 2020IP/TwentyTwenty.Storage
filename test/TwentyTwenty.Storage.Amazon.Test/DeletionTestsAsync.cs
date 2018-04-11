@@ -51,7 +51,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 }
             } while (objectsRequest != null);
 
-            Assert.Equal(keys.Count, 0);
+            Assert.Empty(keys);
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
             });
             
-            Assert.Equal(ex.StatusCode, HttpStatusCode.NotFound);
+            Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
         }
     }
 }
