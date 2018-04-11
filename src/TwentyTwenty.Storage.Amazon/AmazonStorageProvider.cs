@@ -23,12 +23,12 @@ namespace TwentyTwenty.Storage.Amazon
 
         public AmazonStorageProvider(AmazonProviderOptions options)
         {
-            _serviceUrl = options.ServiceUrl ?? DefaultServiceUrl;
+            _serviceUrl = string.IsNullOrEmpty(options.ServiceUrl) ? DefaultServiceUrl : options.ServiceUrl;
             _bucket = options.Bucket;
 
             var S3Config = new AmazonS3Config
             {
-                ServiceURL = _serviceUrl            
+                ServiceURL = _serviceUrl
             };
 
             _s3Client = new AmazonS3Client(options.PublicKey, options.SecretKey, S3Config);
