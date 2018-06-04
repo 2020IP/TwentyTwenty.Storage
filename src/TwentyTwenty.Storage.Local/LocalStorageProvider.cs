@@ -75,7 +75,7 @@ namespace TwentyTwenty.Storage.Local
             var sourcePath = Path.Combine(_basePath, sourceContainerName, sourceBlobName);
 
             var destDir = Path.Combine(_basePath, destinationContainerName);
-            Directory.CreateDirectory(destDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(destDir));
 
             var destPath = Path.Combine(destDir, destinationBlobName ?? sourceBlobName);
 
@@ -197,8 +197,9 @@ namespace TwentyTwenty.Storage.Local
 
             try
             {
-                Directory.CreateDirectory(dir);
-                using (var file = File.Create(Path.Combine(dir, blobName)))
+                var path = Path.Combine(dir, blobName);
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                using (var file = File.Create(path))
                 {
                     source.CopyTo(file);
                 }
