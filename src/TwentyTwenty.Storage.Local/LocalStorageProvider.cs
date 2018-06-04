@@ -220,8 +220,9 @@ namespace TwentyTwenty.Storage.Local
 
             try
             {
-                Directory.CreateDirectory(dir);
-                using (var file = File.Create(Path.Combine(dir, blobName)))
+                var path = Path.Combine(dir, blobName);
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                using (var file = File.Create(path))
                 {
                     await source.CopyToAsync(file);
                 }
