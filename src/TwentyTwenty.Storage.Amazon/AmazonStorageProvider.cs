@@ -32,7 +32,8 @@ namespace TwentyTwenty.Storage.Amazon
 
 			var S3Config = new AmazonS3Config
 			{
-				ServiceURL = _serviceUrl
+				ServiceURL = _serviceUrl,
+ 				Timeout = options.Timeout
 			};
 
 			_s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
