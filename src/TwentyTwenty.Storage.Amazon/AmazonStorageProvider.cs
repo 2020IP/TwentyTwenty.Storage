@@ -12,448 +12,448 @@ using Amazon.Runtime.CredentialManagement;
 
 namespace TwentyTwenty.Storage.Amazon
 {
-	// NOTE: S3 doesn't support getting the MD5 hash of objects
-	//          It unreliably returns the MD5 in the ETAG header
-	//          which is what is currently being put into the ContentMD5 property
+    // NOTE: S3 doesn't support getting the MD5 hash of objects
+    //          It unreliably returns the MD5 in the ETAG header
+    //          which is what is currently being put into the ContentMD5 property
 
-	public sealed class AmazonStorageProvider : IStorageProvider
-	{
-		private const string DefaultServiceUrl = "https://s3.amazonaws.com";
-		private readonly IAmazonS3 _s3Client;
-		private readonly string _bucket;
-		private readonly string _serverSideEncryptionMethod;
-		private readonly string _serviceUrl;
+    public sealed class AmazonStorageProvider : IStorageProvider
+    {
+        private const string DefaultServiceUrl = "https://s3.amazonaws.com";
+        private readonly IAmazonS3 _s3Client;
+        private readonly string _bucket;
+        private readonly string _serverSideEncryptionMethod;
+        private readonly string _serviceUrl;
 
-		public AmazonStorageProvider(AmazonProviderOptions options)
-		{
-			_serviceUrl = string.IsNullOrEmpty(options.ServiceUrl) ? DefaultServiceUrl : options.ServiceUrl;
-			_bucket = options.Bucket;
-			_serverSideEncryptionMethod = options.ServerSideEncryptionMethod;
+        public AmazonStorageProvider(AmazonProviderOptions options)
+        {
+            _serviceUrl = string.IsNullOrEmpty(options.ServiceUrl) ? DefaultServiceUrl : options.ServiceUrl;
+            _bucket = options.Bucket;
+            _serverSideEncryptionMethod = options.ServerSideEncryptionMethod;
 
-			var S3Config = new AmazonS3Config
-			{
-				ServiceURL = _serviceUrl,
- 				Timeout = options.Timeout
-			};
+            var S3Config = new AmazonS3Config
+            {
+                ServiceURL = _serviceUrl,
+                Timeout = options.Timeout ?? ClientConfig.MaxTimeout,
+            };
 
-			_s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
-		}
+            _s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
+        }
 
-		private AWSCredentials ReadAwsCredentials(AmazonProviderOptions options)
-		{
-			if (!string.IsNullOrWhiteSpace(options.ProfileName))
-			{
-				var credentialProfileStoreChain = new CredentialProfileStoreChain();
-				AWSCredentials defaultCredentials;
-				
-				if (credentialProfileStoreChain.TryGetAWSCredentials(options.ProfileName, out defaultCredentials))
-					return defaultCredentials;
-				else
-					throw new AmazonClientException("Unable to find a default profile in CredentialProfileStoreChain.");
-			}
+        private AWSCredentials ReadAwsCredentials(AmazonProviderOptions options)
+        {
+            if (!string.IsNullOrWhiteSpace(options.ProfileName))
+            {
+                var credentialProfileStoreChain = new CredentialProfileStoreChain();
+                AWSCredentials defaultCredentials;
 
-			if (!string.IsNullOrEmpty(options.PublicKey) && !string.IsNullOrWhiteSpace(options.SecretKey))
-			{
-				return new BasicAWSCredentials(options.PublicKey, options.SecretKey);
-			}
+                if (credentialProfileStoreChain.TryGetAWSCredentials(options.ProfileName, out defaultCredentials))
+                    return defaultCredentials;
+                else
+                    throw new AmazonClientException("Unable to find a default profile in CredentialProfileStoreChain.");
+            }
 
-			return new EnvironmentVariablesAWSCredentials();
-		}
+            if (!string.IsNullOrEmpty(options.PublicKey) && !string.IsNullOrWhiteSpace(options.SecretKey))
+            {
+                return new BasicAWSCredentials(options.PublicKey, options.SecretKey);
+            }
 
-		public async Task DeleteBlobAsync(string containerName, string blobName)
-		{
-			var key = GenerateKeyName(containerName, blobName);
+            return new EnvironmentVariablesAWSCredentials();
+        }
 
-			var objectDeleteRequest = new DeleteObjectRequest()
-			{
-				BucketName = _bucket,
-				Key = key
-			};
+        public async Task DeleteBlobAsync(string containerName, string blobName)
+        {
+            var key = GenerateKeyName(containerName, blobName);
 
-			try
-			{
-				await _s3Client.DeleteObjectAsync(objectDeleteRequest);
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+            var objectDeleteRequest = new DeleteObjectRequest()
+            {
+                BucketName = _bucket,
+                Key = key
+            };
 
-		public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName,
-			string destinationContainerName, string destinationBlobName = null)
-		{
-			if (string.IsNullOrEmpty(sourceContainerName))
-			{
-				throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceContainerName)}");
-			}
-			if (string.IsNullOrEmpty(sourceBlobName))
-			{
-				throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceBlobName)}");
-			}
-			if (string.IsNullOrEmpty(destinationContainerName))
-			{
-				throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationContainerName)}");
-			}
-			if (destinationBlobName == string.Empty)
-			{
-				throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationBlobName)}");
-			}
+            try
+            {
+                await _s3Client.DeleteObjectAsync(objectDeleteRequest);
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-			var sourceKey = GenerateKeyName(sourceContainerName, sourceBlobName);
-			var destinationKey = GenerateKeyName(destinationContainerName, destinationBlobName ?? sourceBlobName);
+        public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName,
+            string destinationContainerName, string destinationBlobName = null)
+        {
+            if (string.IsNullOrEmpty(sourceContainerName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceContainerName)}");
+            }
+            if (string.IsNullOrEmpty(sourceBlobName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceBlobName)}");
+            }
+            if (string.IsNullOrEmpty(destinationContainerName))
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationContainerName)}");
+            }
+            if (destinationBlobName == string.Empty)
+            {
+                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationBlobName)}");
+            }
 
-			try
-			{
-				var request = new CopyObjectRequest
-				{
-					SourceBucket = _bucket,
-					SourceKey = sourceKey,
-					DestinationBucket = _bucket,
-					DestinationKey = destinationKey,
-					ServerSideEncryptionMethod = _serverSideEncryptionMethod
-				};
+            var sourceKey = GenerateKeyName(sourceContainerName, sourceBlobName);
+            var destinationKey = GenerateKeyName(destinationContainerName, destinationBlobName ?? sourceBlobName);
 
-				var response = await _s3Client.CopyObjectAsync(request);
+            try
+            {
+                var request = new CopyObjectRequest
+                {
+                    SourceBucket = _bucket,
+                    SourceKey = sourceKey,
+                    DestinationBucket = _bucket,
+                    DestinationKey = destinationKey,
+                    ServerSideEncryptionMethod = _serverSideEncryptionMethod
+                };
 
-				if (response.HttpStatusCode != HttpStatusCode.OK)
-				{
-					throw new StorageException(StorageErrorCode.GenericException, "Copy failed.");
-				}
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+                var response = await _s3Client.CopyObjectAsync(request);
 
-		public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName,
-			string destinationContainerName, string destinationBlobName = null)
-		{
-			await CopyBlobAsync(sourceContainerName, sourceBlobName, destinationContainerName, destinationBlobName);
-			await DeleteBlobAsync(sourceContainerName, sourceBlobName);
-		}
+                if (response.HttpStatusCode != HttpStatusCode.OK)
+                {
+                    throw new StorageException(StorageErrorCode.GenericException, "Copy failed.");
+                }
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-		public async Task DeleteContainerAsync(string containerName)
-		{
-			var objectsRequest = new ListObjectsRequest
-			{
-				BucketName = _bucket,
-				Prefix = containerName,
-				MaxKeys = 100000
-			};
+        public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName,
+            string destinationContainerName, string destinationBlobName = null)
+        {
+            await CopyBlobAsync(sourceContainerName, sourceBlobName, destinationContainerName, destinationBlobName);
+            await DeleteBlobAsync(sourceContainerName, sourceBlobName);
+        }
 
-			var keys = new List<KeyVersion>();
+        public async Task DeleteContainerAsync(string containerName)
+        {
+            var objectsRequest = new ListObjectsRequest
+            {
+                BucketName = _bucket,
+                Prefix = containerName,
+                MaxKeys = 100000
+            };
 
-			try
-			{
-				do
-				{
-					var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
+            var keys = new List<KeyVersion>();
 
-					keys.AddRange(objectsResponse.S3Objects
-						.Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
+            try
+            {
+                do
+                {
+                    var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
-					// If response is truncated, set the marker to get the next set of keys.
-					if (objectsResponse.IsTruncated)
-					{
-						objectsRequest.Marker = objectsResponse.NextMarker;
-					}
-					else
-					{
-						objectsRequest = null;
-					}
-				} while (objectsRequest != null);
+                    keys.AddRange(objectsResponse.S3Objects
+                        .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
 
-				if (keys.Count > 0)
-				{
-					var objectsDeleteRequest = new DeleteObjectsRequest()
-					{
-						BucketName = _bucket,
-						Objects = keys
-					};
+                    // If response is truncated, set the marker to get the next set of keys.
+                    if (objectsResponse.IsTruncated)
+                    {
+                        objectsRequest.Marker = objectsResponse.NextMarker;
+                    }
+                    else
+                    {
+                        objectsRequest = null;
+                    }
+                } while (objectsRequest != null);
 
-					await _s3Client.DeleteObjectsAsync(objectsDeleteRequest);
-				}
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+                if (keys.Count > 0)
+                {
+                    var objectsDeleteRequest = new DeleteObjectsRequest()
+                    {
+                        BucketName = _bucket,
+                        Objects = keys
+                    };
 
-		public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
-		{
-			var key = GenerateKeyName(containerName, blobName);
+                    await _s3Client.DeleteObjectsAsync(objectsDeleteRequest);
+                }
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-			try
-			{
-				var objectMetaRequest = new GetObjectMetadataRequest()
-				{
-					BucketName = _bucket,
-					Key = key
-				};
+        public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
+        {
+            var key = GenerateKeyName(containerName, blobName);
 
-				var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
+            try
+            {
+                var objectMetaRequest = new GetObjectMetadataRequest()
+                {
+                    BucketName = _bucket,
+                    Key = key
+                };
 
-				var objectAclRequest = new GetACLRequest()
-				{
-					BucketName = _bucket,
-					Key = key
-				};
+                var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-				var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-				var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
+                var objectAclRequest = new GetACLRequest()
+                {
+                    BucketName = _bucket,
+                    Key = key
+                };
 
-				return new BlobDescriptor
-				{
-					Name = blobName,
-					Container = containerName,
-					Length = objectMetaResponse.Headers.ContentLength,
-					ETag = objectMetaResponse.ETag,
-					ContentMD5 = objectMetaResponse.ETag,
-					ContentType = objectMetaResponse.Headers.ContentType,
-					ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
-					LastModified = objectMetaResponse.LastModified,
-					Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
-					Metadata = objectMetaResponse.Metadata.ToMetadata(),
-				};
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+                var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
+                var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
-		public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
-		{
-			try
-			{
-				return await _s3Client.GetObjectStreamAsync(_bucket, GenerateKeyName(containerName, blobName), null);
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+                return new BlobDescriptor
+                {
+                    Name = blobName,
+                    Container = containerName,
+                    Length = objectMetaResponse.Headers.ContentLength,
+                    ETag = objectMetaResponse.ETag,
+                    ContentMD5 = objectMetaResponse.ETag,
+                    ContentType = objectMetaResponse.Headers.ContentType,
+                    ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
+                    LastModified = objectMetaResponse.LastModified,
+                    Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                    Metadata = objectMetaResponse.Metadata.ToMetadata(),
+                };
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-		public string GetBlobUrl(string containerName, string blobName)
-		{
-			return $"{_serviceUrl}/{_bucket}/{GenerateKeyName(containerName, blobName)}";
-		}
+        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        {
+            try
+            {
+                return await _s3Client.GetObjectStreamAsync(_bucket, GenerateKeyName(containerName, blobName), null);
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-		public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
-			string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
-		{
-			var headers = new ResponseHeaderOverrides();
+        public string GetBlobUrl(string containerName, string blobName)
+        {
+            return $"{_serviceUrl}/{_bucket}/{GenerateKeyName(containerName, blobName)}";
+        }
 
-			if (isDownload)
-			{
-				headers.ContentDisposition = "attachment;";
-			}
+        public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
+            string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
+        {
+            var headers = new ResponseHeaderOverrides();
 
-			if (!string.IsNullOrEmpty(fileName))
-			{
-				headers.ContentDisposition += "filename=\"" + fileName + "\"";
-			}
+            if (isDownload)
+            {
+                headers.ContentDisposition = "attachment;";
+            }
 
-			if (!string.IsNullOrEmpty(contentType))
-			{
-				headers.ContentType = contentType;
-			}
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                headers.ContentDisposition += "filename=\"" + fileName + "\"";
+            }
 
-			var urlRequest = new GetPreSignedUrlRequest()
-			{
-				BucketName = _bucket,
-				Key = GenerateKeyName(containerName, blobName),
-				Expires = expiry.UtcDateTime,
-				ResponseHeaderOverrides = headers,
-				Verb = access == BlobUrlAccess.Read ? HttpVerb.GET : HttpVerb.PUT
-			};
+            if (!string.IsNullOrEmpty(contentType))
+            {
+                headers.ContentType = contentType;
+            }
 
-			try
-			{
-				return _s3Client.GetPreSignedURL(urlRequest);
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+            var urlRequest = new GetPreSignedUrlRequest()
+            {
+                BucketName = _bucket,
+                Key = GenerateKeyName(containerName, blobName),
+                Expires = expiry.UtcDateTime,
+                ResponseHeaderOverrides = headers,
+                Verb = access == BlobUrlAccess.Read ? HttpVerb.GET : HttpVerb.PUT
+            };
 
-		public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
-		{
-			var descriptors = new List<BlobDescriptor>();
+            try
+            {
+                return _s3Client.GetPreSignedURL(urlRequest);
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-			var objectsRequest = new ListObjectsRequest
-			{
-				BucketName = _bucket,
-				Prefix = containerName,
-				MaxKeys = 100000
-			};
+        public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
+        {
+            var descriptors = new List<BlobDescriptor>();
 
-			try
-			{
-				do
-				{
-					var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
+            var objectsRequest = new ListObjectsRequest
+            {
+                BucketName = _bucket,
+                Prefix = containerName,
+                MaxKeys = 100000
+            };
 
-					foreach (S3Object entry in objectsResponse.S3Objects)
-					{
-						var objectMetaRequest = new GetObjectMetadataRequest()
-						{
-							BucketName = _bucket,
-							Key = entry.Key
-						};
+            try
+            {
+                do
+                {
+                    var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
-						var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
+                    foreach (S3Object entry in objectsResponse.S3Objects)
+                    {
+                        var objectMetaRequest = new GetObjectMetadataRequest()
+                        {
+                            BucketName = _bucket,
+                            Key = entry.Key
+                        };
 
-						var objectAclRequest = new GetACLRequest()
-						{
-							BucketName = _bucket,
-							Key = entry.Key
-						};
+                        var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-						var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-						var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
+                        var objectAclRequest = new GetACLRequest()
+                        {
+                            BucketName = _bucket,
+                            Key = entry.Key
+                        };
 
-						descriptors.Add(new BlobDescriptor
-						{
-							Name = entry.Key.Remove(0, containerName.Length + 1),
-							Container = containerName,
-							Length = entry.Size,
-							ETag = entry.ETag,
-							ContentMD5 = entry.ETag,
-							ContentType = objectMetaResponse.Headers.ContentType,
-							LastModified = entry.LastModified,
-							Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
-							ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
-							Metadata = objectMetaResponse.Metadata.ToMetadata(),
-						});
-					}
+                        var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
+                        var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
-					// If response is truncated, set the marker to get the next set of keys.
-					if (objectsResponse.IsTruncated)
-					{
-						objectsRequest.Marker = objectsResponse.NextMarker;
-					}
-					else
-					{
-						objectsRequest = null;
-					}
-				} while (objectsRequest != null);
+                        descriptors.Add(new BlobDescriptor
+                        {
+                            Name = entry.Key.Remove(0, containerName.Length + 1),
+                            Container = containerName,
+                            Length = entry.Size,
+                            ETag = entry.ETag,
+                            ContentMD5 = entry.ETag,
+                            ContentType = objectMetaResponse.Headers.ContentType,
+                            LastModified = entry.LastModified,
+                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
+                            Metadata = objectMetaResponse.Metadata.ToMetadata(),
+                        });
+                    }
 
-				return descriptors;
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+                    // If response is truncated, set the marker to get the next set of keys.
+                    if (objectsResponse.IsTruncated)
+                    {
+                        objectsRequest.Marker = objectsResponse.NextMarker;
+                    }
+                    else
+                    {
+                        objectsRequest = null;
+                    }
+                } while (objectsRequest != null);
 
-		public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
-		{
-			if (source.Length >= 100000000)
-			{
-				var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
+                return descriptors;
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-				try
-				{
-					await new TransferUtility(_s3Client).UploadAsync(fileTransferUtilityRequest);
-				}
-				catch (AmazonS3Exception asex)
-				{
-					throw asex.ToStorageException();
-				}
-			}
-			else
-			{
-				var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        {
+            if (source.Length >= 100000000)
+            {
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
 
-				try
-				{
-					await _s3Client.PutObjectAsync(putRequest);
-				}
-				catch (AmazonS3Exception asex)
-				{
-					throw asex.ToStorageException();
-				}
-			}
-		}
+                try
+                {
+                    await new TransferUtility(_s3Client).UploadAsync(fileTransferUtilityRequest);
+                }
+                catch (AmazonS3Exception asex)
+                {
+                    throw asex.ToStorageException();
+                }
+            }
+            else
+            {
+                var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
 
-		public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
-		{
-			var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
+                try
+                {
+                    await _s3Client.PutObjectAsync(putRequest);
+                }
+                catch (AmazonS3Exception asex)
+                {
+                    throw asex.ToStorageException();
+                }
+            }
+        }
 
-			try
-			{
-				await _s3Client.CopyObjectAsync(updateRequest);
-			}
-			catch (AmazonS3Exception asex)
-			{
-				throw asex.ToStorageException();
-			}
-		}
+        public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
+        {
+            var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
 
-		private S3CannedACL GetCannedACL(BlobProperties properties)
-			=> properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
+            try
+            {
+                await _s3Client.CopyObjectAsync(updateRequest);
+            }
+            catch (AmazonS3Exception asex)
+            {
+                throw asex.ToStorageException();
+            }
+        }
 
-		private static string GenerateKeyName(string containerName, string blobName) => $"{containerName}/{blobName}";
+        private S3CannedACL GetCannedACL(BlobProperties properties)
+            => properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
 
-		private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
-		{
-			var updateRequest = new CopyObjectRequest()
-			{
-				SourceBucket = _bucket,
-				SourceKey = GenerateKeyName(containerName, blobName),
-				DestinationBucket = _bucket,
-				DestinationKey = GenerateKeyName(containerName, blobName),
-				ContentType = properties?.ContentType,
-				CannedACL = GetCannedACL(properties),
-				MetadataDirective = S3MetadataDirective.REPLACE,
-				ServerSideEncryptionMethod = _serverSideEncryptionMethod
-			};
-			updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
-			updateRequest.Metadata.AddMetadata(properties?.Metadata);
+        private static string GenerateKeyName(string containerName, string blobName) => $"{containerName}/{blobName}";
 
-			return updateRequest;
-		}
+        private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
+        {
+            var updateRequest = new CopyObjectRequest()
+            {
+                SourceBucket = _bucket,
+                SourceKey = GenerateKeyName(containerName, blobName),
+                DestinationBucket = _bucket,
+                DestinationKey = GenerateKeyName(containerName, blobName),
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties),
+                MetadataDirective = S3MetadataDirective.REPLACE,
+                ServerSideEncryptionMethod = _serverSideEncryptionMethod
+            };
+            updateRequest.Headers.ContentDisposition = properties.ContentDisposition;
+            updateRequest.Metadata.AddMetadata(properties?.Metadata);
 
-		private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
-		{
-			var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-			{
-				BucketName = _bucket,
-				InputStream = source,
-				PartSize = 6291456,
-				Key = GenerateKeyName(containerName, blobName),
-				ContentType = properties?.ContentType,
-				CannedACL = GetCannedACL(properties),
-				AutoCloseStream = closeStream,
-				ServerSideEncryptionMethod = _serverSideEncryptionMethod
-			};
-			fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
-			fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
+            return updateRequest;
+        }
 
-			return fileTransferUtilityRequest;
-		}
+        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
+        {
+            var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                InputStream = source,
+                PartSize = 6291456,
+                Key = GenerateKeyName(containerName, blobName),
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties),
+                AutoCloseStream = closeStream,
+                ServerSideEncryptionMethod = _serverSideEncryptionMethod
+            };
+            fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+            fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
 
-		private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
-		{
-			var putRequest = new PutObjectRequest()
-			{
-				BucketName = _bucket,
-				Key = GenerateKeyName(containerName, blobName),
-				InputStream = source,
-				ContentType = properties?.ContentType,
-				CannedACL = GetCannedACL(properties),
-				AutoCloseStream = closeStream,
-				ServerSideEncryptionMethod = _serverSideEncryptionMethod
-			};
-			putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
-			putRequest.Metadata.AddMetadata(properties?.Metadata);
+            return fileTransferUtilityRequest;
+        }
 
-			return putRequest;
-		}
-	}
+        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
+        {
+            var putRequest = new PutObjectRequest()
+            {
+                BucketName = _bucket,
+                Key = GenerateKeyName(containerName, blobName),
+                InputStream = source,
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties),
+                AutoCloseStream = closeStream,
+                ServerSideEncryptionMethod = _serverSideEncryptionMethod
+            };
+            putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+            putRequest.Metadata.AddMetadata(properties?.Metadata);
+
+            return putRequest;
+        }
+    }
 }
