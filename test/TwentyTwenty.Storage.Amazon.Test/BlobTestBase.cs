@@ -34,8 +34,10 @@ namespace TwentyTwenty.Storage.Amazon.Test
             {
                 Bucket = fixture.Config["Bucket"],
                 PublicKey = fixture.Config["PublicKey"],
-                SecretKey = fixture.Config["PrivateKey"]
-            });
+                SecretKey = fixture.Config["PrivateKey"],
+				ServerSideEncryptionMethod = fixture.Config["ServerSideEncryptionMethod"],
+				ProfileName = fixture.Config["ProfileName"],
+			});
 
             // Dumby provider to test exception throwing
             _exceptionProvider = new AmazonStorageProvider(new AmazonProviderOptions

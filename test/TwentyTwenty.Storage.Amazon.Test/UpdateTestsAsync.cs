@@ -1,4 +1,5 @@
 ﻿using Amazon.S3.Model;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -74,6 +75,36 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var meta = await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
 
             Assert.Equal(newProps.ContentDisposition, meta.Headers.ContentDisposition);
+        }
+
+        [Fact]
+        public async void Test_Blob_Meta_Updated()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var contentType = "image/jpg";
+            var newContentType = "image/png";
+            var data = GenerateRandomBlobStream();
+            var meta = new Dictionary<string, string>
+            {
+                //{ "FileName", "黑猫.jpeg" }, // Apparently amazon can't handle unicode in metadata.
+                { "filename" , "test.jpg" }
+            };
+
+            await CreateNewObjectAsync(container, blobName, data, false, contentType);
+
+            var newProps = new BlobProperties
+            {
+                ContentType = newContentType,
+                Metadata = meta,
+            };
+
+            await _provider.UpdateBlobPropertiesAsync(container, blobName, newProps);
+
+            var obj = await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
+
+            Assert.Equal(meta, obj.Metadata.ToMetadata());
+            Assert.Equal(newContentType, obj.Headers.ContentType);
         }
     }
 }

@@ -59,16 +59,39 @@ namespace TwentyTwenty.Storage.Azure
             }
         }
 
-        public Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+        public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
             string destinationBlobName = null)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<bool>();
+            var sourceContainer = _blobClient.GetContainerReference(sourceContainerName);
+            var sourceBlob = sourceContainer.GetBlockBlobReference(sourceBlobName);
+
+            var destContainer = _blobClient.GetContainerReference(destinationContainerName);
+
+            await destContainer.CreateIfNotExistsAsync(sourceContainer.Properties.PublicAccess ?? 
+                BlobContainerPublicAccessType.Off, _requestOptions, _context).ConfigureAwait(false);
+
+            var destBlob = destContainer.GetBlockBlobReference(destinationBlobName ?? sourceBlobName);
+
+            await destBlob.StartCopyAsync(sourceBlob).ConfigureAwait(false);
+            
+            while (destBlob.CopyState.Status == CopyStatus.Pending)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+                await destBlob.FetchAttributesAsync().ConfigureAwait(false);
+            }
+
+            if (destBlob.CopyState.Status != CopyStatus.Success)
+            {
+                throw new Exception("Copy failed: " +    destBlob.CopyState.Status);
+            }
         }
 
-        public Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
+        public async Task MoveBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
             string destinationBlobName = null)
         {
-            throw new NotImplementedException();
+            await CopyBlobAsync(sourceContainerName, sourceBlobName, destinationContainerName, destinationBlobName);
+            await DeleteBlobAsync(sourceContainerName, sourceBlobName);
         }
 
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
@@ -176,6 +199,8 @@ namespace TwentyTwenty.Storage.Azure
                     var results = await container
                         .ListBlobsSegmentedAsync(null, true, BlobListingDetails.Metadata, 100, token, _requestOptions, _context)
                         .ConfigureAwait(false);
+                    
+                    token = results.ContinuationToken;
 
                     list.AddRange(results.Results.OfType<CloudBlockBlob>().Select(blob =>
                     {

@@ -160,7 +160,7 @@ namespace TwentyTwenty.Storage.Local
             {
                 var dir = Path.Combine(_basePath, containerName);
                 var dirInfo = new DirectoryInfo(dir);
-                var fileInfo = dirInfo.GetFiles();
+                var fileInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
 
                 foreach (var f in fileInfo)
                 {

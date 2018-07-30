@@ -1,4 +1,4 @@
-#20|20 Storage
+# 20|20 Storage
 
 [![Build status](https://ci.appveyor.com/api/projects/status/0ss5kpj5gy739vwx/branch/master?svg=true)](https://ci.appveyor.com/project/2020IP/twentytwenty-storage/branch/master)
 [![Nuget Version](https://img.shields.io/nuget/v/TwentyTwenty.Storage.svg)](https://www.nuget.org/packages/TwentyTwenty.Storage/)
@@ -109,15 +109,12 @@ await _provider.DeleteBlobAsync(containerName, blobName);
 The libary, and the functional tests within it, depends on access to actual cloud storage provider accounts.  Providing these configuration values can be done through environment variables or the user secret store.
 
 ### Installing User Secrets Manager
-The secret manager can be installed globally with:
-```
-dnu commands install Microsoft.Extensions.SecretManager
-```
+[Here](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-2.0) the instruction about the secret manager
 
 Secrets can be listed with:
 ```
 cd test\TwentyTwenty.Storage.Azure.Test
-user-secret list
+dotnet user-secrets list
 ```
 
 ### Adding Provider-Specific Secrets
@@ -125,20 +122,22 @@ user-secret list
 ##### Azure:
 ```
 cd test\TwentyTwenty.Storage.Azure.Test
-user-secret set ConnectionString "my_really_long_connection_string"
+dotnet user-secrets set ConnectionString "my_really_long_connection_string"
 ```
 ##### Amazon:
 ```
 cd test\TwentyTwenty.Storage.Amazon.Test
-user-secret set PublicKey "my_public_key"
-user-secret set PrivateKey "my_private_key"
-user-secret set Bucket "my_bucket_name"
+dotnet user-secrets set PublicKey "my_public_key"
+dotnet user-secrets set PrivateKey "my_private_key"
+dotnet user-secrets set Bucket "my_bucket_name"
+dotnet user-secrets set ServerSideEncryptionMethod "AES256"
+dotnet user-secrets set ProfileName "my_profile_name"
 ```
 ##### Google:
 ```
 cd test\TwentyTwenty.Storage.Google.Test
-user-secret set GoogleEmail "my_google_storage_api_email"
-user-secret set GoogleBucket "my_google_bucket"
-user-secret set GoogleP12PrivateKey "my_base64_encoded_byte_array_google_p12_key"
+dotnet user-secrets set GoogleEmail "my_google_storage_api_email"
+dotnet user-secrets set GoogleBucket "my_google_bucket"
+dotnet user-secrets set GoogleP12PrivateKey "my_base64_encoded_byte_array_google_p12_key"
 ```
 (To get the 'GoogleP12PrivateKey' get the byte array from the P12 certificate for your Google Cloud Storage API and base64 encode it)

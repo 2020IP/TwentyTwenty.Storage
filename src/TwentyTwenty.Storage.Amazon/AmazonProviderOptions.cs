@@ -9,5 +9,9 @@
         public string Bucket { get; set; }
 
         public string ServiceUrl { get; set; }
-    }
+
+		public string ServerSideEncryptionMethod { get; set; }
+		
+		public string ProfileName { get; set; }
+	}
 }

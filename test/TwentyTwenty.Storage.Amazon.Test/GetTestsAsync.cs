@@ -50,7 +50,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.NotNull(descriptor.LastModified);
             Assert.Equal(descriptor.Length, datalength);
             Assert.Equal(descriptor.Name, blobName);
-            Assert.Equal(descriptor.Security, BlobSecurity.Public);
+            Assert.Equal(BlobSecurity.Public, descriptor.Security);
             Assert.Equal(descriptor.Metadata, meta);
         }
 
@@ -81,7 +81,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                 Assert.NotNull(descriptor.LastModified);
                 Assert.Equal(descriptor.Length, blob.Length);
                 Assert.Equal(descriptor.Name, blob.Name);
-                Assert.Equal(descriptor.Security, BlobSecurity.Private);
+                Assert.Equal(BlobSecurity.Private, descriptor.Security);
             }
         }
 
