@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>A cross-cloud storage abstraction</Description>
     <AssemblyTitle>2020 Storage - Local Filesystem Provider</AssemblyTitle>
-    <VersionPrefix>2.1.0</VersionPrefix>
+    <VersionPrefix>$(SemVer)</VersionPrefix>
     <Authors>2020IP</Authors>
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>

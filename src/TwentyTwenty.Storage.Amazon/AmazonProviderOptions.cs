@@ -1,4 +1,6 @@
-﻿namespace TwentyTwenty.Storage.Amazon
+﻿using System;
+
+namespace TwentyTwenty.Storage.Amazon
 {
     public class AmazonProviderOptions
     {
@@ -10,8 +12,10 @@
 
         public string ServiceUrl { get; set; }
 
-		public string ServerSideEncryptionMethod { get; set; }
-		
-		public string ProfileName { get; set; }
-	}
+        public string ServerSideEncryptionMethod { get; set; }
+
+        public string ProfileName { get; set; }
+
+        public TimeSpan? Timeout { get; set; }
+    }
 }
