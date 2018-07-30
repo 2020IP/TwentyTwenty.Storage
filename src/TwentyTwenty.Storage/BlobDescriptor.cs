@@ -23,6 +23,13 @@ namespace TwentyTwenty.Storage
 
         public string Container { get; set; }
 
+        public string Path
+        {
+            get
+            {
+                return $"{this.Container}/{this.Name}";
+            }
+        }
         public string Url { get; set; }
 
         public IDictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
