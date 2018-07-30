@@ -5,7 +5,7 @@
     <AssemblyTitle>2020 Storage</AssemblyTitle>
     <VersionPrefix>$(SemVer)</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard1.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage</AssemblyName>
     <PackageId>TwentyTwenty.Storage</PackageId>
