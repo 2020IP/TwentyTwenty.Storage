@@ -52,7 +52,8 @@ namespace TwentyTwenty.Storage
             {
                 using (Stream source = await provider.GetBlobStreamAsync(containerName, blobName))
                 { 
-                    source.Seek(0, SeekOrigin.Begin);
+                    //S3 doesn't support seek 0 - have to assume at beginning of stream (hashstream)
+                    //source.Seek(0, SeekOrigin.Begin);
                     source.CopyTo(fileStream);
                 }
             }
@@ -159,7 +160,7 @@ namespace TwentyTwenty.Storage
         {
             string tempFileName = Path.GetTempFileName();
 
-            await provider.CopyToLocalAsync(tempFileName, containerName, blobName);
+            await provider.CopyToLocalAsync(containerName, blobName, tempFileName);
 
             return tempFileName;
         }
@@ -197,10 +198,10 @@ namespace TwentyTwenty.Storage
         {
             IList<BlobDescriptor> list = await provider.ListBlobsAsync(sourceContainer);
 
-            foreach (BlobDescriptor blob in list)
+           await Task.WhenAll(list.Select(async (blob) =>
             {
                 await provider.CopyBlobAsync(blob.Path, blob.Path.Replace(sourceContainer, targetContainer));
-            }
+            }));
         }
 
         //public static string GetFullName(this BlobDescriptor blobDescriptor)

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Net;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
+using System.Collections.Concurrent;
 
 namespace TwentyTwenty.Storage.Amazon
 {
@@ -283,7 +284,7 @@ namespace TwentyTwenty.Storage.Amazon
 
         public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
-            var descriptors = new List<BlobDescriptor>();
+            var descriptors = new ConcurrentBag<BlobDescriptor>();
 
             var objectsRequest = new ListObjectsRequest
             {
@@ -298,39 +299,42 @@ namespace TwentyTwenty.Storage.Amazon
                 {
                     var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
-                    foreach (S3Object entry in objectsResponse.S3Objects)
-                    {
-                        var objectMetaRequest = new GetObjectMetadataRequest()
-                        {
-                            BucketName = _bucket,
-                            Key = entry.Key
-                        };
+                    //get metadata in parallel -- too slow to await each call -- should still probably create a non metadata version as it is still slow to retrieve metadata for each file, especially if it's not needed
 
-                        var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
+                    await Task.WhenAll(objectsResponse.S3Objects.Select(async (entry) =>
+                   {
+                       
+                       var objectMetaRequest = new GetObjectMetadataRequest()
+                       {
+                           BucketName = _bucket,
+                           Key = entry.Key
+                       };
 
-                        var objectAclRequest = new GetACLRequest()
-                        {
-                            BucketName = _bucket,
-                            Key = entry.Key
-                        };
+                       var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-                        var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                        var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
+                       var objectAclRequest = new GetACLRequest()
+                       {
+                           BucketName = _bucket,
+                           Key = entry.Key
+                       };
 
-                        descriptors.Add(new BlobDescriptor
-                        {
-                            Name = entry.Key.Remove(0, containerName.Length + 1),
-                            Container = containerName,
-                            Length = entry.Size,
-                            ETag = entry.ETag,
-                            ContentMD5 = entry.ETag,
-                            ContentType = objectMetaResponse.Headers.ContentType,
-                            LastModified = entry.LastModified,
-                            Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
-                            ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
-                            Metadata = objectMetaResponse.Metadata.ToMetadata(),
-                        });
-                    }
+                       var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
+                       var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
+
+                       descriptors.Add(new BlobDescriptor
+                       {
+                           Name = entry.Key.Remove(0, containerName.Length + 1),
+                           Container = containerName,
+                           Length = entry.Size,
+                           ETag = entry.ETag,
+                           ContentMD5 = entry.ETag,
+                           ContentType = objectMetaResponse.Headers.ContentType,
+                           LastModified = entry.LastModified,
+                           Security = isPublic ? BlobSecurity.Public : BlobSecurity.Private,
+                           ContentDisposition = objectMetaResponse.Headers.ContentDisposition,
+                           Metadata = objectMetaResponse.Metadata.ToMetadata(),
+                       });
+                   }));
 
                     // If response is truncated, set the marker to get the next set of keys.
                     if (objectsResponse.IsTruncated)
@@ -343,7 +347,7 @@ namespace TwentyTwenty.Storage.Amazon
                     }
                 } while (objectsRequest != null);
 
-                return descriptors;
+                return descriptors.ToList();
             }
             catch (AmazonS3Exception asex)
             {
@@ -398,7 +402,7 @@ namespace TwentyTwenty.Storage.Amazon
         private S3CannedACL GetCannedACL(BlobProperties properties)
             => properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
 
-        private static string GenerateKeyName(string containerName, string blobName) => $"{containerName}/{blobName}";
+        private static string GenerateKeyName(string containerName, string blobName) => String.IsNullOrEmpty(containerName) ? blobName : $"{containerName}/{blobName}";
 
         private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
         {
