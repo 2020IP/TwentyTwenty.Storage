@@ -43,11 +43,15 @@ namespace TwentyTwenty.Storage
         public static async Task CopyFromLocalAsync(this IStorageProvider provider, string localPath, string containerName, string blobName)
         {
             using (System.IO.FileStream stream = File.OpenRead(localPath))
-            await provider.SaveBlobStreamAsync(containerName, blobName, null);
+            {
+                await provider.SaveBlobStreamAsync(containerName, blobName, stream);
+            }
         }
 
         public static async Task CopyToLocalAsync(this IStorageProvider provider, string containerName, string blobName, string localPath)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+
             using (FileStream fileStream = File.Create(localPath))
             {
                 using (Stream source = await provider.GetBlobStreamAsync(containerName, blobName))
@@ -67,8 +71,19 @@ namespace TwentyTwenty.Storage
             {
                 foreach (BlobDescriptor blob in contents)
                 {
-                    await provider.CopyToLocalAsync(blob.Path, targetFolder);
+                    await provider.CopyToLocalAsync(blob.Path, blob.Path.Replace(containerName, targetFolder));
                 }
+            }
+        }
+
+        public static async Task CopyContainerFromLocalFolderAsync(this IStorageProvider provider, string sourceFolder, string containerName)
+        {
+            var dirInfo = new DirectoryInfo(sourceFolder);
+            var fileInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+
+            foreach (var f in fileInfo)
+            {
+                await provider.CopyFromLocalAsync(f.FullName, CombineContainerPath(containerName, f.DirectoryName.Substring(sourceFolder.Length)), f.Name);
             }
         }
 
@@ -91,6 +106,17 @@ namespace TwentyTwenty.Storage
             System.IO.Directory.Delete(localPath);
         }
 
+        public static async Task CopyContainerFromLocalActionAsync(this IStorageProvider provider, string containerName, Action<string> action)
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempPath);
+
+            action(tempPath);
+
+            await provider.CopyContainerFromLocalFolderAsync(tempPath, containerName);
+
+            System.IO.Directory.Delete(tempPath, true);
+        }
 
         public static async Task<Stream> GetBlobStreamAsync(this IStorageProvider provider, string path)
         {            
@@ -126,7 +152,7 @@ namespace TwentyTwenty.Storage
         {
             string tempFileName = Path.GetTempFileName();
 
-            await provider.CopyToLocalAsync(tempFileName, containerName, blobName);
+            await provider.CopyToLocalAsync(containerName, blobName, tempFileName);
 
             action(tempFileName);
             
@@ -212,6 +238,11 @@ namespace TwentyTwenty.Storage
         private static string GetContainerName(string path)
         {
             return Path.GetDirectoryName(path).Replace('\\', '/');
+        }
+
+        private static string CombineContainerPath(params string[] paths)
+        {
+            return Path.Combine(paths.Select(i => i.Replace('\\','/').TrimStart('/')).ToArray()).Replace('\\', '/');
         }
 
         public static long ToUnixTimeSeconds(this DateTimeOffset dateTimeOffset)

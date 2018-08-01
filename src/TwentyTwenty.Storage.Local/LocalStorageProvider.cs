@@ -168,7 +168,7 @@ namespace TwentyTwenty.Storage.Local
                         ContentMD5 = "",
                         ETag = "",
                         ContentType = f.Extension.GetMimeType(),
-                        Container = f.DirectoryName.Substring(_basePath.Length + 1).Replace('\\','/'),
+                        Container = f.DirectoryName.Substring(_basePath.Length).Replace('\\','/').TrimStart('/'),
                         LastModified = f.LastWriteTime,
                         Length = f.Length,
                         Name = f.Name,
