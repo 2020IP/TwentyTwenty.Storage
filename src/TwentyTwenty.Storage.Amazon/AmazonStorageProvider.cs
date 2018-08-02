@@ -84,18 +84,18 @@ namespace TwentyTwenty.Storage.Amazon
         public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName,
             string destinationContainerName, string destinationBlobName = null)
         {
-            if (string.IsNullOrEmpty(sourceContainerName))
-            {
-                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceContainerName)}");
-            }
+            //if (string.IsNullOrEmpty(sourceContainerName))
+            //{
+            //    throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceContainerName)}");
+            //}
             if (string.IsNullOrEmpty(sourceBlobName))
             {
                 throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(sourceBlobName)}");
             }
-            if (string.IsNullOrEmpty(destinationContainerName))
-            {
-                throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationContainerName)}");
-            }
+            //if (string.IsNullOrEmpty(destinationContainerName))
+            //{
+            //    throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationContainerName)}");
+            //}
             if (destinationBlobName == string.Empty)
             {
                 throw new StorageException(StorageErrorCode.InvalidName, $"Invalid {nameof(destinationBlobName)}");
