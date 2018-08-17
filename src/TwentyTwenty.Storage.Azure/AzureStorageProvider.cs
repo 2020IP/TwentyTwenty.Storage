@@ -128,14 +128,19 @@ namespace TwentyTwenty.Storage.Azure
             }
         }
 
-        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<StreamResponse> GetBlobStreamAsync(string containerName, string blobName, ByteRange byteRange = null)
         {
+            if (byteRange != null)
+            {
+                throw new NotImplementedException("ByteRange for Azure Storage Provider has not been implemented.");
+            }
+
             var blob = _blobClient.GetContainerReference(containerName)
                 .GetBlobReference(blobName);
 
             try
             {
-                return await blob.OpenReadAsync(null, _requestOptions, _context).ConfigureAwait(false);
+                return new StreamResponse(await blob.OpenReadAsync(null, _requestOptions, _context).ConfigureAwait(false));
             }
             catch (Exception e)
             {

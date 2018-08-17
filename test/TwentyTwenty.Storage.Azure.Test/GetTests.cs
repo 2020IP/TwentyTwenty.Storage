@@ -43,7 +43,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.GetBlockBlobReference(blobName)
                 .UploadFromStreamAsync(data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
+            using (var blobStream = (await _provider.GetBlobStreamAsync(container, blobName)).Stream)
             {
                 var ms = new MemoryStream();
                 await blobStream.CopyToAsync(ms);

@@ -19,7 +19,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             await CreateNewObjectAsync(container, blobName, data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
+            using (var blobStream = (await _provider.GetBlobStreamAsync(container, blobName)).Stream)
             {
                 Assert.True(StreamEquals(blobStream, data));
             }

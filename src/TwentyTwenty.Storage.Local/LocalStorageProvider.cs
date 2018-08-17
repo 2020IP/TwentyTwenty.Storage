@@ -128,12 +128,21 @@ namespace TwentyTwenty.Storage.Local
             return Path.Combine(_basePath, containerName, blobName);
         }
 
-        public Stream GetBlobStream(string containerName, string blobName)
+        public StreamResponse GetBlobStream(string containerName, string blobName, ByteRange byteRange = null)
         {
             try
             {
                 var path = Path.Combine(_basePath, containerName, blobName);
-                return File.OpenRead(path);
+                Stream stream = File.OpenRead(path);
+                long contentLength = stream.Length;
+
+                if (byteRange != null)
+                {
+                    long byteRangeEnd = byteRange.End ?? (contentLength - 1);
+                    stream = new PartialReadFileStream(stream, byteRange.Start, byteRangeEnd);
+                }
+
+                return new StreamResponse(stream, contentLength);
             }
             catch (Exception ex)
             {
@@ -141,9 +150,9 @@ namespace TwentyTwenty.Storage.Local
             }
         }
 
-        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<StreamResponse> GetBlobStreamAsync(string containerName, string blobName, ByteRange byteRange = null)
         {
-            return await Task.Run(() => GetBlobStream(containerName, blobName));
+            return await Task.Run(() => GetBlobStream(containerName, blobName, byteRange));
         }
 
         public string GetBlobUrl(string containerName, string blobName)

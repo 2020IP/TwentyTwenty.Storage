@@ -27,6 +27,7 @@ namespace TwentyTwenty.Storage.Amazon
 
         public AmazonStorageProvider(AmazonProviderOptions options)
         {
+            
             _serviceUrl = string.IsNullOrEmpty(options.ServiceUrl) ? DefaultServiceUrl : options.ServiceUrl;
             _bucket = options.Bucket;
             _serverSideEncryptionMethod = options.ServerSideEncryptionMethod;
@@ -37,7 +38,50 @@ namespace TwentyTwenty.Storage.Amazon
                 Timeout = options.Timeout ?? ClientConfig.MaxTimeout,
             };
 
-            _s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
+            var client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
+
+            client.AfterResponseEvent += Client_AfterResponseEvent;
+            client.BeforeRequestEvent += Client_BeforeRequestEvent;
+
+            _s3Client = client;
+        }
+
+        private void Client_BeforeRequestEvent(object sender, RequestEventArgs e)
+        {
+            //Handle blank end range, which S3 SDK does not support
+            if (e != null && e is WebServiceRequestEventArgs)
+            {
+                WebServiceRequestEventArgs args = e as WebServiceRequestEventArgs;
+
+                if (args.Request != null && args.Request is GetObjectRequest)
+                {
+                    GetObjectRequest request = args.Request as GetObjectRequest;
+
+                    if (request.ByteRange != null && request.ByteRange.End == -1)
+                    {
+                        args.Headers["Range"] = String.Format("bytes={0}-", request.ByteRange.Start);
+                    }
+                }
+            }
+        }
+
+        private void Client_AfterResponseEvent(object sender, ResponseEventArgs e)
+        {
+            //Store Content-Range header to retrieve source file length.  No built in support in S3 SDK.
+            if (e != null && e is WebServiceResponseEventArgs)
+            {
+                WebServiceResponseEventArgs args = e as WebServiceResponseEventArgs;
+
+                if (args.Response != null && args.Response is GetObjectResponse)
+                {
+                    GetObjectResponse response = args.Response as GetObjectResponse;
+
+                    if (args.ResponseHeaders.ContainsKey("Content-Range"))
+                    {
+                        response.ResponseMetadata.Metadata.Add("Content-Range", args.ResponseHeaders["Content-Range"]);
+                    }
+                }
+            }
         }
 
         private AWSCredentials ReadAwsCredentials(AmazonProviderOptions options)
@@ -226,11 +270,43 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<StreamResponse> GetBlobStreamAsync(string containerName, string blobName, ByteRange byteRange = null)
         {
             try
             {
-                return await _s3Client.GetObjectStreamAsync(_bucket, GenerateKeyName(containerName, blobName), null);
+                GetObjectRequest request = new GetObjectRequest
+                {
+                    BucketName = _bucket,
+                    Key = GenerateKeyName(containerName, blobName)
+                };
+
+                
+
+                if (byteRange != null)
+                {
+                    request.ByteRange =  new global::Amazon.S3.Model.ByteRange(byteRange.Start, byteRange.End ?? -1);
+                }
+
+                GetObjectResponse response = await _s3Client.GetObjectAsync(request);
+
+                long fileSize = response.ContentLength;
+
+                if (response.ResponseMetadata.Metadata.ContainsKey("Content-Range"))
+                {
+                    string contentRangeString = response.ResponseMetadata.Metadata["Content-Range"];
+
+                    System.Net.Http.Headers.ContentRangeHeaderValue contentRange = null;
+
+                    System.Net.Http.Headers.ContentRangeHeaderValue.TryParse(contentRangeString, out contentRange);
+
+                    if (contentRange != null && contentRange.HasLength)
+                    {
+                        fileSize = contentRange.Length.Value;
+                    }
+                }
+
+                return new StreamResponse(response.ResponseStream, fileSize);
+
             }
             catch (AmazonS3Exception asex)
             {

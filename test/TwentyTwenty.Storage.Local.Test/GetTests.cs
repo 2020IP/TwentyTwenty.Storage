@@ -19,7 +19,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
             CreateNewFile(container, blobName, data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
+            using (var blobStream = (await _provider.GetBlobStreamAsync(container, blobName)).Stream)
             {
                 Assert.True(StreamEquals(data, blobStream));
             }

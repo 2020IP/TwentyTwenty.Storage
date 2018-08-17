@@ -61,8 +61,13 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
+        public async Task<StreamResponse> GetBlobStreamAsync(string containerName, string blobName, ByteRange byteRange = null)
         {
+            if (byteRange != null)
+            {
+                throw new NotImplementedException("ByteRange for Azure Storage Provider has not been implemented.");
+            }
+
             try
             {
                 var stream = new MemoryStream();
@@ -71,7 +76,7 @@ namespace TwentyTwenty.Storage.Google
                 
                 stream.Seek(0, SeekOrigin.Begin);
                 
-                return stream;
+                return new StreamResponse(stream);
             }
             catch (GoogleApiException gae)
             {

@@ -11,7 +11,7 @@ namespace TwentyTwenty.Storage
     {
         public static async Task<string> GetBlobTextAsync(this IStorageProvider provider, string containerName, string blobName)
         {
-            using (StreamReader stream = new StreamReader(await provider.GetBlobStreamAsync(containerName, blobName)))
+            using (StreamReader stream = new StreamReader((await provider.GetBlobStreamAsync(containerName, blobName)).Stream))
             {
                 return await stream.ReadToEndAsync();
             }
@@ -54,7 +54,7 @@ namespace TwentyTwenty.Storage
 
             using (FileStream fileStream = File.Create(localPath))
             {
-                using (Stream source = await provider.GetBlobStreamAsync(containerName, blobName))
+                using (Stream source = (await provider.GetBlobStreamAsync(containerName, blobName)).Stream)
                 { 
                     //S3 doesn't support seek 0 - have to assume at beginning of stream (hashstream)
                     //source.Seek(0, SeekOrigin.Begin);
@@ -118,9 +118,9 @@ namespace TwentyTwenty.Storage
             System.IO.Directory.Delete(tempPath, true);
         }
 
-        public static async Task<Stream> GetBlobStreamAsync(this IStorageProvider provider, string path)
+        public static async Task<StreamResponse> GetBlobStreamAsync(this IStorageProvider provider, string path, ByteRange byteRange = null)
         {            
-            return await provider.GetBlobStreamAsync(GetContainerName(path), Path.GetFileName(path));
+            return await provider.GetBlobStreamAsync(GetContainerName(path), Path.GetFileName(path), byteRange);
         }
 
         public static async Task CopyToLocalAsync(this IStorageProvider provider, string path, string localPath)
