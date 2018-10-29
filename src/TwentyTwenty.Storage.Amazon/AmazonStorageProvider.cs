@@ -23,12 +23,14 @@ namespace TwentyTwenty.Storage.Amazon
         private readonly string _bucket;
         private readonly string _serverSideEncryptionMethod;
         private readonly string _serviceUrl;
+        private readonly long _chunkedThreshold;
 
         public AmazonStorageProvider(AmazonProviderOptions options)
         {
             _serviceUrl = string.IsNullOrEmpty(options.ServiceUrl) ? DefaultServiceUrl : options.ServiceUrl;
             _bucket = options.Bucket;
             _serverSideEncryptionMethod = options.ServerSideEncryptionMethod;
+            _chunkedThreshold = options.ChunkedUploadThreshold;
 
             var S3Config = new AmazonS3Config
             {
@@ -36,7 +38,7 @@ namespace TwentyTwenty.Storage.Amazon
                 Timeout = options.Timeout ?? ClientConfig.MaxTimeout,
             };
 
-            _s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
+            _s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);            
         }
 
         private AWSCredentials ReadAwsCredentials(AmazonProviderOptions options)
@@ -356,7 +358,10 @@ namespace TwentyTwenty.Storage.Amazon
         {
             length = source.CanSeek ? source.Length : length;
 
-            if (length.HasValue && length.Value >= 100000000)
+            // PutObject supports a max of 5GB.
+            var threshold = Math.Min(_chunkedThreshold, 5000000000);
+
+            if (length.HasValue && length.Value >= threshold)
             {
                 var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream, length);
                 try
