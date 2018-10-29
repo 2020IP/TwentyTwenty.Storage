@@ -373,6 +373,11 @@ namespace TwentyTwenty.Storage.Amazon
             {
                 var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
 
+                if (length.HasValue)
+                {
+                    putRequest.Headers.ContentLength = length.Value;
+                }
+
                 try
                 {
                     await _s3Client.PutObjectAsync(putRequest);
