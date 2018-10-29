@@ -358,8 +358,7 @@ namespace TwentyTwenty.Storage.Amazon
 
             if (length.HasValue && length.Value >= 100000000)
             {
-                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
-
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream, length);
                 try
                 {
                     await new TransferUtility(_s3Client).UploadAsync(fileTransferUtilityRequest);
@@ -371,12 +370,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
             else
             {
-                var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream);
-
-                if (length.HasValue)
-                {
-                    putRequest.Headers.ContentLength = length.Value;
-                }
+                var putRequest = CreateUpload(containerName, blobName, source, properties, closeStream, length);
 
                 try
                 {
@@ -427,7 +421,8 @@ namespace TwentyTwenty.Storage.Amazon
             return updateRequest;
         }
 
-        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
+        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, 
+            BlobProperties properties, bool closeStream, long? length = null)
         {
             var fileTransferUtilityRequest = new TransferUtilityUploadRequest
             {
@@ -443,10 +438,16 @@ namespace TwentyTwenty.Storage.Amazon
             fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
             fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
 
+            if (length.HasValue)
+            {
+                fileTransferUtilityRequest.Headers.ContentLength = length.Value;
+            }
+
             return fileTransferUtilityRequest;
         }
 
-        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, BlobProperties properties, bool closeStream)
+        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, 
+            BlobProperties properties, bool closeStream, long? length = null)
         {
             var putRequest = new PutObjectRequest()
             {
@@ -460,6 +461,11 @@ namespace TwentyTwenty.Storage.Amazon
             };
             putRequest.Headers.ContentDisposition = properties?.ContentDisposition;
             putRequest.Metadata.AddMetadata(properties?.Metadata);
+
+            if (length.HasValue)
+            {
+                putRequest.Headers.ContentLength = length.Value;
+            }
 
             return putRequest;
         }
