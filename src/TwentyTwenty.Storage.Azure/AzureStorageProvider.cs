@@ -232,7 +232,8 @@ namespace TwentyTwenty.Storage.Azure
             return list;
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+            BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
             var container = _blobClient.GetContainerReference(containerName);
             var props = properties ?? BlobProperties.Empty;

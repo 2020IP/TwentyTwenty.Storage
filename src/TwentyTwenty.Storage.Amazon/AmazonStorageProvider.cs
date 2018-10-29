@@ -351,9 +351,12 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+            BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
-            if (source.Length >= 100000000)
+            length = source.CanSeek ? source.Length : length;
+
+            if (length.HasValue && length.Value >= 100000000)
             {
                 var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream);
 

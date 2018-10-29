@@ -190,7 +190,8 @@ namespace TwentyTwenty.Storage.Local
             return Task.Run(()=> ListBlobs(containerName));
         }
 
-        public void SaveBlobStream(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        public void SaveBlobStream(string containerName, string blobName, Stream source, 
+            BlobProperties properties = null, bool closeStream = true)
         {
             var dir = Path.Combine(_basePath, containerName);
 
@@ -214,7 +215,8 @@ namespace TwentyTwenty.Storage.Local
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+            BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
             var dir = Path.Combine(_basePath, containerName);
 

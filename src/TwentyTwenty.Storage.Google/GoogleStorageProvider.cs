@@ -48,7 +48,8 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, BlobProperties properties = null, bool closeStream = true)
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+            BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
             try
             {
