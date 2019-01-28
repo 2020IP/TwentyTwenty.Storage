@@ -58,18 +58,6 @@ namespace TwentyTwenty.Storage.Amazon
             {
                 return new BasicAWSCredentials(options.PublicKey, options.SecretKey);
             }
-
-            try
-            {
-                var env = new EnvironmentVariablesAWSCredentials();
-                env.FetchCredentials();
-                
-                return new EnvironmentVariablesAWSCredentials();
-            }
-            catch (InvalidOperationException)
-            {
-                // This exceptions happens in case there are no credentials into the environment variables Variables
-            }
             
             return FallbackCredentialsFactory.GetCredentials();
         }
