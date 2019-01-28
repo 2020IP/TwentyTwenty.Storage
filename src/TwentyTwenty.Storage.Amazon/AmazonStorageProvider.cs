@@ -50,8 +50,8 @@ namespace TwentyTwenty.Storage.Amazon
 
                 if (credentialProfileStoreChain.TryGetAWSCredentials(options.ProfileName, out defaultCredentials))
                     return defaultCredentials;
-                else
-                    throw new AmazonClientException("Unable to find a default profile in CredentialProfileStoreChain.");
+
+                throw new AmazonClientException("Unable to find a default profile in CredentialProfileStoreChain.");
             }
 
             if (!string.IsNullOrEmpty(options.PublicKey) && !string.IsNullOrWhiteSpace(options.SecretKey))
@@ -59,7 +59,19 @@ namespace TwentyTwenty.Storage.Amazon
                 return new BasicAWSCredentials(options.PublicKey, options.SecretKey);
             }
 
-            return new EnvironmentVariablesAWSCredentials();
+            try
+            {
+                var env = new EnvironmentVariablesAWSCredentials();
+                env.FetchCredentials();
+                
+                return new EnvironmentVariablesAWSCredentials();
+            }
+            catch (InvalidOperationException)
+            {
+                // This exceptions happens in case there are no credentials into the environment variables Variables
+            }
+            
+            return FallbackCredentialsFactory.GetCredentials();
         }
 
         public async Task DeleteBlobAsync(string containerName, string blobName)
