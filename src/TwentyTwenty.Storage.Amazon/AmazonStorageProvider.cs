@@ -46,10 +46,10 @@ namespace TwentyTwenty.Storage.Amazon
             if (!string.IsNullOrWhiteSpace(options.ProfileName))
             {
                 var credentialProfileStoreChain = new CredentialProfileStoreChain();
-                AWSCredentials defaultCredentials;
-
-                if (credentialProfileStoreChain.TryGetAWSCredentials(options.ProfileName, out defaultCredentials))
+                if (credentialProfileStoreChain.TryGetAWSCredentials(options.ProfileName, out AWSCredentials defaultCredentials))
+                {
                     return defaultCredentials;
+                }
 
                 throw new AmazonClientException("Unable to find a default profile in CredentialProfileStoreChain.");
             }
