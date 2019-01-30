@@ -273,7 +273,7 @@ namespace TwentyTwenty.Storage.Amazon
                 Verb = access == BlobUrlAccess.Read ? HttpVerb.GET : HttpVerb.PUT
             };
 
-            if (string.IsNullOrEmpty(_serverSideEncryptionMethod))
+            if (!string.IsNullOrEmpty(_serverSideEncryptionMethod))
             {
                 urlRequest.ServerSideEncryptionMethod = _serverSideEncryptionMethod;
             }
