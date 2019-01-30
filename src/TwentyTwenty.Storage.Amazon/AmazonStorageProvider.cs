@@ -275,7 +275,7 @@ namespace TwentyTwenty.Storage.Amazon
 
             if (string.IsNullOrEmpty(_serverSideEncryptionMethod))
             {
-                urlRequest.ServerSideEncryptionCustomerMethod = _serverSideEncryptionMethod;
+                urlRequest.ServerSideEncryptionMethod = _serverSideEncryptionMethod;
             }
 
             try
