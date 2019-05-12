@@ -68,8 +68,11 @@ namespace TwentyTwenty.Storage.Azure
 
             var destContainer = _blobClient.GetContainerReference(destinationContainerName);
 
-            await destContainer.CreateIfNotExistsAsync(sourceContainer.Properties.PublicAccess ?? 
+            if(!await destContainer.ExistsAsync().ConfigureAwait(false))
+            {
+                await destContainer.CreateIfNotExistsAsync(sourceContainer.Properties.PublicAccess ?? 
                 BlobContainerPublicAccessType.Off, _requestOptions, _context).ConfigureAwait(false);
+            }
 
             var destBlob = destContainer.GetBlockBlobReference(destinationBlobName ?? sourceBlobName);
 
@@ -241,7 +244,12 @@ namespace TwentyTwenty.Storage.Azure
 
             try
             {
-                var created = await container.CreateIfNotExistsAsync(security, _requestOptions, _context).ConfigureAwait(false);
+                var created = false;
+                
+                if(!await container.ExistsAsync().ConfigureAwait(false))
+                {
+                    created = await container.CreateIfNotExistsAsync(security, _requestOptions, _context).ConfigureAwait(false);
+                }
 
                 var blob = container.GetBlockBlobReference(blobName);
                 blob.Properties.ContentType = props.ContentType;                
