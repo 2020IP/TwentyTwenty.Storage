@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
@@ -80,5 +81,42 @@ namespace TwentyTwenty.Storage.Local.Test
             var list = await _provider.ListBlobsAsync(container);
             Assert.Equal(3, list.Count);
         }
+        
+        [Theory]
+        [InlineData("test", false)]
+        [InlineData("dir/test", false)]
+        [InlineData("dir/..//test", false)]
+        [InlineData("dir\\..\\test", true)]
+        [InlineData("../test", true)]
+        [InlineData("..\\test", false)]
+        [InlineData("...\\.\\test", true)]
+        [InlineData("dir\\...\\.\\test", true)]
+        public async void Test_Path_Traversal_Check(string blobName, bool shouldBeThrowing)
+        {
+            async Task TestCode()
+            {
+                var container = GetRandomContainerName();
+                var data = GenerateRandomBlobStream();
+                await _provider.SaveBlobStreamAsync(container, blobName, data, BlobProperties.Empty, false);
+
+                var containingDirectory = Path.Combine(BasePath, container);
+                var realFullPath = Path.GetFullPath(Path.Combine(containingDirectory, blobName));
+
+                Assert.StartsWith(containingDirectory, realFullPath);
+                using (var file = File.OpenRead(Path.Combine(BasePath, container, blobName)))
+                {
+                    Assert.True(StreamEquals(data, file));
+                }
+            }
+            if (shouldBeThrowing)
+            {
+                await Assert.ThrowsAsync<StorageException>(TestCode);
+            }
+            else
+            {
+                await TestCode();
+            }
+        }
+        
     }
 }
