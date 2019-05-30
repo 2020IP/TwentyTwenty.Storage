@@ -194,18 +194,16 @@ namespace TwentyTwenty.Storage.Local
         public void SaveBlobStream(string containerName, string blobName, Stream source, 
             BlobProperties properties = null, bool closeStream = true)
         {
-            var regex = new Regex(@"([a-zA-Z0-9\s_\\.\-:])");
-            var match = regex.Match(blobName);
             var dir = Path.Combine(_basePath, containerName);
-
-            if (!match.Success || !Path.GetFullPath(Path.Combine(dir, blobName)).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+            var path = Path.Combine(dir, blobName);
+            
+            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
             }
             
             try
             {
-                var path = Path.Combine(dir, blobName);
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 using (var file = File.Create(path))
                 {
@@ -226,18 +224,16 @@ namespace TwentyTwenty.Storage.Local
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
             BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
-            var regex = new Regex(@"([a-zA-Z0-9\s_\\.\-:])");
-            var match = regex.Match(blobName);
             var dir = Path.Combine(_basePath, containerName);
+            var path = Path.Combine(dir, blobName);
 
-            if (!match.Success || !Path.GetFullPath(Path.Combine(dir, blobName)).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
             }
 
             try
             {
-                var path = Path.Combine(dir, blobName);
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 using (var file = File.Create(path))
                 {
