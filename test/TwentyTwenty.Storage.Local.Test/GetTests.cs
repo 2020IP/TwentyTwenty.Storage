@@ -86,9 +86,9 @@ namespace TwentyTwenty.Storage.Local.Test
         [InlineData("test", false)]
         [InlineData("dir/test", false)]
         [InlineData("dir/..//test", false)]
-        [InlineData("dir\\..\\test", true)]
+        [InlineData("dir\\..\\test", false)]
         [InlineData("../test", true)]
-        [InlineData("..\\test", false)]
+        [InlineData("..\\test", true)]
         [InlineData("...\\.\\test", true)]
         [InlineData("dir\\...\\.\\test", true)]
         public async void Test_Path_Traversal_Check(string blobName, bool shouldBeThrowing)
