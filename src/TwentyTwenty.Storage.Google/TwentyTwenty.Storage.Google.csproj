@@ -4,7 +4,7 @@
     <Description>TwentyTwenty.Storage.Google Class Library</Description>
     <VersionPrefix>$(SemVer)</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Google</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Google</PackageId>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Cloud.Storage.V1" Version="2.1.0" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="2.3.0" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@
     <AssemblyTitle>2020 Storage - Local Filesystem Provider</AssemblyTitle>
     <VersionPrefix>$(SemVer)</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Local</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Local</PackageId>
