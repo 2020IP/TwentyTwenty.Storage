@@ -410,7 +410,8 @@ namespace TwentyTwenty.Storage.Amazon
         private S3CannedACL GetCannedACL(BlobProperties properties)
             => properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
 
-        private static string GenerateKeyName(string containerName, string blobName) => $"{containerName}/{blobName}";
+        private static string GenerateKeyName(string containerName, string blobName) 
+            => string.IsNullOrWhiteSpace(containerName) ? blobName : $"{containerName}/{blobName}";
 
         private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
         {
