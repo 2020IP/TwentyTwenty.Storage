@@ -66,7 +66,7 @@ namespace TwentyTwenty.Storage.Amazon
         {
             var key = GenerateKeyName(containerName, blobName);
 
-            var objectDeleteRequest = new DeleteObjectRequest()
+            var objectDeleteRequest = new DeleteObjectRequest
             {
                 BucketName = _bucket,
                 Key = key
@@ -154,7 +154,7 @@ namespace TwentyTwenty.Storage.Amazon
                     var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
                     keys.AddRange(objectsResponse.S3Objects
-                        .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
+                        .Select(x => new KeyVersion { Key = x.Key, VersionId = null }));
 
                     // If response is truncated, set the marker to get the next set of keys.
                     if (objectsResponse.IsTruncated)
@@ -169,7 +169,7 @@ namespace TwentyTwenty.Storage.Amazon
 
                 if (keys.Count > 0)
                 {
-                    var objectsDeleteRequest = new DeleteObjectsRequest()
+                    var objectsDeleteRequest = new DeleteObjectsRequest
                     {
                         BucketName = _bucket,
                         Objects = keys
@@ -190,7 +190,7 @@ namespace TwentyTwenty.Storage.Amazon
 
             try
             {
-                var objectMetaRequest = new GetObjectMetadataRequest()
+                var objectMetaRequest = new GetObjectMetadataRequest
                 {
                     BucketName = _bucket,
                     Key = key
@@ -198,7 +198,7 @@ namespace TwentyTwenty.Storage.Amazon
 
                 var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-                var objectAclRequest = new GetACLRequest()
+                var objectAclRequest = new GetACLRequest
                 {
                     BucketName = _bucket,
                     Key = key
@@ -264,7 +264,7 @@ namespace TwentyTwenty.Storage.Amazon
                 headers.ContentType = contentType;
             }
 
-            var urlRequest = new GetPreSignedUrlRequest()
+            var urlRequest = new GetPreSignedUrlRequest
             {
                 BucketName = _bucket,
                 Key = GenerateKeyName(containerName, blobName),
@@ -307,7 +307,7 @@ namespace TwentyTwenty.Storage.Amazon
 
                     foreach (S3Object entry in objectsResponse.S3Objects)
                     {
-                        var objectMetaRequest = new GetObjectMetadataRequest()
+                        var objectMetaRequest = new GetObjectMetadataRequest
                         {
                             BucketName = _bucket,
                             Key = entry.Key
@@ -315,7 +315,7 @@ namespace TwentyTwenty.Storage.Amazon
 
                         var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-                        var objectAclRequest = new GetACLRequest()
+                        var objectAclRequest = new GetACLRequest
                         {
                             BucketName = _bucket,
                             Key = entry.Key
@@ -415,7 +415,7 @@ namespace TwentyTwenty.Storage.Amazon
 
         private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
         {
-            var updateRequest = new CopyObjectRequest()
+            var updateRequest = new CopyObjectRequest
             {
                 SourceBucket = _bucket,
                 SourceKey = GenerateKeyName(containerName, blobName),
@@ -460,7 +460,7 @@ namespace TwentyTwenty.Storage.Amazon
         private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, 
             BlobProperties properties, bool closeStream, long? length = null)
         {
-            var putRequest = new PutObjectRequest()
+            var putRequest = new PutObjectRequest
             {
                 BucketName = _bucket,
                 Key = GenerateKeyName(containerName, blobName),
