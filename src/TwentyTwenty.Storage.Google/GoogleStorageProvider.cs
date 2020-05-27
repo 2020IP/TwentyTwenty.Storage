@@ -19,6 +19,7 @@ using Google.Cloud.Storage.V1;
 using BlobObject = Google.Apis.Storage.v1.Data.Object;
 using Google.Apis.Storage.v1.Data;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -102,16 +103,22 @@ namespace TwentyTwenty.Storage.Google
 
             var headers = new Dictionary<string, IEnumerable<string>>();
 
+            ContentDispositionHeaderValue cdHeader;
+            if (isDownload)
+            {
+                cdHeader = new ContentDispositionHeaderValue("attachment");
+            }
+            else
+            {
+                cdHeader = new ContentDispositionHeaderValue("inline");
+            }
+
             if (!string.IsNullOrEmpty(fileName))
             {
-                var header = $"filename=\"{fileName}\"";
+                cdHeader.FileNameStar = fileName;
+            }
 
-                headers["Content-Disposition"] = new[] { isDownload ? "attachment; " + header : header };
-            }
-            else if (isDownload)
-            {
-                headers["Content-Disposition"] = new[] { "attachment;" };
-            }
+            headers["Content-Disposition"] = new [] { cdHeader.ToString() };
 
             if (!string.IsNullOrEmpty(contentType))
             {

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace TwentyTwenty.Storage.Azure
@@ -158,19 +159,30 @@ namespace TwentyTwenty.Storage.Azure
         }
 
         public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false, 
-            string filename = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
+            string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
             var blob = _blobClient.GetContainerReference(containerName)
                 .GetBlockBlobReference(blobName);
 
             var builder = new UriBuilder(blob.Uri);
             var headers = new SharedAccessBlobHeaders();
-            var hasFilename = !string.IsNullOrEmpty(filename);
 
-            if (hasFilename || isDownload)
+            ContentDispositionHeaderValue cdHeader;
+            if (isDownload)
             {
-                headers.ContentDisposition = "attachment" + (hasFilename ? "; filename=\"" + filename + "\"" : string.Empty);
+                cdHeader = new ContentDispositionHeaderValue("attachment");
             }
+            else
+            {
+                cdHeader = new ContentDispositionHeaderValue("inline");
+            }
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                cdHeader.FileNameStar = fileName;
+            }
+            
+            headers.ContentDisposition = cdHeader.ToString();
 
             if (!string.IsNullOrEmpty(contentType))
             {
