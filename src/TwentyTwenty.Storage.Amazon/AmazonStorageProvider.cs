@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Net;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
+using System.Net.Http.Headers;
 
 namespace TwentyTwenty.Storage.Amazon
 {
@@ -249,15 +250,22 @@ namespace TwentyTwenty.Storage.Amazon
         {
             var headers = new ResponseHeaderOverrides();
 
+            ContentDispositionHeaderValue cdHeader;
             if (isDownload)
             {
-                headers.ContentDisposition = "attachment;";
+                cdHeader = new ContentDispositionHeaderValue("attachment");
+            }
+            else
+            {
+                cdHeader = new ContentDispositionHeaderValue("inline");
             }
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                headers.ContentDisposition += "filename=\"" + fileName + "\"";
+                cdHeader.FileNameStar = fileName;
             }
+
+            headers.ContentDisposition = cdHeader.ToString();
 
             if (!string.IsNullOrEmpty(contentType))
             {
