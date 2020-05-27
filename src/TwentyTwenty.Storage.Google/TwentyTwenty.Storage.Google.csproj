@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Cloud.Storage.V1" Version="2.3.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
 </Project>
