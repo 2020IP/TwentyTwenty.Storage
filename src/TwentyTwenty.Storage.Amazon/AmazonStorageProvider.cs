@@ -108,16 +108,47 @@ namespace TwentyTwenty.Storage.Amazon
 
             try
             {
-                var request = new CopyObjectRequest
+                // Get the size of the object.
+                var metadataRequest = new GetObjectMetadataRequest
                 {
-                    SourceBucket = _bucket,
-                    SourceKey = sourceKey,
-                    DestinationBucket = _bucket,
-                    DestinationKey = destinationKey,
-                    ServerSideEncryptionMethod = _serverSideEncryptionMethod
+                    BucketName = _bucket,
+                    Key = sourceKey,
                 };
 
-                var response = await _s3Client.CopyObjectAsync(request);
+                AmazonWebServiceResponse response;
+                var metadataResponse = await _s3Client.GetObjectMetadataAsync(metadataRequest);
+
+                var objectSize = metadataResponse.ContentLength; // Length in bytes.
+                var limit = 5 * (long)Math.Pow(2, 30); // CopyObject size limit 5 GB.
+
+                if (objectSize >= limit)
+                {
+                    var request = new InitiateMultipartUploadRequest
+                    {
+                        BucketName = _bucket,
+                        Key = destinationKey,
+                        ContentType = metadataResponse.Headers.ContentType,
+                        // CannedACL = metadataResponse.Headers.. GetCannedACL(properties),
+                        ServerSideEncryptionMethod = metadataResponse.ServerSideEncryptionMethod,
+                    };
+                    request.Headers.ContentDisposition = metadataResponse.Headers.ContentDisposition;
+                    request.Metadata.AddMetadata(metadataResponse.Metadata.ToMetadata());
+                    
+                    response = await MultipartCopy(sourceKey, destinationKey, objectSize, request);
+                }
+                else
+                {
+                    var request = new CopyObjectRequest
+                    {
+                        SourceBucket = _bucket,
+                        SourceKey = sourceKey,
+                        DestinationBucket = _bucket,
+                        DestinationKey = destinationKey,
+                        ServerSideEncryptionMethod = _serverSideEncryptionMethod
+                    };
+
+                    response = await _s3Client.CopyObjectAsync(request);
+                }
 
                 if (response.HttpStatusCode != HttpStatusCode.OK)
                 {
@@ -403,11 +434,42 @@ namespace TwentyTwenty.Storage.Amazon
 
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
-            var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
-
+            var key = GenerateKeyName(containerName, blobName);
             try
             {
-                await _s3Client.CopyObjectAsync(updateRequest);
+                // Get the size of the object.
+                var metadataRequest = new GetObjectMetadataRequest
+                {
+                    BucketName = _bucket,
+                    Key = key,
+                };
+
+                var metadataResponse = await _s3Client.GetObjectMetadataAsync(metadataRequest);
+
+                var objectSize = metadataResponse.ContentLength; // Length in bytes.
+                var limit = 5 * (long)Math.Pow(2, 30); // CopyObject size limit 5 GB.
+
+                if (objectSize >= limit)
+                {
+                    var request = new InitiateMultipartUploadRequest
+                    {
+                        BucketName = _bucket,
+                        Key = key,
+                        ContentType = properties?.ContentType,
+                        CannedACL = GetCannedACL(properties),
+                        ServerSideEncryptionMethod = _serverSideEncryptionMethod
+                    };
+                    request.Headers.ContentDisposition = properties.ContentDisposition;
+                    request.Metadata.AddMetadata(properties?.Metadata);
+                    
+                    var completeUploadResponse = await MultipartCopy(key, key, objectSize, request);
+                }
+                else
+                {
+                    var updateRequest = CreateUpdateRequest(containerName, blobName, properties);
+                    await _s3Client.CopyObjectAsync(updateRequest);
+                }
+
             }
             catch (AmazonS3Exception asex)
             {
@@ -487,6 +549,48 @@ namespace TwentyTwenty.Storage.Amazon
             }
 
             return putRequest;
+        }
+
+        private async Task<CompleteMultipartUploadResponse> MultipartCopy(string sourceKey, string destinationKey, 
+            long objectSize, InitiateMultipartUploadRequest initiateRequest)
+        {
+            var copyResponses = new List<CopyPartResponse>();
+            var partSize = 5 * (long)Math.Pow(2, 20); // Part size is 5 MB.
+                    
+            // Initiate the upload.                    
+            var initResponse = await _s3Client.InitiateMultipartUploadAsync(initiateRequest);
+
+            long bytePosition = 0;
+            for (int i = 1; bytePosition < objectSize; i++)
+            {
+                var copyRequest = new CopyPartRequest
+                {
+                    DestinationBucket = _bucket,
+                    DestinationKey = destinationKey,
+                    SourceBucket = _bucket,
+                    SourceKey = sourceKey,
+                    UploadId = initResponse.UploadId,
+                    FirstByte = bytePosition,
+                    LastByte = bytePosition + partSize - 1 >= objectSize ? objectSize - 1 : bytePosition + partSize - 1,
+                    PartNumber = i,
+                };
+
+                copyResponses.Add(await _s3Client.CopyPartAsync(copyRequest));
+
+                bytePosition += partSize;
+            }
+
+            // Set up to complete the copy.
+            var completeRequest = new CompleteMultipartUploadRequest
+            {
+                BucketName = _bucket,
+                Key = destinationKey,
+                UploadId = initResponse.UploadId
+            };
+            completeRequest.AddPartETags(copyResponses);
+
+            // Complete the copy.
+            return await _s3Client.CompleteMultipartUploadAsync(completeRequest);
         }
     }
 }
