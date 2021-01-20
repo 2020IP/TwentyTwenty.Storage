@@ -38,7 +38,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             {
                 BucketName = Config["Bucket"],
                 Prefix = ContainerPrefix,
-                MaxKeys = 100000
+                MaxKeys = 1000
             };
 
             var keys = new List<KeyVersion>();
