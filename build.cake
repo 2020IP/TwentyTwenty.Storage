@@ -1,4 +1,4 @@
-#tool nuget:?package=GitVersion.CommandLine&version=3.6.5
+#tool nuget:?package=GitVersion.CommandLine&version=5.0.1
 #addin nuget:?package=Newtonsoft.Json&version=9.0.1
 
 GitVersion versionInfo = null;
