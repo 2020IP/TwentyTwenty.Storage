@@ -16,7 +16,6 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/2020IP/TwentyTwenty.Storage</RepositoryUrl>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.3' ">$(PackageTargetFallback);dnxcore50;portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

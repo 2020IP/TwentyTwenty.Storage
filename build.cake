@@ -1,5 +1,4 @@
-#tool nuget:?package=GitVersion.CommandLine&version=3.6.5
-#addin nuget:?package=Newtonsoft.Json&version=9.0.1
+#tool nuget:?package=GitVersion.CommandLine&version=5.0.1
 
 GitVersion versionInfo = null;
 var target = Argument("target", "Default");
@@ -10,37 +9,33 @@ Task("Clean")
     .Does(() => {
         if (DirectoryExists(outputDir))
         {
-            DeleteDirectory(outputDir, recursive:true);
+            DeleteDirectory(outputDir, new DeleteDirectorySettings { Recursive = true });
         }
         CreateDirectory(outputDir);
     });
 
 Task("Version")
+    .IsDependentOn("Clean")
     .Does(() => {
-        GitVersion(new GitVersionSettings{
-            UpdateAssemblyInfo = true,
-            OutputType = GitVersionOutput.BuildServer
-        });
-        versionInfo = GitVersion(new GitVersionSettings{ OutputType = GitVersionOutput.Json });
-        Information(Newtonsoft.Json.JsonConvert.SerializeObject(versionInfo, Newtonsoft.Json.Formatting.Indented));
-    });
-
-Task("Restore")
-    .IsDependentOn("Version")
-    .Does(() => {        
-        DotNetCoreRestore(new DotNetCoreRestoreSettings
+        GitVersion(new GitVersionSettings
         {
-            ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
-        });        
+            UpdateAssemblyInfo = true,
+            OutputType = GitVersionOutput.BuildServer,
+            NoFetch = true,
+        });
+
+        versionInfo = GitVersion(new GitVersionSettings
+        { 
+            OutputType = GitVersionOutput.Json,
+            NoFetch = true
+        });
     });
 
 Task("Build")
-    .IsDependentOn("Clean")
-    .IsDependentOn("Restore")
+    .IsDependentOn("Version")
     .Does(() => {
         DotNetCoreBuild(".", new DotNetCoreBuildSettings
         {
-            NoRestore = true,
             Configuration = configuration,
             ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
         });

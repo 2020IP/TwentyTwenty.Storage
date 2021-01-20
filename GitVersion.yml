@@ -1,8 +1,6 @@
-next-version: 2.2.0
+next-version: 0.1.0
 branches:
-  dev(elop)?(ment)?$:
+  develop:
     tag: ci
     prevent-increment-of-merged-branch-version: true
     track-merge-target: false
-ignore:
-  sha: []
