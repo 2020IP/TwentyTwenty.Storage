@@ -1,7 +1,7 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
-using System.IO;
+﻿using System.IO;
 using Xunit;
 using System.Collections.Generic;
+using Azure.Storage.Blobs.Models;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -16,12 +16,12 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var containerName = GetRandomContainerName();
 
-            Assert.False(await _client.GetContainerReference(containerName).ExistsAsync());
+            Assert.False(await _client.GetBlobContainerClient(containerName).ExistsAsync());
             
             var data = GenerateRandomBlobStream();
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream());
 
-            Assert.True(await _client.GetContainerReference(containerName).ExistsAsync());
+            Assert.True(await _client.GetBlobContainerClient(containerName).ExistsAsync());
         }
 
         [Fact]
@@ -29,20 +29,20 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var containerName = GetRandomContainerName();
 
-            Assert.False(await _client.GetContainerReference(containerName).ExistsAsync());
+            Assert.False(await _client.GetBlobContainerClient(containerName).ExistsAsync());
 
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream());
 
-            var container = _client.GetContainerReference(containerName);
+            var container = _client.GetBlobContainerClient(containerName);
             Assert.True(await container.ExistsAsync());
-            Assert.Equal(BlobContainerPublicAccessType.Off, (await container.GetPermissionsAsync()).PublicAccess);
+            Assert.Equal(PublicAccessType.None, (await container.GetAccessPolicyAsync()).Value.BlobPublicAccess);
 
             containerName = GetRandomContainerName();
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream(), new BlobProperties { Security = BlobSecurity.Private });
 
-            container = _client.GetContainerReference(containerName);
+            container = _client.GetBlobContainerClient(containerName);
             Assert.True(await container.ExistsAsync());
-            Assert.Equal(BlobContainerPublicAccessType.Off, (await container.GetPermissionsAsync()).PublicAccess);
+            Assert.Equal(PublicAccessType.None, (await container.GetAccessPolicyAsync()).Value.BlobPublicAccess);
         }
 
         [Fact]
@@ -50,13 +50,13 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var containerName = GetRandomContainerName();
 
-            Assert.False(await _client.GetContainerReference(containerName).ExistsAsync());
+            Assert.False(await _client.GetBlobContainerClient(containerName).ExistsAsync());
 
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream(), new BlobProperties { Security = BlobSecurity.Public });
 
-            var container = _client.GetContainerReference(containerName);
+            var container = _client.GetBlobContainerClient(containerName);
             Assert.True(await container.ExistsAsync());
-            Assert.Equal(BlobContainerPublicAccessType.Blob, (await container.GetPermissionsAsync()).PublicAccess);
+            Assert.Equal(PublicAccessType.Blob, (await container.GetAccessPolicyAsync()).Value.BlobPublicAccess);
         }
 
         [Fact]
@@ -68,9 +68,9 @@ namespace TwentyTwenty.Storage.Azure.Test
             var stream = new MemoryStream();
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, closeStream: false);
-            await _client.GetContainerReference(container)
-                .GetBlockBlobReference(blobName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(container)
+                .GetBlobClient(blobName)
+                .DownloadToAsync(stream);
             
             Assert.True(StreamEquals(data, stream));
         }
@@ -86,13 +86,13 @@ namespace TwentyTwenty.Storage.Azure.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, new BlobProperties { ContentType = contentType });
 
-            var blob = _client.GetContainerReference(container)
-                .GetBlockBlobReference(blobName);
+            var blob = _client.GetBlobContainerClient(container)
+                .GetBlobClient(blobName);
                 
-            await blob.FetchAttributesAsync();
+            var blobProperties = await blob.GetPropertiesAsync();
             
-            Assert.Equal(dataLength, blob.Properties.Length);
-            Assert.Equal(contentType, blob.Properties.ContentType);
+            Assert.Equal(dataLength, blobProperties.Value.ContentLength);
+            Assert.Equal(contentType, blobProperties.Value.ContentType);
         }
 
         [Fact]
@@ -107,13 +107,13 @@ namespace TwentyTwenty.Storage.Azure.Test
             
             await _provider.SaveBlobStreamAsync(container, blobName, data, prop);
 
-            var blob = _client.GetContainerReference(container)
-                .GetBlockBlobReference(blobName);
+            var blob = _client.GetBlobContainerClient(container)
+                .GetBlobClient(blobName);
 
-            await blob.FetchAttributesAsync();
+            var blobProperties = await blob.GetPropertiesAsync();
 
-            Assert.Equal(dataLength, blob.Properties.Length);
-            Assert.Equal($"attachment; filename=\"{filename}\"", blob.Properties.ContentDisposition);
+            Assert.Equal(dataLength, blobProperties.Value.ContentLength);
+            Assert.Equal($"attachment; filename=\"{filename}\"", blobProperties.Value.ContentDisposition);
         }
 
         [Fact]
@@ -132,10 +132,10 @@ namespace TwentyTwenty.Storage.Azure.Test
             await _provider.SaveBlobStreamAsync(container, blobName, data, 
                 new BlobProperties { Metadata = meta });
 
-            var b = _client.GetContainerReference(container).GetBlockBlobReference(blobName);
-            await b.FetchAttributesAsync();
-            
-            Assert.Equal(meta, b.Metadata);
+            var b = _client.GetBlobContainerClient(container).GetBlobClient(blobName);
+            var props = await b.GetPropertiesAsync();
+
+            Assert.Equal(meta, props.Value.Metadata);
         }
 
         [Fact]

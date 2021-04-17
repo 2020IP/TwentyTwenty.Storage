@@ -1,4 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿using Azure.Storage.Blobs;
 using System;
 using System.IO;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         protected AzureStorageProvider _provider;
         protected AzureStorageProvider _exceptionProvider;
         protected StorageFixture _fixture;
-        protected CloudBlobClient _client;
+        protected BlobServiceClient _client;
 
         public BlobTestBase(StorageFixture fixture)
         {
@@ -86,18 +86,18 @@ namespace TwentyTwenty.Storage.Azure.Test
             await method(_provider);
         }
 
-        protected async Task AssertBlobDescriptor(BlobDescriptor descriptor, CloudBlockBlob blobRef)
+        protected async Task AssertBlobDescriptor(BlobDescriptor descriptor, BlobClient blobRef)
         {
             Assert.NotNull(descriptor);
 
-            await blobRef.FetchAttributesAsync();
+            var blobProperties = await blobRef.GetPropertiesAsync();
 
-            Assert.Equal(blobRef.Container.Name, descriptor.Container);
-            Assert.Equal(blobRef.Properties.ContentMD5, descriptor.ContentMD5);
-            Assert.Equal(blobRef.Properties.ContentType, descriptor.ContentType);
+            Assert.Equal(blobRef.BlobContainerName, descriptor.Container);
+            Assert.Equal(blobProperties.Value.ContentHash.ToHex(), descriptor.ContentMD5);
+            Assert.Equal(blobProperties.Value.ContentType, descriptor.ContentType);
             Assert.NotEmpty(descriptor.ETag);
             Assert.NotNull(descriptor.LastModified);
-            Assert.Equal(blobRef.Properties.Length, descriptor.Length);
+            Assert.Equal(blobProperties.Value.ContentLength, descriptor.Length);
             Assert.Equal(blobRef.Name, descriptor.Name);
             Assert.Equal(BlobSecurity.Public, descriptor.Security);
         }

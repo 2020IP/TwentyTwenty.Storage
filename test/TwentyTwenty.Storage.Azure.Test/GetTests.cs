@@ -1,4 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿using Azure.Storage.Blobs.Models;
 using System.IO;
 using Xunit;
 
@@ -18,13 +18,15 @@ namespace TwentyTwenty.Storage.Azure.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream(256);
-            var containerRef = _client.GetContainerReference(container);
-            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var containerRef = _client.GetBlobContainerClient(container);
+            var blobRef = containerRef.GetBlobClient(blobName);
             var contentType = "image/png";
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-            blobRef.Properties.ContentType = contentType;
-            await blobRef.UploadFromStreamAsync(data);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
+            
+            await blobRef.UploadAsync(data, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders {
+                ContentType = contentType
+            }});
 
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
 
@@ -37,11 +39,11 @@ namespace TwentyTwenty.Storage.Azure.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
-            await containerRef.GetBlockBlobReference(blobName)
-                .UploadFromStreamAsync(data);
+            await containerRef.GetBlobClient(blobName)
+                .UploadAsync(data);
 
             using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
             {
@@ -56,24 +58,39 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var container = GetRandomContainerName();
 
-            var containerRef = _client.GetContainerReference(container);
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
+            var containerRef = _client.GetBlobContainerClient(container);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
 
-            var blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-            blobRef.Properties.ContentType = "image/png";
-            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+            var blobRef = containerRef.GetBlobClient(GenerateRandomName());
+            await blobRef.UploadAsync(GenerateRandomBlobStream(), new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "image/png"
+                }
+            });
 
-            blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-            blobRef.Properties.ContentType = "image/jpg";
-            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+            blobRef = containerRef.GetBlobClient(GenerateRandomName());
+            await blobRef.UploadAsync(GenerateRandomBlobStream(), new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "image/jpg"
+                }
+            });
 
-            blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-            blobRef.Properties.ContentType = "text/plain";
-            await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+            blobRef = containerRef.GetBlobClient(GenerateRandomName());
+            await blobRef.UploadAsync(GenerateRandomBlobStream(), new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "text/plain"
+                }
+            });
 
             foreach (var blob in await _provider.ListBlobsAsync(container))
             {
-                await AssertBlobDescriptor(blob, containerRef.GetBlockBlobReference(blob.Name));
+                await AssertBlobDescriptor(blob, containerRef.GetBlobClient(blob.Name));
             }
         }
 
@@ -84,13 +101,13 @@ namespace TwentyTwenty.Storage.Azure.Test
             var count = 150;
             var container = GetRandomContainerName();
 
-            var containerRef = _client.GetContainerReference(container);
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
+            var containerRef = _client.GetBlobContainerClient(container);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
 
             for (int i = 0; i < count; i++)
             {
-                var blobRef = containerRef.GetBlockBlobReference(GenerateRandomName());
-                await blobRef.UploadFromStreamAsync(GenerateRandomBlobStream());
+                var blobRef = containerRef.GetBlobClient(GenerateRandomName());
+                await blobRef.UploadAsync(GenerateRandomBlobStream());
             }
 
             var list = await _provider.ListBlobsAsync(container);
