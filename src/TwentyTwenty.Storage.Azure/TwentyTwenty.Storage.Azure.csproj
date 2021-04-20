@@ -1,29 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Description>A cross-cloud storage abstraction</Description>
-    <AssemblyTitle>2020 Storage - Azure Blob Storage Provider</AssemblyTitle>
-    <VersionPrefix>$(SemVer)</VersionPrefix>
-    <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
-    <AssemblyName>TwentyTwenty.Storage.Azure</AssemblyName>
-    <PackageId>TwentyTwenty.Storage.Azure</PackageId>
-    <PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
-    <PackageReleaseNotes>Version 2.0 drops support for the synchronous API and provides a better footing for adding new features.</PackageReleaseNotes>
-    <PackageIconUrl>https://avatars3.githubusercontent.com/u/15891935?v=3&amp;s=64</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/2020IP/TwentyTwenty.Storage</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/2020IP/TwentyTwenty.Storage</RepositoryUrl>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Description>A cross-cloud storage abstraction</Description>
+		<AssemblyTitle>2020 Storage - Azure Blob Storage Provider</AssemblyTitle>
+		<VersionPrefix>$(SemVer)</VersionPrefix>
+		<Authors>2020IP</Authors>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<AssemblyName>TwentyTwenty.Storage.Azure</AssemblyName>
+		<PackageId>TwentyTwenty.Storage.Azure</PackageId>
+		<PackageTags>storage blob file scalable cloud azure amazon store windows aws s3 local filesystem</PackageTags>
+		<PackageReleaseNotes>Version 2.0 drops support for the synchronous API and provides a better footing for adding new features.</PackageReleaseNotes>
+		<PackageIconUrl>https://avatars3.githubusercontent.com/u/15891935?v=3&amp;s=64</PackageIconUrl>
+		<PackageProjectUrl>https://github.com/2020IP/TwentyTwenty.Storage</PackageProjectUrl>
+		<PackageLicenseUrl>https://raw.githubusercontent.com/2020IP/TwentyTwenty.Storage/master/LICENSE.txt</PackageLicenseUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>git://github.com/2020IP/TwentyTwenty.Storage</RepositoryUrl>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../TwentyTwenty.Storage/TwentyTwenty.Storage.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="../TwentyTwenty.Storage/TwentyTwenty.Storage.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.8.1" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+	</ItemGroup>
 </Project>

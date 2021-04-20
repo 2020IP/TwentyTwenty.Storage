@@ -15,9 +15,9 @@ namespace TwentyTwenty.Storage.Azure.Test
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
             await containerRef.CreateAsync();
-            await containerRef.GetBlockBlobReference(blobName).UploadFromStreamAsync(data); // Why not create a file in there for good measure
+            await containerRef.GetBlobClient(blobName).UploadAsync(data); // Why not create a file in there for good measure
 
             await _provider.DeleteContainerAsync(container);
 
@@ -31,10 +31,10 @@ namespace TwentyTwenty.Storage.Azure.Test
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
 
-            var containerRef = _client.GetContainerReference(container);
-            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var containerRef = _client.GetBlobContainerClient(container);
+            var blobRef = containerRef.GetBlobClient(blobName);
             await containerRef.CreateAsync();
-            await blobRef.UploadFromStreamAsync(data);
+            await blobRef.UploadAsync(data);
 
             await _provider.DeleteBlobAsync(container, blobName);
 
