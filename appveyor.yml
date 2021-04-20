@@ -1,8 +1,7 @@
 version: '{build}'
-image: Visual Studio 2019
+image: Ubuntu
 configuration: Release
-build_script:
-- ps: ./Build.ps1
+build: script
 test: off
 deploy:
   - provider: NuGet
@@ -19,7 +18,9 @@ deploy:
     artifact: /.*\.nupkg/
     draft: true
     on:    
-      appveyor_repo_tag: true        # deploy on tag push only
+      appveyor_repo_tag: true
+build_script:
+  - ./build.sh
 environment:
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
