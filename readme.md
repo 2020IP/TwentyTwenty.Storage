@@ -3,8 +3,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/0ss5kpj5gy739vwx/branch/master?svg=true)](https://ci.appveyor.com/project/2020IP/twentytwenty-storage/branch/master)
 [![Nuget Version](https://img.shields.io/nuget/v/TwentyTwenty.Storage.svg)](https://www.nuget.org/packages/TwentyTwenty.Storage/)
 
-<!--TravisCI: [![Build Status](https://travis-ci.org/2020IP/TwentyTwenty.Storage.svg)](https://travis-ci.org/2020IP/TwentyTwenty.Storage)-->
-
 ## Overview
 
 20|20 Storage uses the least common denominator of functionality between the supported providers to build a cross-cloud storage solution.

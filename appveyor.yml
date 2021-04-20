@@ -1,13 +1,12 @@
 version: '{build}'
-image: Visual Studio 2019
+image: Ubuntu
 configuration: Release
-build_script:
-- ps: ./Build.ps1
+build: script
 test: off
 deploy:
   - provider: NuGet
     api_key:
-      secure: 6LqavZsVwaAsuw6SK7XKQRuMzqb9pedzqVK7AI0+j3w51bN1FOu7Fi2l2Fj6bmu/
+      secure: zbVLdtBTLzHDiLO1T4O9r6Jj0XthVKRtK1B0EtqWhDpaoF3Iv3smoGB0k0PW1TRB
     artifact: /.*\.nupkg/
     on:
       appveyor_repo_tag: true
@@ -19,7 +18,9 @@ deploy:
     artifact: /.*\.nupkg/
     draft: true
     on:    
-      appveyor_repo_tag: true        # deploy on tag push only
+      appveyor_repo_tag: true
+build_script:
+  - ./build.sh
 environment:
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
@@ -32,4 +33,4 @@ environment:
   Bucket:
     secure: fRpLLhsG0i4uDTlsToxZdE+1lOaQkUWjjCHF6fUZVwk=
   ConnectionString:
-    secure: I1jJEwh9J372gesfYOasmqmi4LqVjDEFD3+n1Yh4+UVEKSQgTRvoBvvHFwJRLggTCDOAyKEV6w13AEam6Of+/CdIhzcA0jGuIQf0aIBZtzXxKS+efCKbPDSaCLHrGIVGFaSrH3QWTuLwVEb+zdKUYBx2mvA28vU3HIMssUmaaCedBEyJ8Kwa6gwauWgmxwMhwFNhMPwLJDInQ3vOiBatvyt3GFDPkOgP1tqgXtYVb6E=
+    secure: I1jJEwh9J372gesfYOasmqmi4LqVjDEFD3+n1Yh4+UUEye/dnpWKBn2pVhCFN+3CsUmDVuHQZ2X3RhzhOo9WS7vwLVSm64z+yBsbux4lekgCD0FoiBT95dTTmeQbQgwXKG73yEzUV3KvXRMKuylBYOvn5w/nlrT/JzZ1ywozRvMQ0poe/zXmmeYYORn4cIasJ8dNhlfyakfhO4kJBwicPzEost9bnWSBdEIc2EgdBEGbNy5UcyC1wsfSgJnoya36

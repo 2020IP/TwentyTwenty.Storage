@@ -28,11 +28,11 @@ namespace TwentyTwenty.Storage.Azure.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
-            await containerRef.GetBlockBlobReference(blobName)
-                .UploadFromStreamAsync(data);
+            await containerRef.GetBlobClient(blobName)
+                .UploadAsync(data);
 
             await TestProviderAuthAsync(provider => provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties()));
         }
@@ -49,11 +49,11 @@ namespace TwentyTwenty.Storage.Azure.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
-            await containerRef.GetBlockBlobReference(blobName)
-                .UploadFromStreamAsync(data);
+            await containerRef.GetBlobClient(blobName)
+                .UploadAsync(data);
 
             await TestProviderAuthAsync(provider => provider.GetBlobStreamAsync(container, blobName));
         }
@@ -64,11 +64,11 @@ namespace TwentyTwenty.Storage.Azure.Test
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
-            await containerRef.GetBlockBlobReference(blobName)
-                .UploadFromStreamAsync(data);
+            await containerRef.GetBlobClient(blobName)
+                .UploadAsync(data);
 
             await TestProviderAuthAsync(provider => provider.GetBlobDescriptorAsync(container, blobName));
         }
@@ -77,7 +77,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public async void Test_Exception_ListBlobAsync_Auth()
         {
             var container = GetRandomContainerName();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
 
@@ -95,7 +95,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public async void Test_Exception_GetBlobStreamAsync_BlobName()
         {
             var container = GetRandomContainerName();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
 
@@ -107,7 +107,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public async void Test_Exception_GetBlobDescriptorAsync_BlobName()
         {
             var container = GetRandomContainerName();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
 
@@ -119,7 +119,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         public async void Test_Exception_UpdateBlobPropertiesAsync_BlobName()
         {
             var container = GetRandomContainerName();
-            var containerRef = _client.GetContainerReference(container);
+            var containerRef = _client.GetBlobContainerClient(container);
 
             await containerRef.CreateAsync();
 

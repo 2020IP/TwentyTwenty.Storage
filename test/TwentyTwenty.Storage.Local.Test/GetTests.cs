@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -88,9 +87,9 @@ namespace TwentyTwenty.Storage.Local.Test
         [InlineData("dir/..//test", false)]
         [InlineData("dir\\..\\test", false)]
         [InlineData("../test", true)]
-        [InlineData("..\\test", true)]
-        [InlineData("...\\.\\test", true)]
-        [InlineData("dir\\...\\.\\test", true)]
+        [InlineData("..\\test", false)]
+        [InlineData("...\\.\\test", false)]
+        [InlineData("dir\\...\\.\\test", false)]
         public async void Test_Path_Traversal_Check(string blobName, bool shouldBeThrowing)
         {
             async Task TestCode()

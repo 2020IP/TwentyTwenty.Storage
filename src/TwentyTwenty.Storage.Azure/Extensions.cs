@@ -1,42 +1,39 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿using Azure;
+using Azure.Storage.Sas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using AzureStorageException = Microsoft.WindowsAzure.Storage.StorageException;
 
 namespace TwentyTwenty.Storage.Azure
 {
     public static class Extensions
     {
-        public static SharedAccessBlobPermissions ToPermissions(this BlobUrlAccess security)
+        public static BlobSasPermissions? ToPermissions(this BlobUrlAccess security)
         {
             switch (security)
             {
                 case BlobUrlAccess.Read:
-                    return SharedAccessBlobPermissions.Read;
+                    return BlobSasPermissions.Read;
                 case BlobUrlAccess.Write:
-                    return SharedAccessBlobPermissions.Create | SharedAccessBlobPermissions.Write;
+                    return BlobSasPermissions.Read | BlobSasPermissions.Write;
                 case BlobUrlAccess.Delete:
-                    return SharedAccessBlobPermissions.Delete;
+                    return BlobSasPermissions.Delete;
                 case BlobUrlAccess.All:
-                    return SharedAccessBlobPermissions.Create | SharedAccessBlobPermissions.Delete | SharedAccessBlobPermissions.Read | SharedAccessBlobPermissions.Write;
-                default:
-                    return SharedAccessBlobPermissions.None;
+                    return BlobSasPermissions.All;
             }
+            return null;
         }
 
         public static Exception Convert(this Exception e)
         {
-            var storageException = (e as AzureStorageException) ?? e.InnerException as AzureStorageException;
+            var storageException = (e as RequestFailedException) ?? e.InnerException as RequestFailedException;
 
             if (storageException != null)
             {
                 StorageErrorCode errorCode;
 
-                switch ((HttpStatusCode)storageException.RequestInformation.HttpStatusCode)
+                switch ((HttpStatusCode)storageException.Status)
                 {
                     case HttpStatusCode.Forbidden:
                         errorCode = StorageErrorCode.InvalidCredentials;
@@ -56,7 +53,7 @@ namespace TwentyTwenty.Storage.Azure
 
         public static bool IsAzureStorageException(this Exception e)
         {
-            return e is AzureStorageException || e.InnerException is AzureStorageException;
+            return e is RequestFailedException || e.InnerException is RequestFailedException;
         }
 
         public static void SetMetadata(this IDictionary<string, string> azureMeta, IDictionary<string, string> meta)
@@ -71,5 +68,7 @@ namespace TwentyTwenty.Storage.Azure
                 }
             }
         }
+
+        public static string ToHex(this byte[] value) => string.Join(string.Empty, value.Select(x => x.ToString("X2")));
     }
 }

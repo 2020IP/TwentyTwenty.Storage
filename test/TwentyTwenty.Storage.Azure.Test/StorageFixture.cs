@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,8 +10,7 @@ namespace TwentyTwenty.Storage.Azure.Test
     public class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
-        public CloudStorageAccount _account;
-        public CloudBlobClient _client;
+        public BlobServiceClient _client;
         
         public StorageFixture()
         {   
@@ -21,26 +20,19 @@ namespace TwentyTwenty.Storage.Azure.Test
                 .AddUserSecrets<StorageFixture>()
                 .Build();
             
-            _client = CloudStorageAccount.Parse(Config["ConnectionString"]).CreateCloudBlobClient();
+            _client = new BlobServiceClient(Config["ConnectionString"]);
         }
 
         public IConfiguration Config { get; private set; }
 
         public void Dispose()
         {
-            var list = new List<CloudBlobContainer>();
-            BlobContinuationToken token = null;
-
-            do
-            {
-                var results = _client.ListContainersSegmentedAsync(ContainerPrefix, token).Result;
-                list.AddRange(results.Results);
-            }
-            while (token != null);
+            var list = new List<BlobContainerItem>();
+            list.AddRange(_client.GetBlobContainers());
 
             foreach (var container in list)
             {
-                container.DeleteAsync().Wait();
+                _client.DeleteBlobContainer(container.Name);
             }
         }
     }

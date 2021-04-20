@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Amazon.S3;
+﻿using Amazon.S3;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test

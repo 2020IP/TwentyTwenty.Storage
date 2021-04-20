@@ -1,36 +1,44 @@
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using System.IO;
+using Azure.Storage.Sas;
+using Azure.Storage;
 
 namespace TwentyTwenty.Storage.Azure
 {
     public sealed class AzureStorageProvider : IStorageProvider
     {
-        private readonly CloudBlobClient _blobClient;
-        private readonly BlobRequestOptions _requestOptions;
-        private readonly OperationContext _context;
-
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly IDictionary<string, string> _settings;
         public AzureStorageProvider(AzureProviderOptions options)
         {
-            _blobClient = CloudStorageAccount
-                .Parse(options.ConnectionString)
-                .CreateCloudBlobClient(); ;
-            _requestOptions = new BlobRequestOptions();
-            _context = new OperationContext();
-        }
+            _blobServiceClient = new BlobServiceClient(options.ConnectionString);
+
+            _settings = new Dictionary<string, string>();
+
+            if (!string.IsNullOrEmpty(options.ConnectionString))
+            {
+                var splitted = options.ConnectionString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var nameValue in splitted)
+                {
+                    var splittedNameValue = nameValue.Split(new char[] { '=' }, 2);
+                    _settings.Add(splittedNameValue[0], splittedNameValue[1]);
+                }
+            }
+        }        
 
         public async Task DeleteBlobAsync(string containerName, string blobName)
         {
             try
             {
-                await _blobClient.GetContainerReference(containerName)
-                    .GetBlobReference(blobName)
-                    .DeleteIfExistsAsync(DeleteSnapshotsOption.None, null, _requestOptions, _context)
+                await _blobServiceClient.GetBlobContainerClient(containerName)
+                    .GetBlobClient(blobName)
+                    .DeleteIfExistsAsync()
                     .ConfigureAwait(false);
             }
             catch (Exception e)
@@ -47,10 +55,11 @@ namespace TwentyTwenty.Storage.Azure
         {
             try
             {
-                await _blobClient.GetContainerReference(containerName)
-                    .DeleteIfExistsAsync(null, _requestOptions, _context);
+                await _blobServiceClient.GetBlobContainerClient(containerName)
+                    .DeleteIfExistsAsync()
+                    .ConfigureAwait(false);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 if (e.IsAzureStorageException())
                 {
@@ -63,31 +72,28 @@ namespace TwentyTwenty.Storage.Azure
         public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName, string destinationContainerName,
             string destinationBlobName = null)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            var sourceContainer = _blobClient.GetContainerReference(sourceContainerName);
-            var sourceBlob = sourceContainer.GetBlockBlobReference(sourceBlobName);
+            var sourceContainer = _blobServiceClient.GetBlobContainerClient(sourceContainerName);
+            var sourceBlob = sourceContainer.GetBlobClient(sourceBlobName);
 
-            var destContainer = _blobClient.GetContainerReference(destinationContainerName);
+            var destContainer = _blobServiceClient.GetBlobContainerClient(destinationContainerName);
 
-            if(!await destContainer.ExistsAsync().ConfigureAwait(false))
+            if (!await destContainer.ExistsAsync().ConfigureAwait(false))
             {
-                await destContainer.CreateIfNotExistsAsync(sourceContainer.Properties.PublicAccess ?? 
-                BlobContainerPublicAccessType.Off, _requestOptions, _context).ConfigureAwait(false);
+                var sourceProps = await sourceContainer.GetPropertiesAsync().ConfigureAwait(false);
+
+                await destContainer.CreateIfNotExistsAsync(publicAccessType: sourceProps.Value.PublicAccess ?? PublicAccessType.None, metadata: sourceProps.Value.Metadata).ConfigureAwait(false);
             }
 
-            var destBlob = destContainer.GetBlockBlobReference(destinationBlobName ?? sourceBlobName);
+            var destBlob = destContainer.GetBlobClient(destinationBlobName ?? sourceBlobName);
 
-            await destBlob.StartCopyAsync(sourceBlob).ConfigureAwait(false);
-            
-            while (destBlob.CopyState.Status == CopyStatus.Pending)
-            {
-                await Task.Delay(500).ConfigureAwait(false);
-                await destBlob.FetchAttributesAsync().ConfigureAwait(false);
-            }
+            var operation = await destBlob.StartCopyFromUriAsync(sourceBlob.Uri).ConfigureAwait(false);
 
-            if (destBlob.CopyState.Status != CopyStatus.Success)
+            await operation.WaitForCompletionAsync().ConfigureAwait(false);
+
+            var destProps = await destBlob.GetPropertiesAsync();
+            if (destProps.Value.CopyStatus != CopyStatus.Success)
             {
-                throw new Exception("Copy failed: " +    destBlob.CopyState.Status);
+                throw new Exception("Copy failed: " + destProps.Value.CopyStatus + ", " + destProps.Value.CopyStatusDescription);
             }
         }
 
@@ -100,26 +106,25 @@ namespace TwentyTwenty.Storage.Azure
 
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
         {
-            var container = _blobClient.GetContainerReference(containerName);
-            var blob = container.GetBlockBlobReference(blobName);
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blob = container.GetBlobClient(blobName);
 
             try
             {
-                await blob.FetchAttributesAsync(null, _requestOptions, _context).ConfigureAwait(false);
-                var props = blob.Properties;
-                var perm = (await container.GetPermissionsAsync(null, _requestOptions, _context).ConfigureAwait(false)).PublicAccess;
+                var blobProps = await blob.GetPropertiesAsync().ConfigureAwait(false);
+                var accessPolicy = await container.GetAccessPolicyAsync().ConfigureAwait(false);
 
                 return new BlobDescriptor
                 {
                     Name = blob.Name,
                     Container = containerName,
                     Url = blob.Uri.ToString(),
-                    Security = perm == BlobContainerPublicAccessType.Off ? BlobSecurity.Private : BlobSecurity.Public,
-                    ContentType = props.ContentType,
-                    ContentMD5 = props.ContentMD5,
-                    ETag = props.ETag,
-                    LastModified = props.LastModified,
-                    Length = props.Length,
+                    Security = accessPolicy.Value.BlobPublicAccess == PublicAccessType.None ? BlobSecurity.Private : BlobSecurity.Public,
+                    ContentType = blobProps.Value.ContentType,
+                    ContentMD5 = string.Join(string.Empty, blobProps.Value.ContentHash.Select(x => x.ToString("X2"))),
+                    ETag = blobProps.Value.ETag.ToString(),
+                    LastModified = blobProps.Value.LastModified,
+                    Length = blobProps.Value.ContentLength,
                 };
             }
             catch (Exception e)
@@ -134,12 +139,12 @@ namespace TwentyTwenty.Storage.Azure
 
         public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
         {
-            var blob = _blobClient.GetContainerReference(containerName)
-                .GetBlobReference(blobName);
+            var blob = _blobServiceClient.GetBlobContainerClient(containerName)
+                .GetBlobClient(blobName);
 
             try
             {
-                return await blob.OpenReadAsync(null, _requestOptions, _context).ConfigureAwait(false);
+                return await blob.OpenReadAsync().ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -153,87 +158,87 @@ namespace TwentyTwenty.Storage.Azure
 
         public string GetBlobUrl(string containerName, string blobName)
         {
-            return _blobClient.GetContainerReference(containerName)
-                .GetBlockBlobReference(blobName)
+            return _blobServiceClient.GetBlobContainerClient(containerName)
+                .GetBlobClient(blobName)
                 .Uri.ToString();
         }
 
-        public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false, 
+        public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, bool isDownload = false,
             string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
-            var blob = _blobClient.GetContainerReference(containerName)
-                .GetBlockBlobReference(blobName);
+            var blob = _blobServiceClient.GetBlobContainerClient(containerName)
+                .GetBlobClient(blobName);
 
-            var builder = new UriBuilder(blob.Uri);
-            var headers = new SharedAccessBlobHeaders();
+            var builder = new BlobSasBuilder
+            {
+                BlobContainerName = containerName,
+                BlobName = blobName,
+                Resource = "b",
+                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+                ExpiresOn = expiry
+            };
 
-            ContentDispositionHeaderValue cdHeader;
+            var p = access.ToPermissions();
+            if (p != null)
+            {
+                builder.SetPermissions(p.Value);
+            }
+
             if (isDownload)
             {
-                cdHeader = new ContentDispositionHeaderValue("attachment");
+                builder.ContentDisposition = "attachment";
             }
             else
             {
-                cdHeader = new ContentDispositionHeaderValue("inline");
+                builder.ContentDisposition = "inline";
             }
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                cdHeader.FileNameStar = fileName;
+                builder.ContentDisposition += ";filename=" + fileName;
             }
-            
-            headers.ContentDisposition = cdHeader.ToString();
 
             if (!string.IsNullOrEmpty(contentType))
             {
-                headers.ContentType = contentType;
+                builder.ContentType = contentType;
             }
 
-            builder.Query = blob.GetSharedAccessSignature(new SharedAccessBlobPolicy
-            {
-                Permissions = access.ToPermissions(),
-                SharedAccessStartTime = DateTimeOffset.UtcNow.AddMinutes(-5),
-                SharedAccessExpiryTime = expiry,
-            }, headers).TrimStart('?');
+            var query = builder.ToSasQueryParameters(new StorageSharedKeyCredential(_settings["AccountName"], _settings["AccountKey"]));
 
-            return builder.Uri.ToString();
+            var uriBuilder = new UriBuilder(blob.Uri);
+            uriBuilder.Query = query.ToString().TrimStart('?');
+
+            return uriBuilder.Uri.ToString();
         }
 
         public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
             var list = new List<BlobDescriptor>();
-            var container = _blobClient.GetContainerReference(containerName);
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
             var security = BlobSecurity.Public;
-
-            BlobContinuationToken token = null;
 
             try
             {
-                do
-                {
-                    var results = await container
-                        .ListBlobsSegmentedAsync(null, true, BlobListingDetails.Metadata, 100, token, _requestOptions, _context)
-                        .ConfigureAwait(false);
-                    
-                    token = results.ContinuationToken;
+                var result = container.GetBlobsAsync();
+                var iterator = result.GetAsyncEnumerator();
 
-                    list.AddRange(results.Results.OfType<CloudBlockBlob>().Select(blob =>
+                while (await iterator.MoveNextAsync().ConfigureAwait(false))
+                {
+                    var blob = iterator.Current;
+
+                    list.Add(new BlobDescriptor
                     {
-                        return new BlobDescriptor
-                        {
-                            Name = blob.Name,
-                            Container = containerName,
-                            Url = blob.Uri.ToString(),
-                            ContentType = blob.Properties.ContentType,
-                            ContentMD5 = blob.Properties.ContentMD5,
-                            ETag = blob.Properties.ETag,
-                            Length = blob.Properties.Length,
-                            LastModified = blob.Properties.LastModified,
-                            Security = security,
-                        };
-                    }));
+                        Name = blob.Name,
+                        Container = containerName,
+                        Url = container.Uri.AbsoluteUri.ToString().TrimEnd('/') + "/" + blob.Name,
+                        ContentType = blob.Properties.ContentType,
+                        ContentMD5 = string.Join(string.Empty, blob.Properties.ContentHash.Select(x => x.ToString("X2"))),
+                        ETag = blob.Properties.ETag.ToString(),
+                        Length = blob.Properties.ContentLength ?? default,
+                        LastModified = blob.Properties.LastModified,
+                        Security = security,
+                    });
                 }
-                while (token != null);
             }
             catch (Exception e)
             {
@@ -247,47 +252,38 @@ namespace TwentyTwenty.Storage.Azure
             return list;
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source,
             BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
-            var container = _blobClient.GetContainerReference(containerName);
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
             var props = properties ?? BlobProperties.Empty;
-            var security = props.Security == BlobSecurity.Public ? BlobContainerPublicAccessType.Blob : BlobContainerPublicAccessType.Off;
+            var security = props.Security == BlobSecurity.Public ? PublicAccessType.Blob : PublicAccessType.None;
 
             try
             {
-                var created = false;
-                
-                if(!await container.ExistsAsync().ConfigureAwait(false))
+                var info = await container.CreateIfNotExistsAsync(publicAccessType: security).ConfigureAwait(false);
+                var created = info != null;
+
+                var blob = container.GetBlobClient(blobName);
+
+                await blob.UploadAsync(source, new BlobUploadOptions
                 {
-                    created = await container.CreateIfNotExistsAsync(security, _requestOptions, _context).ConfigureAwait(false);
-                }
-
-                var blob = container.GetBlockBlobReference(blobName);
-                blob.Properties.ContentType = props.ContentType;                
-                blob.Properties.ContentDisposition = props.ContentDisposition;                
-
-                if (props.Metadata != null)
-                {
-                    blob.Metadata.SetMetadata(props.Metadata);
-                }
-
-                await blob.UploadFromStreamAsync(source, null, _requestOptions, _context).ConfigureAwait(false);
-
-                // Hack to deal with issue https://github.com/Azure/azure-storage-net/issues/353
-                if (!string.IsNullOrEmpty(props.ContentDisposition))
-                {
-                    await blob.SetPropertiesAsync(null, _requestOptions, _context);
-                }
+                    HttpHeaders = new BlobHttpHeaders
+                    {
+                        ContentType = props.ContentType,
+                        ContentDisposition = props.ContentDisposition
+                    },
+                    Metadata = props.Metadata
+                }).ConfigureAwait(false);
 
                 // Check if container permission elevation is necessary
                 if (!created)
                 {
-                    var perms = await container.GetPermissionsAsync(null, _requestOptions, _context).ConfigureAwait(false);
+                    var accessPolicy = await container.GetAccessPolicyAsync().ConfigureAwait(false);
 
-                    if (properties != null && properties.Security == BlobSecurity.Public && perms.PublicAccess == BlobContainerPublicAccessType.Off)
+                    if (properties != null && properties.Security == BlobSecurity.Public && accessPolicy.Value.BlobPublicAccess == PublicAccessType.None)
                     {
-                        await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = security }, null, _requestOptions, _context).ConfigureAwait(false);
+                        await container.SetAccessPolicyAsync(security).ConfigureAwait(false);
                     }
                 }
             }
@@ -303,36 +299,37 @@ namespace TwentyTwenty.Storage.Azure
             {
                 if (closeStream)
                 {
-                    source.Dispose();                    
+                    source.Dispose();
                 }
             }
         }
 
         public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
-            var container = _blobClient.GetContainerReference(containerName);
-            var blob = container.GetBlockBlobReference(blobName);
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blob = container.GetBlobClient(blobName);
 
             try
             {
-                await blob.FetchAttributesAsync(null, _requestOptions, _context).ConfigureAwait(false);
-                blob.Properties.ContentType = properties.ContentType;
-                blob.Properties.ContentDisposition = properties.ContentDisposition;
+                var props = await blob.GetPropertiesAsync().ConfigureAwait(false);
 
-                await blob.SetPropertiesAsync(null, _requestOptions, _context).ConfigureAwait(false);
+                await blob.SetHttpHeadersAsync(new BlobHttpHeaders
+                {
+                    ContentType = properties.ContentType,
+                    ContentDisposition = properties.ContentDisposition
+                }).ConfigureAwait(false);
 
                 if (properties.Metadata != null)
                 {
-                    blob.Metadata.SetMetadata(properties.Metadata);
-                    await blob.SetMetadataAsync();
+                    await blob.SetMetadataAsync(properties.Metadata).ConfigureAwait(false);
                 }
-                
-                var perms = await container.GetPermissionsAsync(null, _requestOptions, _context).ConfigureAwait(false);
+
+                var accessPolicy = await container.GetAccessPolicyAsync().ConfigureAwait(false);
 
                 // Elevate container permissions if necessary.
-                if (properties.Security == BlobSecurity.Public && perms.PublicAccess == BlobContainerPublicAccessType.Off)
+                if (properties.Security == BlobSecurity.Public && accessPolicy.Value.BlobPublicAccess == PublicAccessType.None)
                 {
-                    await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob }, null, _requestOptions, _context).ConfigureAwait(false);
+                    await container.SetAccessPolicyAsync(PublicAccessType.Blob).ConfigureAwait(false);
                 }
             }
             catch (Exception e)

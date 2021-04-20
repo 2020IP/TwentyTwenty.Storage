@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Microsoft.WindowsAzure.Storage.Blob;
+﻿using Azure.Storage.Blobs.Models;
+using System.Collections.Generic;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Azure.Test
@@ -14,14 +14,14 @@ namespace TwentyTwenty.Storage.Azure.Test
         public async void Test_Container_Permissions_Elevated_On_Save_Async()
         {
             var containerName = GetRandomContainerName();
-            var containerRef = _client.GetContainerReference(containerName);
+            var containerRef = _client.GetBlobContainerClient(containerName);
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Off, null, null);
+            await containerRef.CreateAsync(PublicAccessType.None, null, null);
 
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream(), new BlobProperties { Security = BlobSecurity.Public });
             
             Assert.True(await containerRef.ExistsAsync());
-            Assert.Equal(BlobContainerPublicAccessType.Blob, (await containerRef.GetPermissionsAsync()).PublicAccess);
+            Assert.Equal(PublicAccessType.Blob, (await containerRef.GetPropertiesAsync()).Value.PublicAccess);
         }
 
         [Fact]
@@ -29,16 +29,16 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var containerName = GetRandomContainerName();
             var blobName = GenerateRandomName();
-            var containerRef = _client.GetContainerReference(containerName);
-            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var containerRef = _client.GetBlobContainerClient(containerName);
+            var blobRef = containerRef.GetBlobClient(blobName);
             var data = GenerateRandomBlobStream();
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Off, null, null);
+            await containerRef.CreateAsync(PublicAccessType.None, null, null);
 
-            await blobRef.UploadFromStreamAsync(data);
+            await blobRef.UploadAsync(data);
             await _provider.UpdateBlobPropertiesAsync(containerName, blobName, new BlobProperties { Security = BlobSecurity.Public });
 
-            Assert.Equal(BlobContainerPublicAccessType.Blob, (await containerRef.GetPermissionsAsync()).PublicAccess);
+            Assert.Equal(PublicAccessType.Blob, (await containerRef.GetPropertiesAsync()).Value.PublicAccess);
         }
 
         [Fact]
@@ -50,23 +50,28 @@ namespace TwentyTwenty.Storage.Azure.Test
             var contentDisposition = "attachment; filename=\"muhFile.jpg\"";
             var data = GenerateRandomBlobStream();
 
-            var containerRef = _client.GetContainerReference(container);
-            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var containerRef = _client.GetBlobContainerClient(container);
+            var blobRef = containerRef.GetBlobClient(blobName);
 
             await containerRef.CreateAsync();
-            blobRef.Properties.ContentType = "image/png";
 
-            await blobRef.UploadFromStreamAsync(data);
+            await blobRef.UploadAsync(data, new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "image/png"
+                }
+            });
             await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties 
             { 
                 ContentType = contentType,
                 ContentDisposition = contentDisposition,
             });
             
-            await blobRef.FetchAttributesAsync();
+            var blobProperties = await blobRef.GetPropertiesAsync();
             
-            Assert.Equal(contentType, blobRef.Properties.ContentType);
-            Assert.Equal(contentDisposition, blobRef.Properties.ContentDisposition);
+            Assert.Equal(contentType, blobProperties.Value.ContentType);
+            Assert.Equal(contentDisposition, blobProperties.Value.ContentDisposition);
         }
 
         [Fact]
@@ -81,17 +86,15 @@ namespace TwentyTwenty.Storage.Azure.Test
                 { "key2", "val2" },
             };
 
-            var containerRef = _client.GetContainerReference(container);
-            var blobRef = containerRef.GetBlockBlobReference(blobName);
+            var containerRef = _client.GetBlobContainerClient(container);
+            var blobRef = containerRef.GetBlobClient(blobName);
 
             await containerRef.CreateAsync();
 
-            foreach (var kvp in meta)
-            {            
-                blobRef.Metadata.Add(kvp.Key, kvp.Value);
-            }
-
-            await blobRef.UploadFromStreamAsync(data);
+            await blobRef.UploadAsync(data, new BlobUploadOptions
+            {
+                Metadata = meta
+            });
 
             meta = new Dictionary<string, string>
             {
@@ -104,9 +107,9 @@ namespace TwentyTwenty.Storage.Azure.Test
                 Metadata = meta,
             });
             
-            await blobRef.FetchAttributesAsync();
+            var blobProperties = await blobRef.GetPropertiesAsync();
             
-            Assert.Equal(meta, blobRef.Metadata);
+            Assert.Equal(meta, blobProperties.Value.Metadata);
         }
     }
 }

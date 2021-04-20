@@ -1,7 +1,7 @@
-using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
 using Xunit;
 using System.Collections.Generic;
+using Azure.Storage.Blobs.Models;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -16,21 +16,21 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
-            var containerRef = _client.GetContainerReference(sourceContainer);
-            var blobRef = containerRef.GetBlockBlobReference(sourceName);
+            var containerRef = _client.GetBlobContainerClient(sourceContainer);
+            var blobRef = containerRef.GetBlobClient(sourceName);
             var destContainer = GetRandomContainerName();
             var data = GenerateRandomBlobStream();
             var stream = new MemoryStream();
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-            await blobRef.UploadFromStreamAsync(data);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
+            await blobRef.UploadAsync(data);
 
             await _provider.MoveBlobAsync(sourceContainer, sourceName, destContainer);
 
             // Make sure destination now exists and contains original data.
-            await _client.GetContainerReference(destContainer)
-                .GetBlockBlobReference(sourceName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(destContainer)
+                .GetBlobClient(sourceName)
+                .DownloadToAsync(stream);
             
             Assert.True(StreamEquals(data, stream));
 
@@ -43,22 +43,22 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
-            var containerRef = _client.GetContainerReference(sourceContainer);
-            var blobRef = containerRef.GetBlockBlobReference(sourceName);
+            var containerRef = _client.GetBlobContainerClient(sourceContainer);
+            var blobRef = containerRef.GetBlobClient(sourceName);
             var destContainer = GetRandomContainerName();
             var destName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
             var stream = new MemoryStream();
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-            await blobRef.UploadFromStreamAsync(data);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
+            await blobRef.UploadAsync(data);
 
             await _provider.MoveBlobAsync(sourceContainer, sourceName, destContainer, destName);
 
             // Make sure destination now exists and contains original data.
-            await _client.GetContainerReference(destContainer)
-                .GetBlockBlobReference(destName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(destContainer)
+                .GetBlobClient(destName)
+                .DownloadToAsync(stream);
             
             Assert.True(StreamEquals(data, stream));
 
@@ -71,30 +71,30 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
-            var containerRef = _client.GetContainerReference(sourceContainer);
-            var blobRef = containerRef.GetBlockBlobReference(sourceName);
+            var containerRef = _client.GetBlobContainerClient(sourceContainer);
+            var blobRef = containerRef.GetBlobClient(sourceName);
             var destContainer = GetRandomContainerName();
             var data = GenerateRandomBlobStream();
             var stream = new MemoryStream();
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-            await blobRef.UploadFromStreamAsync(data);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
+            await blobRef.UploadAsync(data);
 
             await _provider.CopyBlobAsync(sourceContainer, sourceName, destContainer);
 
             // Make sure destination now exists and contains original data.
-            await _client.GetContainerReference(destContainer)
-                .GetBlockBlobReference(sourceName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(destContainer)
+                .GetBlobClient(sourceName)
+                .DownloadToAsync(stream);
             
             Assert.True(StreamEquals(data, stream));
 
             stream = new MemoryStream();
 
             // Make sure source still exists
-            await _client.GetContainerReference(sourceContainer)
-                .GetBlockBlobReference(sourceName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(sourceContainer)
+                .GetBlobClient(sourceName)
+                .DownloadToAsync(stream);
 
             Assert.True(StreamEquals(data, stream));
         }
@@ -104,31 +104,31 @@ namespace TwentyTwenty.Storage.Azure.Test
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
-            var containerRef = _client.GetContainerReference(sourceContainer);
-            var blobRef = containerRef.GetBlockBlobReference(sourceName);
+            var containerRef = _client.GetBlobContainerClient(sourceContainer);
+            var blobRef = containerRef.GetBlobClient(sourceName);
             var destContainer = GetRandomContainerName();
             var destName = GenerateRandomName();
             var data = GenerateRandomBlobStream();
             var stream = new MemoryStream();
 
-            await containerRef.CreateAsync(BlobContainerPublicAccessType.Blob, null, null);
-            await blobRef.UploadFromStreamAsync(data);
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
+            await blobRef.UploadAsync(data);
 
             await _provider.CopyBlobAsync(sourceContainer, sourceName, destContainer, destName);
 
             // Make sure destination now exists and contains original data.
-            await _client.GetContainerReference(destContainer)
-                .GetBlockBlobReference(destName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(destContainer)
+                .GetBlobClient(destName)
+                .DownloadToAsync(stream);
             
             Assert.True(StreamEquals(data, stream));
 
             stream = new MemoryStream();
 
             // Make sure source still exists
-            await _client.GetContainerReference(sourceContainer)
-                .GetBlockBlobReference(sourceName)
-                .DownloadToStreamAsync(stream);
+            await _client.GetBlobContainerClient(sourceContainer)
+                .GetBlobClient(sourceName)
+                .DownloadToAsync(stream);
 
             Assert.True(StreamEquals(data, stream));
         }
