@@ -221,6 +221,10 @@ namespace TwentyTwenty.Storage.Local
                 {
                     source.Dispose();
                 }
+                if (properties != default)
+                {
+                    UpdateBlobProperties(containerName, blobName, properties);
+                }
             }
             catch (Exception ex)
             {
@@ -244,6 +248,10 @@ namespace TwentyTwenty.Storage.Local
                 if (closeStream)
                 {
                     source.Dispose();
+                }
+                if (properties != default)
+                {
+                    await UpdateBlobPropertiesAsync(containerName, blobName, properties);
                 }
             }
             catch (Exception ex)
