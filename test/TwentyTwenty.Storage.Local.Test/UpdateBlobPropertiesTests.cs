@@ -52,5 +52,33 @@ namespace TwentyTwenty.Storage.Local.Test
             Assert.Equal(propertiesToStore.Metadata.Count, parsedBlobProperties.Metadata.Count);
         }
         
+        [Fact]
+        public async void Test_Updating_Properties_Returns_It_On_Read()
+        {
+            var destinationContainer = GetRandomContainerName();
+            var destinationName = GenerateRandomName();
+            var data = GenerateRandomBlobStream();
+
+            CreateNewFile(destinationContainer, destinationName, data);
+
+            var propertiesToStore = new BlobProperties
+            {
+                Security = BlobSecurity.Public,
+                ContentType = "application/octet-stream",
+                ContentDisposition = "inline",
+                Metadata = new Dictionary<string, string>
+                {
+                    {"custom", "data"},
+                }
+            };
+            _provider.UpdateBlobProperties(destinationContainer, destinationName, propertiesToStore);
+
+            var blob = _provider.GetBlobDescriptor(destinationContainer, destinationName);
+            
+            Assert.Equal(propertiesToStore.Security, blob.Security);
+            Assert.Equal(propertiesToStore.ContentDisposition, blob.ContentDisposition);
+            Assert.Equal(propertiesToStore.ContentType, blob.ContentType);
+            Assert.Equal(propertiesToStore.Metadata, blob.Metadata);
+        }
     }
 }

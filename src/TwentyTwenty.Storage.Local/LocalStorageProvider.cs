@@ -107,7 +107,7 @@ namespace TwentyTwenty.Storage.Local
             {
                 var info = new FileInfo(path);
 
-                return new BlobDescriptor
+                var descriptor = new BlobDescriptor
                 {
                     Container = containerName,
                     ContentMD5 = "",
@@ -119,6 +119,9 @@ namespace TwentyTwenty.Storage.Local
                     Security = BlobSecurity.Private,
                     Url = info.FullName
                 };
+                MergeDescriptorWithCustomMetaIfExists(info.FullName, descriptor);
+
+                return descriptor;
             }
             catch (Exception ex)
             {
@@ -172,7 +175,7 @@ namespace TwentyTwenty.Storage.Local
 
                 foreach (var f in fileInfo)
                 {
-                    localFilesInfo.Add(new BlobDescriptor
+                    var blobDescriptor = new BlobDescriptor
                     {
                         ContentMD5 = "",
                         ETag = "",
@@ -183,7 +186,9 @@ namespace TwentyTwenty.Storage.Local
                         Name = f.Name,
                         Url = f.FullName,
                         Security = BlobSecurity.Private,
-                    });
+                    };
+                    MergeDescriptorWithCustomMetaIfExists(f.FullName, blobDescriptor);
+                    localFilesInfo.Add(blobDescriptor);
                 }
 
                 return localFilesInfo;
