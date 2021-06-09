@@ -194,13 +194,7 @@ namespace TwentyTwenty.Storage.Local
         public void SaveBlobStream(string containerName, string blobName, Stream source, 
             BlobProperties properties = null, bool closeStream = true)
         {
-            var dir = Path.Combine(_basePath, containerName);
-            var path = Path.Combine(dir, blobName);
-            
-            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
-            }
+            var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
             
             try
             {
@@ -224,13 +218,7 @@ namespace TwentyTwenty.Storage.Local
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
             BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
-            var dir = Path.Combine(_basePath, containerName);
-            var path = Path.Combine(dir, blobName);
-
-            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
-            }
+            var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
 
             try
             {
@@ -259,6 +247,19 @@ namespace TwentyTwenty.Storage.Local
         public Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
             return Task.FromResult(0);
+        }
+        
+        private string ExtractFullPathAndProtectAgainstPathTraversal(string containerName, string blobName)
+        {
+            var dir = Path.Combine(_basePath, containerName);
+            var path = Path.Combine(dir, blobName);
+
+            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
+            }
+
+            return path;
         }
     }
 }
