@@ -98,6 +98,12 @@ namespace TwentyTwenty.Storage.Local
 
             File.Copy(sourcePath, destPath, true);
 
+            var sourceMetaPath = CreateMetadataPath(sourcePath);
+            if (File.Exists(sourceMetaPath))
+            {
+                var destMetaPath = CreateMetadataPath(destPath);
+                File.Copy(sourceMetaPath, destMetaPath, true);
+            }
             return Task.FromResult(true);
         }
 
@@ -268,7 +274,7 @@ namespace TwentyTwenty.Storage.Local
                 throw ex.ToStorageException();
             }
         }
-
+        
         public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
         {
             try
