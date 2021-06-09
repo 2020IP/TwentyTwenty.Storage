@@ -31,7 +31,16 @@ namespace TwentyTwenty.Storage.Local
             {
                 throw new StorageException(StorageErrorCode.InvalidName.ToStorageError(), null);
             }
-            try { File.Delete(path); }
+
+            try
+            {
+                File.Delete(path);
+                var metaPath = CreateMetadataPath(path);
+                if (File.Exists(metaPath))
+                {
+                    File.Delete(metaPath);
+                }
+            }
             catch (Exception ex)
             {
                 throw ex.ToStorageException();
