@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -9,10 +11,16 @@ namespace TwentyTwenty.Storage.Local
     public class LocalStorageProvider : IStorageProvider
     {
         private readonly string _basePath;
+        private readonly JsonSerializerOptions _jsonSerialiserOptions;
 
         public LocalStorageProvider(string basePath)
         {
             _basePath = basePath;
+            _jsonSerialiserOptions = new JsonSerializerOptions
+            {
+                Converters = {new JsonStringEnumConverter()},
+                WriteIndented = true
+            };
         }
 
         public void DeleteBlob(string containerName, string blobName)
@@ -241,12 +249,46 @@ namespace TwentyTwenty.Storage.Local
 
         public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
         {
-            return;
+            try
+            {
+                var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
+                var metaPath = CreateMetadataPath(path);
+
+                var json = JsonSerializer.Serialize(properties, _jsonSerialiserOptions);
+
+                using (var file = File.Create(metaPath))
+                using (var streamWriter = new StreamWriter(file))
+                {
+                    streamWriter.Write(json);
+                    streamWriter.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex.ToStorageException();
+            }
         }
 
-        public Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
+        public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
-            return Task.FromResult(0);
+            try
+            {
+                var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
+                var metaPath = CreateMetadataPath(path);
+
+                var json = JsonSerializer.Serialize(properties, _jsonSerialiserOptions);
+
+                using (var file = File.Create(metaPath))
+                using (var streamWriter = new StreamWriter(file))
+                {
+                    await streamWriter.WriteAsync(json);
+                    await streamWriter.FlushAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex.ToStorageException();
+            }
         }
         
         private string ExtractFullPathAndProtectAgainstPathTraversal(string containerName, string blobName)
@@ -260,6 +302,60 @@ namespace TwentyTwenty.Storage.Local
             }
 
             return path;
+        }
+        
+        
+        private static string CreateMetadataPath(string path)
+        {
+            return $"{path}-meta.json";
+        }
+        
+        private void MergeDescriptorWithCustomMetaIfExists(string fullPathToBlob, BlobDescriptor descriptor)
+        {
+            var meta = GetFileMetaIfExists(fullPathToBlob);
+            if (meta != default)
+            {
+                if (!string.IsNullOrWhiteSpace(meta.ContentDisposition))
+                {
+                    descriptor.ContentDisposition = meta.ContentDisposition;
+                }
+
+                if (!string.IsNullOrWhiteSpace(meta.ContentType))
+                {
+                    descriptor.ContentType = meta.ContentType;
+                }
+
+                descriptor.Security = meta.Security;
+                descriptor.Metadata = meta.Metadata;
+            }
+        }
+
+        private BlobDescriptor GetFileMetaIfExists(string fullPathToBlob)
+        {
+            var metaPath = CreateMetadataPath(fullPathToBlob);
+
+            if (!File.Exists(metaPath)) return null;
+
+            using (var file = File.OpenRead(metaPath))
+            using (var streamReader = new StreamReader(file))
+            {
+                var metaContent = streamReader.ReadToEnd();
+                return JsonSerializer.Deserialize<BlobDescriptor>(metaContent, _jsonSerialiserOptions);
+            }
+        }
+
+        private async Task<BlobDescriptor> GetFileMetaIfExistsAsync(string fullPathToBlob)
+        {
+            var metaPath = CreateMetadataPath(fullPathToBlob);
+
+            if (!File.Exists(metaPath)) return null;
+
+            using (var file = File.OpenRead(metaPath))
+            using (var streamReader = new StreamReader(file))
+            {
+                var metaContent = await streamReader.ReadToEndAsync();
+                return JsonSerializer.Deserialize<BlobDescriptor>(metaContent, _jsonSerialiserOptions);
+            }
         }
     }
 }
