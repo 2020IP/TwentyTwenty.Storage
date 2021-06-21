@@ -9,7 +9,7 @@ deploy:
       secure: zbVLdtBTLzHDiLO1T4O9r6Jj0XthVKRtK1B0EtqWhDpaoF3Iv3smoGB0k0PW1TRB
     artifact: /.*\.nupkg/
     on:
-      appveyor_repo_tag: true
+      APPVEYOR_REPO_TAG: true
   - provider: GitHub
     release: v$(GitVersion_SemVer)
     description: 'TwentyTwenty.Storage'
@@ -18,7 +18,7 @@ deploy:
     artifact: /.*\.nupkg/
     draft: true
     on:    
-      appveyor_repo_tag: true
+      APPVEYOR_REPO_TAG: true
 build_script:
   - ./build.sh
 environment:
