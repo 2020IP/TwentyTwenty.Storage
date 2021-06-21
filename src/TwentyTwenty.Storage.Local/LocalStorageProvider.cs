@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -9,10 +11,16 @@ namespace TwentyTwenty.Storage.Local
     public class LocalStorageProvider : IStorageProvider
     {
         private readonly string _basePath;
+        private readonly JsonSerializerOptions _jsonSerialiserOptions;
 
         public LocalStorageProvider(string basePath)
         {
             _basePath = basePath;
+            _jsonSerialiserOptions = new JsonSerializerOptions
+            {
+                Converters = {new JsonStringEnumConverter()},
+                WriteIndented = true
+            };
         }
 
         public void DeleteBlob(string containerName, string blobName)
@@ -23,7 +31,16 @@ namespace TwentyTwenty.Storage.Local
             {
                 throw new StorageException(StorageErrorCode.InvalidName.ToStorageError(), null);
             }
-            try { File.Delete(path); }
+
+            try
+            {
+                File.Delete(path);
+                var metaPath = CreateMetadataPath(path);
+                if (File.Exists(metaPath))
+                {
+                    File.Delete(metaPath);
+                }
+            }
             catch (Exception ex)
             {
                 throw ex.ToStorageException();
@@ -81,6 +98,12 @@ namespace TwentyTwenty.Storage.Local
 
             File.Copy(sourcePath, destPath, true);
 
+            var sourceMetaPath = CreateMetadataPath(sourcePath);
+            if (File.Exists(sourceMetaPath))
+            {
+                var destMetaPath = CreateMetadataPath(destPath);
+                File.Copy(sourceMetaPath, destMetaPath, true);
+            }
             return Task.FromResult(true);
         }
 
@@ -99,7 +122,7 @@ namespace TwentyTwenty.Storage.Local
             {
                 var info = new FileInfo(path);
 
-                return new BlobDescriptor
+                var descriptor = new BlobDescriptor
                 {
                     Container = containerName,
                     ContentMD5 = "",
@@ -111,6 +134,9 @@ namespace TwentyTwenty.Storage.Local
                     Security = BlobSecurity.Private,
                     Url = info.FullName
                 };
+                MergeDescriptorWithCustomMetaIfExists(info.FullName, descriptor);
+
+                return descriptor;
             }
             catch (Exception ex)
             {
@@ -164,7 +190,7 @@ namespace TwentyTwenty.Storage.Local
 
                 foreach (var f in fileInfo)
                 {
-                    localFilesInfo.Add(new BlobDescriptor
+                    var blobDescriptor = new BlobDescriptor
                     {
                         ContentMD5 = "",
                         ETag = "",
@@ -175,7 +201,9 @@ namespace TwentyTwenty.Storage.Local
                         Name = f.Name,
                         Url = f.FullName,
                         Security = BlobSecurity.Private,
-                    });
+                    };
+                    MergeDescriptorWithCustomMetaIfExists(f.FullName, blobDescriptor);
+                    localFilesInfo.Add(blobDescriptor);
                 }
 
                 return localFilesInfo;
@@ -194,13 +222,7 @@ namespace TwentyTwenty.Storage.Local
         public void SaveBlobStream(string containerName, string blobName, Stream source, 
             BlobProperties properties = null, bool closeStream = true)
         {
-            var dir = Path.Combine(_basePath, containerName);
-            var path = Path.Combine(dir, blobName);
-            
-            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
-            }
+            var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
             
             try
             {
@@ -214,6 +236,10 @@ namespace TwentyTwenty.Storage.Local
                 {
                     source.Dispose();
                 }
+                if (properties != default)
+                {
+                    UpdateBlobProperties(containerName, blobName, properties);
+                }
             }
             catch (Exception ex)
             {
@@ -224,13 +250,7 @@ namespace TwentyTwenty.Storage.Local
         public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
             BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
-            var dir = Path.Combine(_basePath, containerName);
-            var path = Path.Combine(dir, blobName);
-
-            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
-            }
+            var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
 
             try
             {
@@ -244,6 +264,32 @@ namespace TwentyTwenty.Storage.Local
                 {
                     source.Dispose();
                 }
+                if (properties != default)
+                {
+                    await UpdateBlobPropertiesAsync(containerName, blobName, properties);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex.ToStorageException();
+            }
+        }
+        
+        public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
+        {
+            try
+            {
+                var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
+                var metaPath = CreateMetadataPath(path);
+
+                var json = JsonSerializer.Serialize(properties, _jsonSerialiserOptions);
+
+                using (var file = File.Create(metaPath))
+                using (var streamWriter = new StreamWriter(file))
+                {
+                    streamWriter.Write(json);
+                    streamWriter.Flush();
+                }
             }
             catch (Exception ex)
             {
@@ -251,14 +297,93 @@ namespace TwentyTwenty.Storage.Local
             }
         }
 
-        public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
+        public async Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
         {
-            return;
+            try
+            {
+                var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
+                var metaPath = CreateMetadataPath(path);
+
+                var json = JsonSerializer.Serialize(properties, _jsonSerialiserOptions);
+
+                using (var file = File.Create(metaPath))
+                using (var streamWriter = new StreamWriter(file))
+                {
+                    await streamWriter.WriteAsync(json);
+                    await streamWriter.FlushAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex.ToStorageException();
+            }
+        }
+        
+        private string ExtractFullPathAndProtectAgainstPathTraversal(string containerName, string blobName)
+        {
+            var dir = Path.Combine(_basePath, containerName);
+            var path = Path.Combine(dir, blobName);
+
+            if (!Path.GetFullPath(path).StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Detected path traversal attempt.").ToStorageException();
+            }
+
+            return path;
+        }
+        
+        
+        private static string CreateMetadataPath(string path)
+        {
+            return $"{path}-meta.json";
+        }
+        
+        private void MergeDescriptorWithCustomMetaIfExists(string fullPathToBlob, BlobDescriptor descriptor)
+        {
+            var meta = GetFileMetaIfExists(fullPathToBlob);
+            if (meta != default)
+            {
+                if (!string.IsNullOrWhiteSpace(meta.ContentDisposition))
+                {
+                    descriptor.ContentDisposition = meta.ContentDisposition;
+                }
+
+                if (!string.IsNullOrWhiteSpace(meta.ContentType))
+                {
+                    descriptor.ContentType = meta.ContentType;
+                }
+
+                descriptor.Security = meta.Security;
+                descriptor.Metadata = meta.Metadata;
+            }
         }
 
-        public Task UpdateBlobPropertiesAsync(string containerName, string blobName, BlobProperties properties)
+        private BlobDescriptor GetFileMetaIfExists(string fullPathToBlob)
         {
-            return Task.FromResult(0);
+            var metaPath = CreateMetadataPath(fullPathToBlob);
+
+            if (!File.Exists(metaPath)) return null;
+
+            using (var file = File.OpenRead(metaPath))
+            using (var streamReader = new StreamReader(file))
+            {
+                var metaContent = streamReader.ReadToEnd();
+                return JsonSerializer.Deserialize<BlobDescriptor>(metaContent, _jsonSerialiserOptions);
+            }
+        }
+
+        private async Task<BlobDescriptor> GetFileMetaIfExistsAsync(string fullPathToBlob)
+        {
+            var metaPath = CreateMetadataPath(fullPathToBlob);
+
+            if (!File.Exists(metaPath)) return null;
+
+            using (var file = File.OpenRead(metaPath))
+            using (var streamReader = new StreamReader(file))
+            {
+                var metaContent = await streamReader.ReadToEndAsync();
+                return JsonSerializer.Deserialize<BlobDescriptor>(metaContent, _jsonSerialiserOptions);
+            }
         }
     }
 }
