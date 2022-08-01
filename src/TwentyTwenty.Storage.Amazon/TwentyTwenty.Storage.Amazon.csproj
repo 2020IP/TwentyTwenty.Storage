@@ -5,7 +5,7 @@
     <AssemblyTitle>2020 Storage - Amazon S3 Provider</AssemblyTitle>
     <VersionPrefix>$(SemVer)</VersionPrefix>
     <Authors>2020IP</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
     <AssemblyName>TwentyTwenty.Storage.Amazon</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Amazon</PackageId>
