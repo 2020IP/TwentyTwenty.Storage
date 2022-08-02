@@ -38,8 +38,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var data = GenerateRandomBlobStream(100000000);
             var stream = new MemoryStream();
             data.CopyTo(stream);
-            stream.Position = 0;
-
+            data.Position = 0;
             await _provider.SaveBlobStreamAsync(container, blobName, data);
 
             var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
