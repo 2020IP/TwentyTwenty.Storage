@@ -53,7 +53,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
         
         [Fact]
-        public async void Test_Updating_Properties_Returns_It_On_Read()
+        public void Test_Updating_Properties_Returns_It_On_Read()
         {
             var destinationContainer = GetRandomContainerName();
             var destinationName = GenerateRandomName();

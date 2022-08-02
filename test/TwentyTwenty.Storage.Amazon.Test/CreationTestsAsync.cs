@@ -38,8 +38,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var data = GenerateRandomBlobStream(100000000);
             var stream = new MemoryStream();
             data.CopyTo(stream);
-            stream.Position = 0;
-
+            data.Position = 0;
             await _provider.SaveBlobStreamAsync(container, blobName, data);
 
             var amzObject = await _client.GetObjectAsync(Bucket, container + "/" + blobName, null);
@@ -72,7 +71,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public async void Test_Blob_Created_Metadata_Set_Async()
         {
             var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();            
+            var blobName = GenerateRandomName();
             var dataLength = 256;
             var data = GenerateRandomBlobStream(dataLength);
             var meta = new Dictionary<string, string>

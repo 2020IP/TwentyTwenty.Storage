@@ -238,15 +238,6 @@ namespace TwentyTwenty.Storage.Google
 
         #region Helpers
 
-        private Blob CreateBlob(string containerName, string blobName, BlobProperties properties = null)
-        {
-            return new Blob
-            {
-                Name = $"{containerName}/{blobName}",
-                ContentType = properties?.ContentType ?? DefaultContentType
-            };
-        }
-
         private string ObjectName(string containerName, string blobName)
             => $"{containerName}/{blobName}";
 
