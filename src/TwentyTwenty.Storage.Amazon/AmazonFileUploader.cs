@@ -1,5 +1,5 @@
 using System;
-using System.Buffers;
+// using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,7 +13,6 @@ namespace TwentyTwenty.Storage.Amazon
         private const int PART_SIZE = 6 * 1024 * 1024;
         private const int READ_BUFFER_SIZE = 20000;
         private readonly IAmazonS3 _s3Client;
-
 
         public AmazonFileUploader(IAmazonS3 s3Client)
         {
@@ -36,8 +35,10 @@ namespace TwentyTwenty.Storage.Amazon
             try
             {
                 var partETags = new List<PartETag>();
-                var readBuffer = ArrayPool<byte>.Shared.Rent(READ_BUFFER_SIZE);
-                var partBuffer = ArrayPool<byte>.Shared.Rent(PART_SIZE + (READ_BUFFER_SIZE * 3));
+                // var readBuffer = ArrayPool<byte>.Shared.Rent(READ_BUFFER_SIZE);
+                // var partBuffer = ArrayPool<byte>.Shared.Rent(PART_SIZE + (READ_BUFFER_SIZE * 3));
+                var readBuffer = new byte[READ_BUFFER_SIZE];
+                var partBuffer = new byte[PART_SIZE + (READ_BUFFER_SIZE * 3)];
 
                 var callbackEvent = new UploadEvent();
                 var nextUploadBuffer = new MemoryStream(partBuffer);
@@ -101,8 +102,8 @@ namespace TwentyTwenty.Storage.Amazon
                 }
                 finally
                 {
-                    ArrayPool<byte>.Shared.Return(partBuffer);
-                    ArrayPool<byte>.Shared.Return(readBuffer);
+                    // ArrayPool<byte>.Shared.Return(partBuffer);
+                    // ArrayPool<byte>.Shared.Return(readBuffer);
 
                     if (autoCloseStream)
                     {

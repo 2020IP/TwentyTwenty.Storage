@@ -71,7 +71,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         public async void Test_Blob_Created_Metadata_Set_Async()
         {
             var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();            
+            var blobName = GenerateRandomName();
             var dataLength = 256;
             var data = GenerateRandomBlobStream(dataLength);
             var meta = new Dictionary<string, string>

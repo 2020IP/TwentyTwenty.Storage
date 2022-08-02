@@ -205,8 +205,10 @@ namespace TwentyTwenty.Storage.Azure
 
             var query = builder.ToSasQueryParameters(new StorageSharedKeyCredential(_settings["AccountName"], _settings["AccountKey"]));
 
-            var uriBuilder = new UriBuilder(blob.Uri);
-            uriBuilder.Query = query.ToString().TrimStart('?');
+            var uriBuilder = new UriBuilder(blob.Uri)
+            {
+                Query = query.ToString().TrimStart('?')
+            };
 
             return uriBuilder.Uri.ToString();
         }
