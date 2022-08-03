@@ -19,7 +19,6 @@ namespace TwentyTwenty.Storage.Google
     public sealed class GoogleStorageProvider : IStorageProvider
     {
         private const string BlobNameRegex = @"(?<Container>[^/]+)/(?<Blob>.+)";
-        private const string DefaultContentType = "application/octet-stream";
         private readonly StorageClient _client;
         private readonly UrlSigner _urlSigner = null;
         private readonly string _bucket;

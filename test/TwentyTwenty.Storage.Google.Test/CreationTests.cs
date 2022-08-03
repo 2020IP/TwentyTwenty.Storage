@@ -22,7 +22,7 @@ namespace TwentyTwenty.Storage.Google.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data);
             await _client.DownloadObjectAsync(Bucket, GetObjectName(container, blobName), stream);
-            
+
             StreamEquals(data, stream);
         }
 
@@ -36,7 +36,7 @@ namespace TwentyTwenty.Storage.Google.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data);
             await _client.DownloadObjectAsync(Bucket, GetObjectName(container, blobName), stream);
-            
+
             StreamEquals(data, stream);
         }
 

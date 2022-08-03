@@ -8,7 +8,7 @@ namespace TwentyTwenty.Storage.Local.Test
     public sealed class CopyMoveTests : BlobTestBase
     {
         public CopyMoveTests(StorageFixture fixture)
-            : base(fixture) { }
+            : base() { }
 
         [Fact]
         public async void Test_Blob_Moved()
