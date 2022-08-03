@@ -154,10 +154,25 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                return (await _client.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { Projection = Projection.Full })
-                    .ReadPageAsync(int.MaxValue))
-                    .Select(GetBlobDescriptor)
-                    .ToList();
+                var enumerable = _client.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { Projection = Projection.Full });
+                
+                var list = new List<BlobDescriptor>();
+                var enumerator = enumerable.GetAsyncEnumerator();
+
+                // TODO: Reafactor to use async enumerators properly in netstandard2.1
+                try
+                {
+                    while (await enumerator.MoveNextAsync())
+                    {
+                        list.Add(GetBlobDescriptor(enumerator.Current));
+                    }
+                }
+                finally
+                {
+                    await enumerator.DisposeAsync();
+                }
+
+                return list;
             }
             catch (GoogleApiException gae)
             {
