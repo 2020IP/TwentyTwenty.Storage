@@ -2,24 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Google;
-using Google.Apis.Upload;
-using Google.Apis.Services;
 using Google.Apis.Auth.OAuth2;
-using Blob = Google.Apis.Storage.v1.Data.Object;
-using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
 using Google.Apis.Requests;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-using System.Text;
-using System.Net;
-using Google.Cloud.Storage.V1;
-using BlobObject = Google.Apis.Storage.v1.Data.Object;
+using Google.Apis.Services;
 using Google.Apis.Storage.v1.Data;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using Google.Apis.Upload;
+using Google.Cloud.Storage.V1;
+using Blob = Google.Apis.Storage.v1.Data.Object;
+using BlobObject = Google.Apis.Storage.v1.Data.Object;
+using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
 
 namespace TwentyTwenty.Storage.Google
 {
@@ -124,13 +124,15 @@ namespace TwentyTwenty.Storage.Google
             {
                 headers["Content-Type"] = new[] { contentType };
             }
-            
-            return _urlSigner.Sign(
-                _bucket,
-                ObjectName(containerName, blobName),
-                expiry,
-                access == BlobUrlAccess.Read ? HttpMethod.Get : HttpMethod.Put,
-                headers);
+
+            var template = UrlSigner.RequestTemplate.FromBucket(_bucket)
+                .WithObjectName(ObjectName(containerName, blobName))
+                .WithRequestHeaders(headers)
+                .WithHttpMethod(access == BlobUrlAccess.Read ? HttpMethod.Get : HttpMethod.Put);
+
+            var options = UrlSigner.Options.FromExpiration(expiry);
+
+            return _urlSigner.Sign(template, options);
         }
 
         public async Task<BlobDescriptor> GetBlobDescriptorAsync(string containerName, string blobName)
@@ -152,9 +154,25 @@ namespace TwentyTwenty.Storage.Google
         {
             try
             {
-                return await _client.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { Projection = Projection.Full })
-                    .Select(GetBlobDescriptor)
-                    .ToList();
+                var enumerable = _client.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { Projection = Projection.Full });
+                
+                var list = new List<BlobDescriptor>();
+                var enumerator = enumerable.GetAsyncEnumerator();
+
+                // TODO: Reafactor to use async enumerators properly in netstandard2.1
+                try
+                {
+                    while (await enumerator.MoveNextAsync())
+                    {
+                        list.Add(GetBlobDescriptor(enumerator.Current));
+                    }
+                }
+                finally
+                {
+                    await enumerator.DisposeAsync();
+                }
+
+                return list;
             }
             catch (GoogleApiException gae)
             {
@@ -237,15 +255,6 @@ namespace TwentyTwenty.Storage.Google
         }
 
         #region Helpers
-
-        private Blob CreateBlob(string containerName, string blobName, BlobProperties properties = null)
-        {
-            return new Blob
-            {
-                Name = $"{containerName}/{blobName}",
-                ContentType = properties?.ContentType ?? DefaultContentType
-            };
-        }
 
         private string ObjectName(string containerName, string blobName)
             => $"{containerName}/{blobName}";

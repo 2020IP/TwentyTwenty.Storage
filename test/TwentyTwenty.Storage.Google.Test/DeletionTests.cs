@@ -25,12 +25,14 @@ namespace TwentyTwenty.Storage.Google.Test
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName1), null, data1);
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName2), null, data2);
 
-            var count = await _client.ListObjectsAsync(Bucket, container).Count();
+            var count = (await _client.ListObjectsAsync(Bucket, container)
+                .ReadPageAsync(10)).Count();
             Assert.Equal(2, count);
 
             await _provider.DeleteContainerAsync(container);
 
-            count = await _client.ListObjectsAsync(Bucket, container).Count();
+            count = (await _client.ListObjectsAsync(Bucket, container)
+                .ReadPageAsync(10)).Count();
             Assert.Equal(0, count);
         }
 
@@ -43,12 +45,15 @@ namespace TwentyTwenty.Storage.Google.Test
 
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
 
-            var count = await _client.ListObjectsAsync(Bucket, container).Count();
+            var count = (await _client.ListObjectsAsync(Bucket, container)
+                .ReadPageAsync(10)).Count();
+
             Assert.Equal(1, count);
 
             await _provider.DeleteBlobAsync(container, blobName);
 
-            count = await _client.ListObjectsAsync(Bucket, container).Count();
+            count = (await _client.ListObjectsAsync(Bucket, container)
+                .ReadPageAsync(10)).Count();
             Assert.Equal(0, count);
         }
     }

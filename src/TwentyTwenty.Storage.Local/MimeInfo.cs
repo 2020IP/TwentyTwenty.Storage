@@ -8,7 +8,7 @@ namespace TwentyTwenty.Storage.Local
 {
     public static class MimeInfo
     {
-        private static IDictionary<string, string> _mimeMappings = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase)
+        private static readonly IDictionary<string, string> _mimeMappings = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase)
         {
             {".323", "text/h323"},
             {".3g2", "video/3gpp2"},
@@ -584,9 +584,7 @@ namespace TwentyTwenty.Storage.Local
                 extension = "." + extension;
             }
 
-            string mime;
-
-            return _mimeMappings.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
+            return _mimeMappings.TryGetValue(extension, out string mime) ? mime : "application/octet-stream";
         }
     }
 }

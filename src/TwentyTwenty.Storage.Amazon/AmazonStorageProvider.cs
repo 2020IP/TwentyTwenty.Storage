@@ -1,15 +1,15 @@
-﻿using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.S3.Transfer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
-using System.Net.Http.Headers;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 
 namespace TwentyTwenty.Storage.Amazon
 {
@@ -19,6 +19,7 @@ namespace TwentyTwenty.Storage.Amazon
 
     public sealed class AmazonStorageProvider : IStorageProvider
     {
+        private const int PART_SIZE = 6 * 1024 * 1024;
         private const string DefaultServiceUrl = "https://s3.amazonaws.com";
         private readonly IAmazonS3 _s3Client;
         private readonly string _bucket;
@@ -407,10 +408,20 @@ namespace TwentyTwenty.Storage.Amazon
 
             if (length.HasValue && length.Value >= threshold)
             {
-                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream, length);
+                // TODO: Return to using S3 library's TransferUtility when bug is fixed.  See https://github.com/aws/aws-sdk-net/issues/675
+                //var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream, length);
+                // try
+                // {
+                //     using (var util = new TransferUtility(_s3Client))
+                //     {
+                //         await util.UploadAsync(fileTransferUtilityRequest);
+                //     }
+                // }
                 try
                 {
-                    await new TransferUtility(_s3Client).UploadAsync(fileTransferUtilityRequest);
+                    var uploader = new AmazonFileUploader(_s3Client);
+                    await uploader.UploadFileAsync(_bucket, GenerateKeyName(containerName, blobName), source,
+                        properties?.ContentType, GetCannedACL(properties), _serverSideEncryptionMethod, closeStream, null);
                 }
                 catch (AmazonS3Exception asex)
                 {
@@ -502,30 +513,31 @@ namespace TwentyTwenty.Storage.Amazon
             return updateRequest;
         }
 
-        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, 
-            BlobProperties properties, bool closeStream, long? length = null)
-        {
-            var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-            {
-                BucketName = _bucket,
-                InputStream = source,
-                PartSize = 6291456,
-                Key = GenerateKeyName(containerName, blobName),
-                ContentType = properties?.ContentType,
-                CannedACL = GetCannedACL(properties),
-                AutoCloseStream = closeStream,
-                ServerSideEncryptionMethod = _serverSideEncryptionMethod
-            };
-            fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
-            fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
+        // TODO: Return to using S3 library's TransferUtility when bug is fixed.  See https://github.com/aws/aws-sdk-net/issues/675
+        // private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, 
+        //     BlobProperties properties, bool closeStream, long? length = null)
+        // {
+        //     var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+        //     {
+        //         BucketName = _bucket,
+        //         InputStream = source,
+        //         PartSize = PART_SIZE,
+        //         Key = GenerateKeyName(containerName, blobName),
+        //         ContentType = properties?.ContentType,
+        //         CannedACL = GetCannedACL(properties),
+        //         AutoCloseStream = closeStream,
+        //         ServerSideEncryptionMethod = _serverSideEncryptionMethod
+        //     };
+        //     fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+        //     fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
 
-            if (length.HasValue)
-            {
-                fileTransferUtilityRequest.Headers.ContentLength = length.Value;
-            }
+        //     if (length.HasValue)
+        //     {
+        //         fileTransferUtilityRequest.Headers.ContentLength = length.Value;
+        //     }
 
-            return fileTransferUtilityRequest;
-        }
+        //     return fileTransferUtilityRequest;
+        // }
 
         private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, 
             BlobProperties properties, bool closeStream, long? length = null)
