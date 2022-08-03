@@ -12,7 +12,7 @@ namespace TwentyTwenty.Storage.Local.Test
     public sealed class UpdateBlobPropertiesTests : BlobTestBase
     {
         public UpdateBlobPropertiesTests(StorageFixture fixture)
-            : base(fixture) { }
+            : base() { }
 
         [Fact]
         public async void Test_Updating_Properties_Stores_Meta_File()

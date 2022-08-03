@@ -17,7 +17,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
     [Collection("BlobTestBase")]
     public abstract class BlobTestBase
     {
-        Random _rand = new Random();
+        private readonly Random _rand = new();
         protected AmazonS3Client _client;
         protected IStorageProvider _provider;
         protected IStorageProvider _exceptionProvider;
@@ -60,12 +60,12 @@ namespace TwentyTwenty.Storage.Amazon.Test
             return new MemoryStream(GenerateRandomBlob(length));
         }
 
-        protected string GetRandomContainerName()
+        protected static string GetRandomContainerName()
         {
             return StorageFixture.ContainerPrefix + Guid.NewGuid().ToString("N");
         }
 
-        protected string GenerateRandomName()
+        protected static string GenerateRandomName()
         {
             return Guid.NewGuid().ToString("N");
         }
@@ -89,7 +89,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             await _client.PutObjectAsync(putRequest);
         }
 
-        protected bool StreamEquals(Stream stream1, Stream stream2)
+        protected static bool StreamEquals(Stream stream1, Stream stream2)
         {
             if (stream1.CanSeek)
             {

@@ -9,7 +9,6 @@ using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 
 namespace TwentyTwenty.Storage.Amazon
 {
@@ -19,7 +18,6 @@ namespace TwentyTwenty.Storage.Amazon
 
     public sealed class AmazonStorageProvider : IStorageProvider
     {
-        private const int PART_SIZE = 6 * 1024 * 1024;
         private const string DefaultServiceUrl = "https://s3.amazonaws.com";
         private readonly IAmazonS3 _s3Client;
         private readonly string _bucket;
@@ -40,7 +38,7 @@ namespace TwentyTwenty.Storage.Amazon
                 Timeout = options.Timeout ?? ClientConfig.MaxTimeout,
             };
 
-            _s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);            
+            _s3Client = new AmazonS3Client(ReadAwsCredentials(options), S3Config);
         }
 
         private AWSCredentials ReadAwsCredentials(AmazonProviderOptions options)

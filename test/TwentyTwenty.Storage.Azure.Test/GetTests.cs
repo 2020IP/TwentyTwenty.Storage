@@ -45,12 +45,10 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.GetBlobClient(blobName)
                 .UploadAsync(data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
-            {
-                var ms = new MemoryStream();
-                await blobStream.CopyToAsync(ms);
-                Assert.True(StreamEquals(ms, data));
-            }
+            using var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+            var ms = new MemoryStream();
+            await blobStream.CopyToAsync(ms);
+            Assert.True(StreamEquals(ms, data));
         }
 
         [Fact]

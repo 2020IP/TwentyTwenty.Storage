@@ -23,13 +23,11 @@ namespace TwentyTwenty.Storage.Google.Test
     [Collection("BlobTestBase")]
     public abstract class BlobTestBase : IClassFixture<StorageFixture>
     {
-        protected static readonly Random _rand = new Random();
+        protected static readonly Random _rand = new();
         protected StorageClient _client; 
         protected IStorageProvider _provider;
         protected string Bucket;
         protected string ContainerPrefix;
-
-        private const string DefaultContentType = "application/octet-stream";
 
         /// <summary>
         /// For blobs which have a "public" ACL.
@@ -48,32 +46,32 @@ namespace TwentyTwenty.Storage.Google.Test
             });
         }
 
-        public string GetObjectName(string container, string blobName)
+        public static string GetObjectName(string container, string blobName)
             => $"{container}/{blobName}";
 
-        public byte[] GenerateRandomBlob(int length = 256)
+        public static byte[] GenerateRandomBlob(int length = 256)
         {
             var buffer = new byte[length];
             _rand.NextBytes(buffer);
             return buffer;
         }
 
-        public MemoryStream GenerateRandomBlobStream(int length = 256)
+        public static MemoryStream GenerateRandomBlobStream(int length = 256)
         {
             return new MemoryStream(GenerateRandomBlob(length));
         }
 
-        public string GetRandomContainerName()
+        public static string GetRandomContainerName()
         {
             return StorageFixture.ContainerPrefix + GenerateRandomName();
         }
 
-        public string GenerateRandomName()
+        public static string GenerateRandomName()
         {
             return Guid.NewGuid().ToString("N");
         }
 
-        protected void PrintAcl(IList<ObjectAccessControl> acl)
+        protected static void PrintAcl(IList<ObjectAccessControl> acl)
         {
             if (acl != null)
             {
@@ -103,7 +101,7 @@ namespace TwentyTwenty.Storage.Google.Test
         //     }
         // }
 
-        protected bool StreamEquals(Stream stream1, Stream stream2)
+        protected static bool StreamEquals(Stream stream1, Stream stream2)
         {
             if (stream1.CanSeek)
             {

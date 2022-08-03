@@ -2,24 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Requests;
-using Google.Apis.Services;
 using Google.Apis.Storage.v1.Data;
-using Google.Apis.Upload;
 using Google.Cloud.Storage.V1;
 using Blob = Google.Apis.Storage.v1.Data.Object;
 using BlobObject = Google.Apis.Storage.v1.Data.Object;
-using PredefinedAcl = Google.Apis.Storage.v1.ObjectsResource.InsertMediaUpload.PredefinedAclEnum;
 
 namespace TwentyTwenty.Storage.Google
 {

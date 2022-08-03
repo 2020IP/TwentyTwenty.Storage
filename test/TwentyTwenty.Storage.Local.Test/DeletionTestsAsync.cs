@@ -7,7 +7,7 @@ namespace TwentyTwenty.Storage.Local.Test
     public sealed class DeletionTestsAsync : BlobTestBase
     {
         public DeletionTestsAsync(StorageFixture fixture)
-            : base(fixture) { }
+            : base() { }
 
         [Fact]
         public async void Test_Container_Deleted_Async()

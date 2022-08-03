@@ -7,7 +7,7 @@ using System.IO;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
-    public class StorageFixture : IDisposable
+    public sealed class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
         public BlobServiceClient _client;

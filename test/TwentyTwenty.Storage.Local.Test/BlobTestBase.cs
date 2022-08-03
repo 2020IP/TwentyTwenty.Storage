@@ -13,11 +13,11 @@ namespace TwentyTwenty.Storage.Local.Test
     [Collection("BlobTestBase")]
     public abstract class BlobTestBase
     {
-        Random _rand = new Random();
-        protected LocalStorageProvider _provider;
-        protected string BasePath;
+        protected readonly Random _rand = new();
+        protected readonly LocalStorageProvider _provider;
+        protected readonly string BasePath;
 
-        public BlobTestBase(StorageFixture fixture)
+        public BlobTestBase()
         {
             BasePath = StorageFixture.BasePath;
             _provider = new LocalStorageProvider(StorageFixture.BasePath);
@@ -35,12 +35,12 @@ namespace TwentyTwenty.Storage.Local.Test
             return new MemoryStream(GenerateRandomBlob(length));
         }
 
-        protected string GetRandomContainerName()
+        protected static string GetRandomContainerName()
         {
             return StorageFixture.ContainerPrefix + Guid.NewGuid().ToString("N");
         }
 
-        protected string GenerateRandomName()
+        protected static string GenerateRandomName()
         {
             return Guid.NewGuid().ToString("N");
         }
@@ -52,13 +52,11 @@ namespace TwentyTwenty.Storage.Local.Test
             var dir = Path.GetDirectoryName(path);            
             Directory.CreateDirectory(dir);
 
-            using (var file = File.Create(path))
-            {
-                source.CopyTo(file);
-            }
+            using var file = File.Create(path);
+            source.CopyTo(file);
         }
 
-        protected bool StreamEquals(Stream stream1, Stream stream2)
+        protected static bool StreamEquals(Stream stream1, Stream stream2)
         {
             if (stream1.CanSeek)
             {

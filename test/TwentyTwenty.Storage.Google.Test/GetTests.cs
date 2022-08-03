@@ -23,10 +23,8 @@ namespace TwentyTwenty.Storage.Google.Test
 
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
-            {
-                Assert.True(StreamEquals(blobStream, data));
-            }
+            using var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+            Assert.True(StreamEquals(blobStream, data));
         }
 
         [Fact]

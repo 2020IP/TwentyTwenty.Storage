@@ -47,7 +47,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             var acl = await _client.GetACLAsync(objectAclRequest);
 
             var isPublic = acl.AccessControlList.Grants
-                .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Count() > 0;
+                .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Any();
 
             Assert.True(isPublic);
         }

@@ -8,7 +8,7 @@ namespace TwentyTwenty.Storage.Local.Test
     public sealed class GetTests : BlobTestBase
     {
         public GetTests(StorageFixture fixture)
-            : base(fixture) { }
+            : base() { }
 
         [Fact]
         public async void Test_Get_Blob_Stream_Async()
@@ -19,10 +19,8 @@ namespace TwentyTwenty.Storage.Local.Test
 
             CreateNewFile(container, blobName, data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
-            {
-                Assert.True(StreamEquals(data, blobStream));
-            }
+            using var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+            Assert.True(StreamEquals(data, blobStream));
         }
 
         [Fact]
@@ -102,10 +100,8 @@ namespace TwentyTwenty.Storage.Local.Test
                 var realFullPath = Path.GetFullPath(Path.Combine(containingDirectory, blobName));
 
                 Assert.StartsWith(containingDirectory, realFullPath);
-                using (var file = File.OpenRead(Path.Combine(BasePath, container, blobName)))
-                {
-                    Assert.True(StreamEquals(data, file));
-                }
+                using var file = File.OpenRead(Path.Combine(BasePath, container, blobName));
+                Assert.True(StreamEquals(data, file));
             }
             if (shouldBeThrowing)
             {

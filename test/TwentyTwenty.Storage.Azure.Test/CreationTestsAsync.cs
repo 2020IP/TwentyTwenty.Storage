@@ -18,7 +18,6 @@ namespace TwentyTwenty.Storage.Azure.Test
 
             Assert.False(await _client.GetBlobContainerClient(containerName).ExistsAsync());
             
-            var data = GenerateRandomBlobStream();
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream());
 
             Assert.True(await _client.GetBlobContainerClient(containerName).ExistsAsync());

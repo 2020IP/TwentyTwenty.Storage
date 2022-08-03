@@ -9,7 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
-    public class StorageFixture : IDisposable
+    public sealed class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
         public readonly StorageClient _client;
