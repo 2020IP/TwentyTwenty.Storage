@@ -34,6 +34,26 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
+        public async void Test_Does_Blob_Exist_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var data = GenerateRandomBlobStream(256);
+            var containerRef = _client.GetBlobContainerClient(container);
+            var blobRef = containerRef.GetBlobClient(blobName);
+            var contentType = "image/png";
+
+            await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
+            
+            await blobRef.UploadAsync(data, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders {
+                ContentType = contentType
+            }});
+
+            Assert.True(await _provider.DoesBlobExistAsync(container, blobName));
+            Assert.False(await _provider.DoesBlobExistAsync(container, "fake"));
+        }
+
+        [Fact]
         public async void Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
@@ -45,12 +65,10 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.GetBlobClient(blobName)
                 .UploadAsync(data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
-            {
-                var ms = new MemoryStream();
-                await blobStream.CopyToAsync(ms);
-                Assert.True(StreamEquals(ms, data));
-            }
+            using var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+            var ms = new MemoryStream();
+            await blobStream.CopyToAsync(ms);
+            Assert.True(StreamEquals(ms, data));
         }
 
         [Fact]

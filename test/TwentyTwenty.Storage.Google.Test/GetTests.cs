@@ -1,10 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Net;
 using Google.Cloud.Storage.V1;
-using Microsoft.Extensions.Configuration;
 using Xunit;
-using GoogleCredential = Google.Apis.Auth.OAuth2.GoogleCredential;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
@@ -23,10 +19,8 @@ namespace TwentyTwenty.Storage.Google.Test
 
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
-            {
-                Assert.True(StreamEquals(blobStream, data));
-            }
+            using var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+            Assert.True(StreamEquals(blobStream, data));
         }
 
         [Fact]
@@ -53,15 +47,30 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
+        public async void Test_Does_Blob_Exist_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var datalength = 256;
+            var data = GenerateRandomBlobStream(datalength);
+            var contentType = "image/png";
+
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), contentType, data);
+
+            Assert.True(await _provider.DoesBlobExistAsync(container, blobName));
+            Assert.False(await _provider.DoesBlobExistAsync(container, "fake"));
+        }
+
+        [Fact]
         public async void Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
 
-            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()),
                 "image/png", GenerateRandomBlobStream());
-            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()),
                 "image/jpg", GenerateRandomBlobStream(), new UploadObjectOptions { PredefinedAcl = PredefinedObjectAcl.PublicRead });
-            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()), 
+            await _client.UploadObjectAsync(Bucket, GetObjectName(container, GenerateRandomName()),
                 "text/plain", GenerateRandomBlobStream());
 
             var list = await _provider.ListBlobsAsync(container);
@@ -109,7 +118,7 @@ namespace TwentyTwenty.Storage.Google.Test
             var url = _provider.GetBlobUrl(container, blobName);
             Assert.NotEmpty(url);
 
-            System.Console.WriteLine("URL: " + url);
+            Console.WriteLine("URL: " + url);
         }
 
         [Fact]
@@ -121,10 +130,10 @@ namespace TwentyTwenty.Storage.Google.Test
 
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
 
-            var url = _provider.GetBlobSasUrl(container, blobName, DateTimeOffset.Now.AddHours(1), contentType: "text/plain" );
+            var url = _provider.GetBlobSasUrl(container, blobName, DateTimeOffset.Now.AddHours(1), contentType: "text/plain");
             Assert.NotEmpty(url);
 
-            System.Console.WriteLine("SAS URL: " + url);
+            Console.WriteLine("SAS URL: " + url);
         }
     }
 }

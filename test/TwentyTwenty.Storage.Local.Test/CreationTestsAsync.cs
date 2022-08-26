@@ -7,8 +7,8 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class CreationTestsAsync : BlobTestBase
     {
-        public CreationTestsAsync(StorageFixture fixture)
-            : base(fixture) { }
+        public CreationTestsAsync()
+            : base() { }
 
         [Fact]
         public async void Test_Blob_Created()
@@ -19,10 +19,8 @@ namespace TwentyTwenty.Storage.Local.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, closeStream: false);
 
-            using (var file = File.OpenRead(Path.Combine(BasePath, container, blobName)))
-            {
-                Assert.True(StreamEquals(data, file));
-            }
+            using var file = File.OpenRead(Path.Combine(BasePath, container, blobName));
+            Assert.True(StreamEquals(data, file));
         }
 
         [Fact]
@@ -34,12 +32,10 @@ namespace TwentyTwenty.Storage.Local.Test
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, closeStream: false);
 
-            using (var file = File.OpenRead(Path.Combine(BasePath, container, blobName)))
-            {
-                Assert.True(StreamEquals(data, file));
-            }
+            using var file = File.OpenRead(Path.Combine(BasePath, container, blobName));
+            Assert.True(StreamEquals(data, file));
         }
-        
+
         [Fact]
         public async void Test_Blob_Created_With_Properties()
         {

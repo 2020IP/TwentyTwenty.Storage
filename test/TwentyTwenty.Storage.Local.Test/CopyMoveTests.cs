@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
@@ -7,8 +6,8 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class CopyMoveTests : BlobTestBase
     {
-        public CopyMoveTests(StorageFixture fixture)
-            : base(fixture) { }
+        public CopyMoveTests()
+            : base() { }
 
         [Fact]
         public async void Test_Blob_Moved()
@@ -31,7 +30,7 @@ namespace TwentyTwenty.Storage.Local.Test
             // Make sure source no longer exists
             Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, sourceName)));
         }
-        
+
         [Fact]
         public async void Test_Blob_Moved_With_Metadata()
         {
@@ -53,13 +52,13 @@ namespace TwentyTwenty.Storage.Local.Test
             {
                 Assert.True(StreamEquals(data, file));
             }
-            
+
             // Make sure that destination -meta.json file exists
             Assert.True(File.Exists(Path.Combine(BasePath, destContainer, $"{sourceName}-meta.json")));
 
             // Make sure source no longer exists
             Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, sourceName)));
-            
+
             // Maure sure source -meta.json file no longer exists
             Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, $"{sourceName}-meta.json")));
         }
@@ -108,7 +107,7 @@ namespace TwentyTwenty.Storage.Local.Test
             // Make sure source no longer exists
             Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, sourceName)));
         }
-        
+
         [Fact]
         public async void Test_Blob_Moved_And_Renamed_With_Metadata()
         {
@@ -133,10 +132,10 @@ namespace TwentyTwenty.Storage.Local.Test
 
             // Make sure destination -meta.json now exists 
             Assert.True(File.Exists(Path.Combine(BasePath, destContainer, $"{destName}-meta.json")));
-            
+
             // Make sure source no longer exists
             Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, sourceName)));
-            
+
             // Make sure source -meta.json no longer exists
             Assert.False(File.Exists(Path.Combine(BasePath, sourceContainer, $"{sourceName}-meta.json")));
         }
@@ -188,8 +187,8 @@ namespace TwentyTwenty.Storage.Local.Test
             {
                 Assert.True(StreamEquals(data, file));
             }
-        } 
-        
+        }
+
         [Fact]
         public async void Test_Blob_Copied_With_Metadata()
         {
@@ -212,10 +211,10 @@ namespace TwentyTwenty.Storage.Local.Test
             {
                 Assert.True(StreamEquals(data, file));
             }
-            
+
             // Make sure destination -meta.json now exists 
             Assert.True(File.Exists(Path.Combine(BasePath, destContainer, $"{sourceName}-meta.json")));
-            
+
             // Make sure source still exists
             using (var file = File.OpenRead(Path.Combine(BasePath, sourceContainer, sourceName)))
             {
@@ -276,7 +275,7 @@ namespace TwentyTwenty.Storage.Local.Test
                 Assert.True(StreamEquals(data, file));
             }
         }
-        
+
         [Fact]
         public async void Test_Blob_Copied_With_New_Name_With_Meta()
         {
@@ -301,7 +300,7 @@ namespace TwentyTwenty.Storage.Local.Test
             }
             // Make sure destination -meta.json now exists
             Assert.True(File.Exists(Path.Combine(BasePath, destContainer, $"{destName}-meta.json")));
-            
+
             // Make sure source still exists
             using (var file = File.OpenRead(Path.Combine(BasePath, sourceContainer, sourceName)))
             {

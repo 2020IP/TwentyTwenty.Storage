@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json;
 using Xunit;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -11,8 +10,8 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class UpdateBlobPropertiesTests : BlobTestBase
     {
-        public UpdateBlobPropertiesTests(StorageFixture fixture)
-            : base(fixture) { }
+        public UpdateBlobPropertiesTests()
+            : base() { }
 
         [Fact]
         public async void Test_Updating_Properties_Stores_Meta_File()

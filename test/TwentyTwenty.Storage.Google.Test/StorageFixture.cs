@@ -1,15 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using System.Linq;
-using Google.Cloud.Storage.V1;
 using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using Microsoft.Extensions.Configuration;
-using System.Security.Cryptography.X509Certificates;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
-    public class StorageFixture : IDisposable
+    public sealed class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
         public readonly StorageClient _client;

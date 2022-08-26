@@ -15,7 +15,7 @@ namespace TwentyTwenty.Storage.Azure.Test
     [Collection("BlobTestBase")]
     public abstract class BlobTestBase
     {        
-        private Random _rand = new Random();
+        private readonly Random _rand = new();
         protected AzureStorageProvider _provider;
         protected AzureStorageProvider _exceptionProvider;
         protected StorageFixture _fixture;
@@ -47,12 +47,12 @@ namespace TwentyTwenty.Storage.Azure.Test
             return new MemoryStream(GenerateRandomBlob(length));
         }
 
-        public string GetRandomContainerName()
+        public static string GetRandomContainerName()
         {
             return StorageFixture.ContainerPrefix + Guid.NewGuid().ToString("N");
         }
 
-        public string GenerateRandomName()
+        public static string GenerateRandomName()
         {
             return Guid.NewGuid().ToString("N");
         }
@@ -86,7 +86,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await method(_provider);
         }
 
-        protected async Task AssertBlobDescriptor(BlobDescriptor descriptor, BlobClient blobRef)
+        protected static async Task AssertBlobDescriptor(BlobDescriptor descriptor, BlobClient blobRef)
         {
             Assert.NotNull(descriptor);
 
@@ -102,7 +102,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             Assert.Equal(BlobSecurity.Public, descriptor.Security);
         }
 
-        protected bool StreamEquals(Stream stream1, Stream stream2)
+        protected static bool StreamEquals(Stream stream1, Stream stream2)
         {
             if (stream1.CanSeek)
             {

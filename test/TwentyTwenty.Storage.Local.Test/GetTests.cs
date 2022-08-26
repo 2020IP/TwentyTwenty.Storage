@@ -7,8 +7,8 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class GetTests : BlobTestBase
     {
-        public GetTests(StorageFixture fixture)
-            : base(fixture) { }
+        public GetTests()
+            : base() { }
 
         [Fact]
         public async void Test_Get_Blob_Stream_Async()
@@ -19,10 +19,8 @@ namespace TwentyTwenty.Storage.Local.Test
 
             CreateNewFile(container, blobName, data);
 
-            using (var blobStream = await _provider.GetBlobStreamAsync(container, blobName))
-            {
-                Assert.True(StreamEquals(data, blobStream));
-            }
+            using var blobStream = await _provider.GetBlobStreamAsync(container, blobName);
+            Assert.True(StreamEquals(data, blobStream));
         }
 
         [Fact]
@@ -43,6 +41,20 @@ namespace TwentyTwenty.Storage.Local.Test
             Assert.Equal(descriptor.Length, datalength);
             Assert.Equal(descriptor.Name, blobName);
             Assert.Equal(BlobSecurity.Private, descriptor.Security);
+        }
+
+        [Fact]
+        public async void Test_Does_Blob_Exist_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName() + ".json";
+            var datalength = 256;
+            var data = GenerateRandomBlobStream(datalength);
+
+            CreateNewFile(container, blobName, data);
+
+            Assert.True(await _provider.DoesBlobExistAsync(container, blobName));
+            Assert.False(await _provider.DoesBlobExistAsync(container, "fake.json"));
         }
 
         [Fact]
@@ -102,10 +114,8 @@ namespace TwentyTwenty.Storage.Local.Test
                 var realFullPath = Path.GetFullPath(Path.Combine(containingDirectory, blobName));
 
                 Assert.StartsWith(containingDirectory, realFullPath);
-                using (var file = File.OpenRead(Path.Combine(BasePath, container, blobName)))
-                {
-                    Assert.True(StreamEquals(data, file));
-                }
+                using var file = File.OpenRead(Path.Combine(BasePath, container, blobName));
+                Assert.True(StreamEquals(data, file));
             }
             if (shouldBeThrowing)
             {

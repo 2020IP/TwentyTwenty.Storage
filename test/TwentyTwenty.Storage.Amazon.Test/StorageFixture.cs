@@ -9,7 +9,7 @@ using System.IO;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
-    public class StorageFixture : IDisposable
+    public sealed class StorageFixture : IDisposable
     {
         public const string ContainerPrefix = "storagetest-";
         public readonly AmazonS3Client _client;

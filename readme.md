@@ -134,8 +134,6 @@ dotnet user-secrets set ProfileName "my_profile_name"
 ##### Google:
 ```
 cd test\TwentyTwenty.Storage.Google.Test
-dotnet user-secrets set GoogleEmail "my_google_storage_api_email"
+dotnet user-secrets set GoogleCredJsonBase64 "my_google_base_64_json_creds"
 dotnet user-secrets set GoogleBucket "my_google_bucket"
-dotnet user-secrets set GoogleP12PrivateKey "my_base64_encoded_byte_array_google_p12_key"
 ```
-(To get the 'GoogleP12PrivateKey' get the byte array from the P12 certificate for your Google Cloud Storage API and base64 encode it)

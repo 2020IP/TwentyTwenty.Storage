@@ -5,8 +5,8 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class ExceptionTestsAsync : BlobTestBase
     {
-        public ExceptionTestsAsync(StorageFixture fixture)
-            : base(fixture) { }
+        public ExceptionTestsAsync()
+            : base() { }
 
         [Fact]
         public async void Test_Blob_Deleted_Directory_Exception_Async()

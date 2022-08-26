@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using System.IO;
 using Azure.Storage.Sas;
-using Azure.Storage;
 
 namespace TwentyTwenty.Storage.Azure
 {
@@ -30,7 +30,7 @@ namespace TwentyTwenty.Storage.Azure
                     _settings.Add(splittedNameValue[0], splittedNameValue[1]);
                 }
             }
-        }        
+        }
 
         public async Task DeleteBlobAsync(string containerName, string blobName)
         {
@@ -136,6 +136,27 @@ namespace TwentyTwenty.Storage.Azure
                 throw;
             }
         }
+
+        public async Task<bool> DoesBlobExistAsync(string containerName, string blobName)
+        {
+            var blob = _blobServiceClient
+                .GetBlobContainerClient(containerName)
+                .GetBlobClient(blobName);
+
+            try
+            {
+                return await blob.ExistsAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.IsAzureStorageException())
+                {
+                    throw e.Convert();
+                }
+                throw;
+            }
+        }
+
 
         public async Task<Stream> GetBlobStreamAsync(string containerName, string blobName)
         {
