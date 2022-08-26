@@ -2,16 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Storage.v1.Data;
 using Google.Cloud.Storage.V1;
-using TwentyTwenty.Storage;
-using TwentyTwenty.Storage.Google;
 using Xunit;
-using Blob = Google.Apis.Storage.v1.Data.Object;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
@@ -41,7 +34,6 @@ namespace TwentyTwenty.Storage.Google.Test
             _client = fixture._client;
             _provider = new GoogleStorageProvider(fixture._credential, new GoogleProviderOptions
             {
-                Email = fixture.Config["GoogleEmail"],
                 Bucket = Bucket,
             });
         }

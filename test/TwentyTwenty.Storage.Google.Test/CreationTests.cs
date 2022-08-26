@@ -50,7 +50,7 @@ namespace TwentyTwenty.Storage.Google.Test
             var data = GenerateRandomBlobStream(dataLength);
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, new BlobProperties { ContentType = contentType });
-            
+
             var blob = await _client.GetObjectAsync(Bucket, GetObjectName(container, blobName));
             Assert.NotNull(blob);
             Assert.NotEmpty(blob.MediaLink);
@@ -71,7 +71,7 @@ namespace TwentyTwenty.Storage.Google.Test
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), null, data);
 
             await _provider.CopyBlobAsync(container, blobName, container2, blobName2);
-                        
+
             var blob = await _client.GetObjectAsync(Bucket, GetObjectName(container, blobName));
             Assert.NotNull(blob);
             Assert.NotEmpty(blob.MediaLink);

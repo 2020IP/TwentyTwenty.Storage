@@ -7,7 +7,7 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class CreationTestsAsync : BlobTestBase
     {
-        public CreationTestsAsync(StorageFixture fixture)
+        public CreationTestsAsync()
             : base() { }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace TwentyTwenty.Storage.Local.Test
             using var file = File.OpenRead(Path.Combine(BasePath, container, blobName));
             Assert.True(StreamEquals(data, file));
         }
-        
+
         [Fact]
         public async void Test_Blob_Created_With_Properties()
         {

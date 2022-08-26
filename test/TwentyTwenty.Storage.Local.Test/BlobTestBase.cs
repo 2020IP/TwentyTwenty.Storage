@@ -25,7 +25,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
         protected byte[] GenerateRandomBlob(int length = 256)
         {
-            var buffer = new Byte[length];
+            var buffer = new byte[length];
             _rand.NextBytes(buffer);
             return buffer;
         }
@@ -49,7 +49,7 @@ namespace TwentyTwenty.Storage.Local.Test
         {
             var path = Path.Combine(BasePath, containerName, blobName);
 
-            var dir = Path.GetDirectoryName(path);            
+            var dir = Path.GetDirectoryName(path);
             Directory.CreateDirectory(dir);
 
             using var file = File.Create(path);

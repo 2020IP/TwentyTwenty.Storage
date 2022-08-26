@@ -1,5 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Xunit;
+﻿using Xunit;
 
 namespace TwentyTwenty.Storage.Google.Test
 {

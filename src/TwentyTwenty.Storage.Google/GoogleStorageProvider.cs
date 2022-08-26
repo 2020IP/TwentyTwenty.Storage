@@ -22,7 +22,6 @@ namespace TwentyTwenty.Storage.Google
         private readonly StorageClient _client;
         private readonly UrlSigner _urlSigner = null;
         private readonly string _bucket;
-        private readonly string _serviceEmail;
 
         public GoogleStorageProvider(GoogleCredential credential, GoogleProviderOptions options)
         {
@@ -32,7 +31,6 @@ namespace TwentyTwenty.Storage.Google
             }
 
             _client = StorageClient.Create(credential);
-            _serviceEmail = options.Email;
             _bucket = options.Bucket;
 
             if (credential.UnderlyingCredential is ServiceAccountCredential cred)
@@ -142,6 +140,19 @@ namespace TwentyTwenty.Storage.Google
             }
         }
 
+        public async Task<bool> DoesBlobExistAsync(string containerName, string blobName)
+        {
+            try
+            {
+                var response = _client.ListObjectsAsync(_bucket, ObjectName(containerName, blobName));
+                return (await response?.ReadPageAsync(1))?.Count() > 0;
+            }
+            catch (GoogleApiException gae)
+            {
+                throw Error(gae);
+            }
+        }
+
         public async Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
             try
@@ -149,6 +160,7 @@ namespace TwentyTwenty.Storage.Google
                 var enumerable = _client.ListObjectsAsync(_bucket, containerName, new ListObjectsOptions { Projection = Projection.Full });
                 
                 var list = new List<BlobDescriptor>();
+                
                 var enumerator = enumerable.GetAsyncEnumerator();
 
                 // TODO: Reafactor to use async enumerators properly in netstandard2.1

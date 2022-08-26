@@ -18,7 +18,7 @@ namespace TwentyTwenty.Storage.Local
             _basePath = basePath;
             _jsonSerialiserOptions = new JsonSerializerOptions
             {
-                Converters = {new JsonStringEnumConverter()},
+                Converters = { new JsonStringEnumConverter() },
                 WriteIndented = true
             };
         }
@@ -92,7 +92,7 @@ namespace TwentyTwenty.Storage.Local
 
             var sourcePath = Path.Combine(_basePath, sourceContainerName, sourceBlobName);
             var destPath = Path.Combine(_basePath, destinationContainerName, destinationBlobName ?? sourceBlobName);
-            
+
             var destDir = Path.GetDirectoryName(destPath);
             Directory.CreateDirectory(destDir);
 
@@ -117,7 +117,7 @@ namespace TwentyTwenty.Storage.Local
         public BlobDescriptor GetBlobDescriptor(string containerName, string blobName)
         {
             var path = Path.Combine(_basePath, containerName, blobName);
-            
+
             try
             {
                 var info = new FileInfo(path);
@@ -149,7 +149,16 @@ namespace TwentyTwenty.Storage.Local
             return Task.Run(() => GetBlobDescriptor(containerName, blobName));
         }
 
-        public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry, 
+        public Task<bool> DoesBlobExistAsync(string containerName, string blobName)
+        {
+            return Task.Run(() =>
+            {
+                var path = Path.Combine(_basePath, containerName, blobName);
+                return File.Exists(path);
+            });
+        }
+
+        public string GetBlobSasUrl(string containerName, string blobName, DateTimeOffset expiry,
             bool isDownload = false, string fileName = null, string contentType = null, BlobUrlAccess access = BlobUrlAccess.Read)
         {
             return Path.Combine(_basePath, containerName, blobName);
@@ -216,14 +225,14 @@ namespace TwentyTwenty.Storage.Local
 
         public Task<IList<BlobDescriptor>> ListBlobsAsync(string containerName)
         {
-            return Task.Run(()=> ListBlobs(containerName));
+            return Task.Run(() => ListBlobs(containerName));
         }
 
-        public void SaveBlobStream(string containerName, string blobName, Stream source, 
+        public void SaveBlobStream(string containerName, string blobName, Stream source,
             BlobProperties properties = null, bool closeStream = true)
         {
             var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
-            
+
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -247,7 +256,7 @@ namespace TwentyTwenty.Storage.Local
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source,
             BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
             var path = ExtractFullPathAndProtectAgainstPathTraversal(containerName, blobName);
@@ -274,7 +283,7 @@ namespace TwentyTwenty.Storage.Local
                 throw ex.ToStorageException();
             }
         }
-        
+
         public void UpdateBlobProperties(string containerName, string blobName, BlobProperties properties)
         {
             try
@@ -318,7 +327,7 @@ namespace TwentyTwenty.Storage.Local
                 throw ex.ToStorageException();
             }
         }
-        
+
         private string ExtractFullPathAndProtectAgainstPathTraversal(string containerName, string blobName)
         {
             var dir = Path.Combine(_basePath, containerName);
@@ -331,13 +340,13 @@ namespace TwentyTwenty.Storage.Local
 
             return path;
         }
-        
-        
+
+
         private static string CreateMetadataPath(string path)
         {
             return $"{path}-meta.json";
         }
-        
+
         private void MergeDescriptorWithCustomMetaIfExists(string fullPathToBlob, BlobDescriptor descriptor)
         {
             var meta = GetFileMetaIfExists(fullPathToBlob);

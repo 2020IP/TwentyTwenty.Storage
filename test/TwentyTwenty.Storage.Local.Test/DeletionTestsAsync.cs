@@ -6,7 +6,7 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class DeletionTestsAsync : BlobTestBase
     {
-        public DeletionTestsAsync(StorageFixture fixture)
+        public DeletionTestsAsync()
             : base() { }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
             Assert.False(File.Exists(Path.Combine(BasePath, container, blobName)));
         }
-        
+
         [Fact]
         public async void Test_Blob_Deleted_Async_Also_Removes_Metadata()
         {
@@ -50,7 +50,7 @@ namespace TwentyTwenty.Storage.Local.Test
             {
                 Security = BlobSecurity.Public
             });
-            
+
             await _provider.DeleteBlobAsync(container, blobName);
 
             Assert.False(File.Exists(Path.Combine(BasePath, container, blobName)));

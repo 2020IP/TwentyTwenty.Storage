@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -50,6 +49,26 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.Equal(descriptor.Name, blobName);
             Assert.Equal(BlobSecurity.Public, descriptor.Security);
             Assert.Equal(descriptor.Metadata, meta);
+        }
+
+        [Fact]
+        public async void Test_Does_Blob_Exist_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName();
+            var datalength = 256;
+            var data = GenerateRandomBlobStream(datalength);
+            var contentType = "image/png";
+            var meta = new Dictionary<string, string>
+            {
+                { "key1", "val1" },
+                { "key2", "val2" },
+            };
+
+            await CreateNewObjectAsync(container, blobName, data, true, contentType, meta);
+
+            Assert.True(await _provider.DoesBlobExistAsync(container, blobName));
+            Assert.False(await _provider.DoesBlobExistAsync(container, "fake"));
         }
 
         [Fact]

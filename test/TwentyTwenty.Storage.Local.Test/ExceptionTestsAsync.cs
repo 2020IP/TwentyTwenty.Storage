@@ -5,7 +5,7 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class ExceptionTestsAsync : BlobTestBase
     {
-        public ExceptionTestsAsync(StorageFixture fixture)
+        public ExceptionTestsAsync()
             : base() { }
 
         [Fact]

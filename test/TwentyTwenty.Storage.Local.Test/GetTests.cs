@@ -7,7 +7,7 @@ namespace TwentyTwenty.Storage.Local.Test
     [Trait("Category", "Local")]
     public sealed class GetTests : BlobTestBase
     {
-        public GetTests(StorageFixture fixture)
+        public GetTests()
             : base() { }
 
         [Fact]
@@ -41,6 +41,20 @@ namespace TwentyTwenty.Storage.Local.Test
             Assert.Equal(descriptor.Length, datalength);
             Assert.Equal(descriptor.Name, blobName);
             Assert.Equal(BlobSecurity.Private, descriptor.Security);
+        }
+
+        [Fact]
+        public async void Test_Does_Blob_Exist_Async()
+        {
+            var container = GetRandomContainerName();
+            var blobName = GenerateRandomName() + ".json";
+            var datalength = 256;
+            var data = GenerateRandomBlobStream(datalength);
+
+            CreateNewFile(container, blobName, data);
+
+            Assert.True(await _provider.DoesBlobExistAsync(container, blobName));
+            Assert.False(await _provider.DoesBlobExistAsync(container, "fake.json"));
         }
 
         [Fact]

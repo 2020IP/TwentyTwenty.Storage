@@ -7,12 +7,12 @@ namespace TwentyTwenty.Storage.Local
     {
         public static StorageException ToStorageException(this Exception ex)
         {
-            if(ex is UnauthorizedAccessException)
+            if (ex is UnauthorizedAccessException)
             {
                 throw new StorageException(StorageErrorCode.InvalidAccess.ToStorageError(), ex);
             }
-            else if (ex is NotSupportedException 
-                || ex is DirectoryNotFoundException 
+            else if (ex is NotSupportedException
+                || ex is DirectoryNotFoundException
                 || ex is FileNotFoundException
                 || ex is ArgumentException)
             {
