@@ -75,24 +75,6 @@ Task("Package")
         DotNetPack("src/TwentyTwenty.Storage.Local/", settings);
     });
 
-Task("Package")
-    .IsDependentOn("Test")
-    .Does(() => {
-        var settings = new DotNetPackSettings
-        {
-            OutputDirectory = outputDir,
-            NoBuild = true,
-            Configuration = configuration,
-            ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
-        };
-
-        DotNetPack("src/TwentyTwenty.Storage/", settings);
-        DotNetPack("src/TwentyTwenty.Storage.Amazon/", settings);
-        DotNetPack("src/TwentyTwenty.Storage.Azure/", settings);
-        DotNetPack("src/TwentyTwenty.Storage.Google/", settings);
-        DotNetPack("src/TwentyTwenty.Storage.Local/", settings);
-    });
-
 Task("Publish")
     .IsDependentOn("Package")
     .Does(() => {
