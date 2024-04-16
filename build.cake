@@ -1,4 +1,4 @@
-#tool nuget:?package=GitVersion.CommandLine&version=5.0.1
+#tool nuget:?package=GitVersion.CommandLine&version=5.12.0
 
 GitVersion versionInfo = null;
 var target = Argument("target", "Default");
@@ -34,7 +34,7 @@ Task("Version")
 Task("Build")
     .IsDependentOn("Version")
     .Does(() => {
-        DotNetCoreBuild(".", new DotNetCoreBuildSettings
+        DotNetBuild(".", new DotNetBuildSettings
         {
             Configuration = configuration,
             ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
@@ -46,7 +46,7 @@ Task("Test")
         var testProjects = GetFiles("./test/**/*.csproj");
         foreach(var proj in testProjects)
         {
-            DotNetCoreTest(proj.FullPath, new DotNetCoreTestSettings
+            DotNetTest(proj.FullPath, new DotNetTestSettings
             {
                 Configuration = configuration,
                 NoBuild = true,
@@ -57,7 +57,7 @@ Task("Test")
 Task("Package")
     .IsDependentOn("Test")
     .Does(() => {
-        var settings = new DotNetCorePackSettings
+        var settings = new DotNetPackSettings
         {
             OutputDirectory = outputDir,
             NoBuild = true,
@@ -65,11 +65,11 @@ Task("Package")
             ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
         };
 
-        DotNetCorePack("src/TwentyTwenty.Storage/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Amazon/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Azure/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Google/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Local/", settings);
+        DotNetPack("src/TwentyTwenty.Storage/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Amazon/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Azure/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Google/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Local/", settings);
 
         if (AppVeyor.IsRunningOnAppVeyor)
         {
