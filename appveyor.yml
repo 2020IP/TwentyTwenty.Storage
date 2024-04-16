@@ -22,7 +22,7 @@ deploy:
 build_script:
   - ./build.sh
 artifacts:
-  - path: '**\*.nupkg'
+  - path: 'artifacts\*.nupkg'
 environment:
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
