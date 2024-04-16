@@ -71,11 +71,11 @@ Task("Package")
         DotNetCorePack("src/TwentyTwenty.Storage.Google/", settings);
         DotNetCorePack("src/TwentyTwenty.Storage.Local/", settings);
 
-        if (AppVeyor.IsRunningOnAppVeyor)
-        {
-            foreach (var file in GetFiles(outputDir + "**/*"))
-                AppVeyor.UploadArtifact(file.FullPath);
-        }
+        // if (AppVeyor.IsRunningOnAppVeyor)
+        // {
+        //     foreach (var file in GetFiles(outputDir + "**/*"))
+        //         AppVeyor.UploadArtifact(file.FullPath);
+        // }
     });
 
 Task("Default")
