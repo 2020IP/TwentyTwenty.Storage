@@ -1,4 +1,4 @@
-#tool nuget:?package=GitVersion.Tool&version=5.12.0
+#tool "dotnet:?package=GitVersion.Tool"
 
 GitVersion versionInfo = null;
 var target = Argument("target", "Default");
