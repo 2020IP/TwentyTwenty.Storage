@@ -1,9 +1,12 @@
-#tool nuget:?package=GitVersion.CommandLine&version=5.0.1
+#tool "dotnet:?package=GitVersion.Tool"
 
 GitVersion versionInfo = null;
 var target = Argument("target", "Default");
 var outputDir = "./artifacts/";
-var configuration   = Argument("configuration", "Release");
+var configuration = Argument("configuration", "Release");
+var nugetFeedUrl = "https://api.nuget.org/v3/index.json";
+var nugetApiKey = EnvironmentVariable("Nuget_ApiKey");
+var isTaggedBuild = Convert.ToBoolean(EnvironmentVariable("APPVEYOR_REPO_TAG"));
 
 Task("Clean")
     .Does(() => {
@@ -34,7 +37,7 @@ Task("Version")
 Task("Build")
     .IsDependentOn("Version")
     .Does(() => {
-        DotNetCoreBuild(".", new DotNetCoreBuildSettings
+        DotNetBuild(".", new DotNetBuildSettings
         {
             Configuration = configuration,
             ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
@@ -46,7 +49,7 @@ Task("Test")
         var testProjects = GetFiles("./test/**/*.csproj");
         foreach(var proj in testProjects)
         {
-            DotNetCoreTest(proj.FullPath, new DotNetCoreTestSettings
+            DotNetTest(proj.FullPath, new DotNetTestSettings
             {
                 Configuration = configuration,
                 NoBuild = true,
@@ -57,7 +60,7 @@ Task("Test")
 Task("Package")
     .IsDependentOn("Test")
     .Does(() => {
-        var settings = new DotNetCorePackSettings
+        var settings = new DotNetPackSettings
         {
             OutputDirectory = outputDir,
             NoBuild = true,
@@ -65,20 +68,29 @@ Task("Package")
             ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.NuGetVersion)
         };
 
-        DotNetCorePack("src/TwentyTwenty.Storage/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Amazon/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Azure/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Google/", settings);
-        DotNetCorePack("src/TwentyTwenty.Storage.Local/", settings);
+        DotNetPack("src/TwentyTwenty.Storage/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Amazon/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Azure/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Google/", settings);
+        DotNetPack("src/TwentyTwenty.Storage.Local/", settings);
+    });
 
-        // if (AppVeyor.IsRunningOnAppVeyor)
-        // {
-        //     foreach (var file in GetFiles(outputDir + "**/*"))
-        //         AppVeyor.UploadArtifact(file.FullPath);
-        // }
+Task("Publish")
+    .IsDependentOn("Package")
+    .Does(() => {
+        if (isTaggedBuild)
+        {
+            var settings = new DotNetNuGetPushSettings
+            {
+                Source = nugetFeedUrl,
+                ApiKey = nugetApiKey,
+            };
+
+            DotNetNuGetPush(outputDir + "*.nupkg", settings);
+        }
     });
 
 Task("Default")
-    .IsDependentOn("Package");
+    .IsDependentOn("Publish");
 
 RunTarget(target);
