@@ -6,6 +6,7 @@ var outputDir = "./artifacts/";
 var configuration = Argument("configuration", "Release");
 var nugetFeedUrl = "https://api.nuget.org/v3/index.json";
 var nugetApiKey = EnvironmentVariable("Nuget_ApiKey");
+var isTaggedBuild = Convert.ToBoolean(EnvironmentVariable("APPVEYOR_REPO_TAG"));
 
 Task("Clean")
     .Does(() => {
@@ -95,13 +96,16 @@ Task("Package")
 Task("Publish")
     .IsDependentOn("Package")
     .Does(() => {
-        var settings = new DotNetCoreNuGetPushSettings
+        if (isTaggedBuild)
         {
-            Source = nugetFeedUrl,
-            ApiKey = nugetApiKey,
-        };
+            var settings = new DotNetCoreNuGetPushSettings
+            {
+                Source = nugetFeedUrl,
+                ApiKey = nugetApiKey,
+            };
 
-        DotNetNuGetPush(outputDir + "*.nupkg", settings);
+            DotNetNuGetPush(outputDir + "*.nupkg", settings);
+        }
     });
 
 Task("Default")
