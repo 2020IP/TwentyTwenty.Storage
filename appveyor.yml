@@ -21,6 +21,8 @@ deploy:
       APPVEYOR_REPO_TAG: true
 build_script:
   - ./build.sh
+artifacts:
+  - path: '**\*.nupkg'
 environment:
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
