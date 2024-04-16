@@ -98,7 +98,7 @@ Task("Publish")
     .Does(() => {
         if (isTaggedBuild)
         {
-            var settings = new DotNetCoreNuGetPushSettings
+            var settings = new DotNetNuGetPushSettings
             {
                 Source = nugetFeedUrl,
                 ApiKey = nugetApiKey,
