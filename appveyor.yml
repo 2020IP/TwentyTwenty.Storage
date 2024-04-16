@@ -3,27 +3,29 @@ image: Ubuntu
 configuration: Release
 build: script
 test: off
-deploy:
-  - provider: NuGet
-    api_key:
-      secure: zwC4xmkpZ0DAkAARMAR1i5+FOiBB9/pBVOC8Ea6NynXL8A6a1SZ1SyJjWrZey4mM
-    artifact: /.*\.nupkg/
-    on:
-      APPVEYOR_REPO_TAG: true
-  - provider: GitHub
-    release: v$(GitVersion_SemVer)
-    description: 'TwentyTwenty.Storage'
-    auth_token:
-      secure: jRySGaPcL/02436nnSFXkXidYIAZpDij4uSLrYqVI0erkq/FC2YG9Tc/GMiPJXBd2cDg1V9ZuCm4UYsBiy4ymPXBFMrR9+/96Mwq9iEbnhP3C9xM9j/ywL8T5q5vwVyr
-    artifact: /.*\.nupkg/
-    draft: true
-    on:    
-      APPVEYOR_REPO_TAG: true
+# deploy:
+#   - provider: NuGet
+#     api_key:
+#       secure: zwC4xmkpZ0DAkAARMAR1i5+FOiBB9/pBVOC8Ea6NynXL8A6a1SZ1SyJjWrZey4mM
+#     artifact: /.*\.nupkg/
+#     on:
+#       APPVEYOR_REPO_TAG: true
+#   - provider: GitHub
+#     release: v$(GitVersion_SemVer)
+#     description: 'TwentyTwenty.Storage'
+#     auth_token:
+#       secure: jRySGaPcL/02436nnSFXkXidYIAZpDij4uSLrYqVI0erkq/FC2YG9Tc/GMiPJXBd2cDg1V9ZuCm4UYsBiy4ymPXBFMrR9+/96Mwq9iEbnhP3C9xM9j/ywL8T5q5vwVyr
+#     artifact: /.*\.nupkg/
+#     draft: true
+#     on:    
+#       APPVEYOR_REPO_TAG: true
 build_script:
   - ./build.sh
-artifacts:
-  - path: 'artifacts\*.nupkg'
+# artifacts:
+#   - path: 'artifacts\*.nupkg'
 environment:
+  Nuget_ApiKey:
+    secure: zwC4xmkpZ0DAkAARMAR1i5+FOiBB9/pBVOC8Ea6NynXL8A6a1SZ1SyJjWrZey4mM
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
   GoogleCredJsonBase64:
