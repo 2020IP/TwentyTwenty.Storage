@@ -1,9 +1,9 @@
-#tool nuget:?package=GitVersion.CommandLine&version=5.12.0
+#tool nuget:?package=GitVersion.Tool&version=5.12.0
 
 GitVersion versionInfo = null;
 var target = Argument("target", "Default");
 var outputDir = "./artifacts/";
-var configuration   = Argument("configuration", "Release");
+var configuration = Argument("configuration", "Release");
 
 Task("Clean")
     .Does(() => {

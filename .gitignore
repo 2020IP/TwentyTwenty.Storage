@@ -212,3 +212,5 @@ FakesAssemblies/
 .nuget
 .build/
 .idea
+
+tools/
