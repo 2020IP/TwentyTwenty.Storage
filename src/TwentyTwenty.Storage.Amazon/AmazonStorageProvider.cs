@@ -183,6 +183,8 @@ namespace TwentyTwenty.Storage.Amazon
                 {
                     var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
+                    if (objectsResponse.S3Objects.Count == 0) break;
+
                     // If response is truncated, set the marker to get the next set of keys.
                     if (objectsResponse.IsTruncated)
                     {
