@@ -173,7 +173,8 @@ namespace TwentyTwenty.Storage.Amazon
             {
                 BucketName = _bucket,
                 Prefix = containerName,
-                MaxKeys = 100000
+                // AWS only allows you to delete 1000 files at a time
+                MaxKeys = 1000
             };
 
             var keys = new List<KeyVersion>();
