@@ -177,16 +177,11 @@ namespace TwentyTwenty.Storage.Amazon
                 MaxKeys = 1000
             };
 
-            var keys = new List<KeyVersion>();
-
             try
             {
                 do
                 {
                     var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
-
-                    keys.AddRange(objectsResponse.S3Objects
-                        .Select(x => new KeyVersion { Key = x.Key, VersionId = null }));
 
                     // If response is truncated, set the marker to get the next set of keys.
                     if (objectsResponse.IsTruncated)
@@ -197,18 +192,17 @@ namespace TwentyTwenty.Storage.Amazon
                     {
                         objectsRequest = null;
                     }
-                } while (objectsRequest != null);
 
-                if (keys.Count > 0)
-                {
                     var objectsDeleteRequest = new DeleteObjectsRequest
                     {
                         BucketName = _bucket,
-                        Objects = keys
+                        Objects = objectsResponse.S3Objects
+                            .Select(x => new KeyVersion { Key = x.Key, VersionId = null })
+                            .ToList(),
                     };
 
                     await _s3Client.DeleteObjectsAsync(objectsDeleteRequest);
-                }
+                } while (objectsRequest != null);
             }
             catch (AmazonS3Exception asex)
             {
