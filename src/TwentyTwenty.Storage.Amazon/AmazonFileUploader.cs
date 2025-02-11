@@ -39,7 +39,7 @@ namespace TwentyTwenty.Storage.Amazon
                 CannedACL = cannedACL,
                 ServerSideEncryptionMethod = encryption,
             };
-            if (properties.Metadata != null && properties.Metadata.Count > 0)
+            if (properties?.Metadata != null && properties.Metadata.Count > 0)
             {
                 initiateRequest.Metadata.AddMetadata(properties.Metadata);
             }
