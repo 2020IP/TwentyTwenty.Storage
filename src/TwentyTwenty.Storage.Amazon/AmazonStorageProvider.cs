@@ -58,7 +58,7 @@ namespace TwentyTwenty.Storage.Amazon
             {
                 return new BasicAWSCredentials(options.PublicKey, options.SecretKey);
             }
-            
+
             return FallbackCredentialsFactory.GetCredentials();
         }
 
@@ -82,8 +82,11 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public async Task CopyBlobAsync(string sourceContainerName, string sourceBlobName,
-            string destinationContainerName, string destinationBlobName = null)
+        public async Task CopyBlobAsync(
+            string sourceContainerName,
+            string sourceBlobName,
+            string destinationContainerName,
+            string destinationBlobName = null)
         {
             if (string.IsNullOrEmpty(sourceContainerName))
             {
@@ -132,7 +135,7 @@ namespace TwentyTwenty.Storage.Amazon
                     };
                     request.Headers.ContentDisposition = metadataResponse.Headers.ContentDisposition;
                     request.Metadata.AddMetadata(metadataResponse.Metadata.ToMetadata());
-                    
+
                     response = await MultipartCopy(sourceKey, destinationKey, objectSize, request);
                 }
                 else
@@ -406,7 +409,7 @@ namespace TwentyTwenty.Storage.Amazon
             }
         }
 
-        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source, 
+        public async Task SaveBlobStreamAsync(string containerName, string blobName, Stream source,
             BlobProperties properties = null, bool closeStream = true, long? length = null)
         {
             length = source.CanSeek ? source.Length : length;
@@ -428,8 +431,14 @@ namespace TwentyTwenty.Storage.Amazon
                 try
                 {
                     var uploader = new AmazonFileUploader(_s3Client);
-                    await uploader.UploadFileAsync(_bucket, GenerateKeyName(containerName, blobName), source,
-                        properties?.ContentType, GetCannedACL(properties), _serverSideEncryptionMethod, closeStream, null);
+                    await uploader.UploadFileAsync(
+                        _bucket,
+                        GenerateKeyName(containerName, blobName),
+                        source,
+                        properties,
+                        GetCannedACL(properties),
+                        _serverSideEncryptionMethod,
+                        closeStream, null);
                 }
                 catch (AmazonS3Exception asex)
                 {
@@ -480,7 +489,7 @@ namespace TwentyTwenty.Storage.Amazon
                     };
                     request.Headers.ContentDisposition = properties.ContentDisposition;
                     request.Metadata.AddMetadata(properties?.Metadata);
-                    
+
                     var completeUploadResponse = await MultipartCopy(key, key, objectSize, request);
                 }
                 else
@@ -499,7 +508,7 @@ namespace TwentyTwenty.Storage.Amazon
         private S3CannedACL GetCannedACL(BlobProperties properties)
             => properties?.Security == BlobSecurity.Public ? S3CannedACL.PublicRead : S3CannedACL.Private;
 
-        private static string GenerateKeyName(string containerName, string blobName) 
+        private static string GenerateKeyName(string containerName, string blobName)
             => string.IsNullOrWhiteSpace(containerName) ? blobName : $"{containerName}/{blobName}";
 
         private CopyObjectRequest CreateUpdateRequest(string containerName, string blobName, BlobProperties properties)
@@ -547,7 +556,7 @@ namespace TwentyTwenty.Storage.Amazon
         //     return fileTransferUtilityRequest;
         // }
 
-        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source, 
+        private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source,
             BlobProperties properties, bool closeStream, long? length = null)
         {
             var putRequest = new PutObjectRequest
@@ -571,12 +580,12 @@ namespace TwentyTwenty.Storage.Amazon
             return putRequest;
         }
 
-        private async Task<CompleteMultipartUploadResponse> MultipartCopy(string sourceKey, string destinationKey, 
+        private async Task<CompleteMultipartUploadResponse> MultipartCopy(string sourceKey, string destinationKey,
             long objectSize, InitiateMultipartUploadRequest initiateRequest)
         {
             var copyResponses = new List<CopyPartResponse>();
             var partSize = 5 * (long)Math.Pow(2, 20); // Part size is 5 MB.
-                    
+
             // Initiate the upload.                    
             var initResponse = await _s3Client.InitiateMultipartUploadAsync(initiateRequest);
 
