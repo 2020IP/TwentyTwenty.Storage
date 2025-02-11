@@ -19,18 +19,32 @@ namespace TwentyTwenty.Storage.Amazon
             _s3Client = s3Client;
         }
 
-        public async Task UploadFileAsync(string bucketName, string key, Stream source, string contentType, S3CannedACL cannedACL,
-            ServerSideEncryptionMethod encryption, bool autoCloseStream, Action<UploadEvent> callback)
+        public async Task UploadFileAsync(
+            string bucketName,
+            string key,
+            Stream source,
+            BlobProperties properties,
+            S3CannedACL cannedACL,
+            ServerSideEncryptionMethod encryption,
+            bool autoCloseStream,
+            Action<UploadEvent> callback)
         {
             //this._logger.LogInformation($"Start uploading to {objectKey}");
-            var initateResponse = await _s3Client.InitiateMultipartUploadAsync(new InitiateMultipartUploadRequest
+
+            var initiateRequest = new InitiateMultipartUploadRequest
             {
                 BucketName = bucketName,
                 Key = key,
-                ContentType = contentType,
+                ContentType = properties?.ContentType,
                 CannedACL = cannedACL,
                 ServerSideEncryptionMethod = encryption,
-            });
+            };
+            if (properties?.Metadata != null && properties.Metadata.Count > 0)
+            {
+                initiateRequest.Metadata.AddMetadata(properties.Metadata);
+            }
+
+            var initateResponse = await _s3Client.InitiateMultipartUploadAsync(initiateRequest);
             //this._logger.LogInformation($"Initiated multi part upload with id {initateResponse.UploadId}");
             try
             {
@@ -53,7 +67,7 @@ namespace TwentyTwenty.Storage.Amazon
 
                         await nextUploadBuffer.WriteAsync(readBuffer, 0, readCount);
 
-                        if(PART_SIZE < nextUploadBuffer.Position)
+                        if (PART_SIZE < nextUploadBuffer.Position)
                         {
                             var isLastPart = readCount == READ_BUFFER_SIZE;
                             var partSize = nextUploadBuffer.Position;
@@ -65,7 +79,7 @@ namespace TwentyTwenty.Storage.Amazon
                                 UploadId = initateResponse.UploadId,
                                 InputStream = nextUploadBuffer,
                                 PartSize = partSize,
-                                PartNumber = partNumber,  
+                                PartNumber = partNumber,
                                 IsLastPart = isLastPart
                             });
                             // this._logger.LogInformation($"Uploaded part {partNumber}. (Last part = {isLastPart}, Part size = {partSize}, Upload Id: {initateResponse.UploadId}");
@@ -79,7 +93,7 @@ namespace TwentyTwenty.Storage.Amazon
                         }
                     }
 
-                    if(nextUploadBuffer.Position != 0)
+                    if (nextUploadBuffer.Position != 0)
                     {
                         var partSize = nextUploadBuffer.Position;
                         nextUploadBuffer.Position = 0;
