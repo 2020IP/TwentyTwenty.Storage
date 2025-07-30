@@ -261,12 +261,20 @@ namespace TwentyTwenty.Storage.Amazon
         public async Task<bool> DoesBlobExistAsync(string containerName, string blobName)
         {
             try
-            {
-                var response = await _s3Client.ListObjectsAsync(_bucket, GenerateKeyName(containerName, blobName));
-                return response?.S3Objects?.Count > 0;
+            {                
+                await _s3Client.GetObjectMetadataAsync(_bucket, GenerateKeyName(containerName, blobName));
+                return true;
             }
             catch (AmazonS3Exception asex)
             {
+                if (string.Equals(asex.ErrorCode, "NoSuchBucket"))
+                {
+                    return false;
+                }
+                else if (string.Equals(asex.ErrorCode, "NotFound"))
+                {
+                    return false;
+                }
                 throw asex.ToStorageException();
             }
         }
