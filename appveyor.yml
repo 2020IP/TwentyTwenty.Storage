@@ -25,7 +25,7 @@ build_script:
 #   - path: 'artifacts\*.nupkg'
 environment:
   Nuget_ApiKey:
-    secure: zwC4xmkpZ0DAkAARMAR1i5+FOiBB9/pBVOC8Ea6NynXL8A6a1SZ1SyJjWrZey4mM
+    secure: /6J1yRQZ3OGXCZ/B0YaKTnGjmdHeGkwMxLwcJnysiOo5UkZB2ayiohjRNYejcVob
   GoogleBucket:
     secure: fRpLLhsG0i4uDTlsToxZdMuIH9oGewaGmGxaGb3Ekys=
   GoogleCredJsonBase64:
