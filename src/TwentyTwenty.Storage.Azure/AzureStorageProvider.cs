@@ -125,6 +125,7 @@ namespace TwentyTwenty.Storage.Azure
                     ETag = blobProps.Value.ETag.ToString(),
                     LastModified = blobProps.Value.LastModified,
                     Length = blobProps.Value.ContentLength,
+                    Metadata = blobProps.Value.Metadata,
                 };
             }
             catch (Exception e)
