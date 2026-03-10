@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -6,10 +7,10 @@ namespace TwentyTwenty.Storage.Azure.Test
     public sealed class DeletionTestsAsync : BlobTestBase
     {
         public DeletionTestsAsync(StorageFixture fixture)
-            :base(fixture) { }
+            : base(fixture) { }
 
         [Fact]
-        public async void Test_Container_Deleted_Async()
+        public async Task Test_Container_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -25,7 +26,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Deleted_Async()
+        public async Task Test_Blob_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -42,7 +43,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Deleted_Without_Exception_When_NonExistant_Async()
+        public async Task Test_Blob_Deleted_Without_Exception_When_NonExistant_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -51,7 +52,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Container_Deleted_Without_Exception_When_NonExistant_Async()
+        public async Task Test_Container_Deleted_Without_Exception_When_NonExistant_Async()
         {
             var container = GetRandomContainerName();
             await _provider.DeleteContainerAsync(container);

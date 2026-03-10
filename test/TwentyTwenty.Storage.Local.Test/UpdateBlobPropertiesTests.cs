@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Xunit;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -14,7 +15,7 @@ namespace TwentyTwenty.Storage.Local.Test
             : base() { }
 
         [Fact]
-        public async void Test_Updating_Properties_Stores_Meta_File()
+        public async Task Test_Updating_Properties_Stores_Meta_File()
         {
             var destinationContainer = GetRandomContainerName();
             var destinationName = GenerateRandomName();

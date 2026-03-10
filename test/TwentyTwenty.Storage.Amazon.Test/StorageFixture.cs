@@ -46,11 +46,14 @@ namespace TwentyTwenty.Storage.Amazon.Test
             {
                 var objectsResponse = _client.ListObjectsAsync(objectsRequest).Result;
 
-                keys.AddRange(objectsResponse.S3Objects
-                    .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
+                if (objectsResponse.S3Objects != null)
+                {
+                    keys.AddRange(objectsResponse.S3Objects
+                        .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
+                }
 
                 // If response is truncated, set the marker to get the next set of keys.
-                if (objectsResponse.IsTruncated)
+                if (objectsResponse.IsTruncated == true)
                 {
                     objectsRequest.Marker = objectsResponse.NextMarker;
                 }

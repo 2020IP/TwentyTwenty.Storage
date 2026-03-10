@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
@@ -11,7 +12,7 @@ namespace TwentyTwenty.Storage.Local.Test
             : base() { }
 
         [Fact]
-        public async void Test_Blob_Created()
+        public async Task Test_Blob_Created()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -24,7 +25,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_RelativePath_BlobName()
+        public async Task Test_Blob_Created_RelativePath_BlobName()
         {
             var container = GetRandomContainerName();
             var blobName = "somePatch/test.txt";
@@ -37,7 +38,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_With_Properties()
+        public async Task Test_Blob_Created_With_Properties()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

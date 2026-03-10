@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs.Models;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Azure.Test
@@ -13,7 +14,7 @@ namespace TwentyTwenty.Storage.Azure.Test
 
 
         [Fact]
-        public async void Test_Get_Blob_Descriptor_Async()
+        public async Task Test_Get_Blob_Descriptor_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -23,10 +24,14 @@ namespace TwentyTwenty.Storage.Azure.Test
             var contentType = "image/png";
 
             await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
-            
-            await blobRef.UploadAsync(data, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders {
-                ContentType = contentType
-            }});
+
+            await blobRef.UploadAsync(data, new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = contentType
+                }
+            });
 
             var descriptor = await _provider.GetBlobDescriptorAsync(container, blobName);
 
@@ -34,7 +39,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Does_Blob_Exist_Async()
+        public async Task Test_Does_Blob_Exist_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -44,17 +49,21 @@ namespace TwentyTwenty.Storage.Azure.Test
             var contentType = "image/png";
 
             await containerRef.CreateAsync(PublicAccessType.Blob, null, null);
-            
-            await blobRef.UploadAsync(data, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders {
-                ContentType = contentType
-            }});
+
+            await blobRef.UploadAsync(data, new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = contentType
+                }
+            });
 
             Assert.True(await _provider.DoesBlobExistAsync(container, blobName));
             Assert.False(await _provider.DoesBlobExistAsync(container, "fake"));
         }
 
         [Fact]
-        public async void Test_Get_Blob_Stream_Async()
+        public async Task Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -72,7 +81,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_List_Async()
+        public async Task Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
 
@@ -114,7 +123,7 @@ namespace TwentyTwenty.Storage.Azure.Test
 
         // Test for bug #12
         [Fact]
-        public async void Test_Get_Big_Blob_List_Async()
+        public async Task Test_Get_Big_Blob_List_Async()
         {
             var count = 150;
             var container = GetRandomContainerName();

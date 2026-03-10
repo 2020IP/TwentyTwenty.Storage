@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Azure.Test
@@ -8,10 +9,10 @@ namespace TwentyTwenty.Storage.Azure.Test
     public sealed class UpdateTestsAsync : BlobTestBase
     {
         public UpdateTestsAsync(StorageFixture fixture)
-            :base(fixture) { }
+            : base(fixture) { }
 
         [Fact]
-        public async void Test_Container_Permissions_Elevated_On_Save_Async()
+        public async Task Test_Container_Permissions_Elevated_On_Save_Async()
         {
             var containerName = GetRandomContainerName();
             var containerRef = _client.GetBlobContainerClient(containerName);
@@ -19,13 +20,13 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync(PublicAccessType.None, null, null);
 
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream(), new BlobProperties { Security = BlobSecurity.Public });
-            
+
             Assert.True(await containerRef.ExistsAsync());
             Assert.Equal(PublicAccessType.Blob, (await containerRef.GetPropertiesAsync()).Value.PublicAccess);
         }
 
         [Fact]
-        public async void Test_Container_Permissions_Elevated_On_Update_Async()
+        public async Task Test_Container_Permissions_Elevated_On_Update_Async()
         {
             var containerName = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -42,7 +43,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Properties_Updated_Async()
+        public async Task Test_Blob_Properties_Updated_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -62,20 +63,20 @@ namespace TwentyTwenty.Storage.Azure.Test
                     ContentType = "image/png"
                 }
             });
-            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties 
-            { 
+            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties
+            {
                 ContentType = contentType,
                 ContentDisposition = contentDisposition,
             });
-            
+
             var blobProperties = await blobRef.GetPropertiesAsync();
-            
+
             Assert.Equal(contentType, blobProperties.Value.ContentType);
             Assert.Equal(contentDisposition, blobProperties.Value.ContentDisposition);
         }
 
         [Fact]
-        public async void Test_Blob_Metadata_Updated_Async()
+        public async Task Test_Blob_Metadata_Updated_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -102,13 +103,13 @@ namespace TwentyTwenty.Storage.Azure.Test
                 { "key3", "val3" },
             };
 
-            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties 
-            { 
+            await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties
+            {
                 Metadata = meta,
             });
-            
+
             var blobProperties = await blobRef.GetPropertiesAsync();
-            
+
             Assert.Equal(meta, blobProperties.Value.Metadata);
         }
     }

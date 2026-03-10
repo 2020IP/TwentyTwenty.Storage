@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
 {
@@ -9,7 +10,7 @@ namespace TwentyTwenty.Storage.Local.Test
             : base() { }
 
         [Fact]
-        public async void Test_Blob_Deleted_Directory_Exception_Async()
+        public async Task Test_Blob_Deleted_Directory_Exception_Async()
         {
             var ex = await Assert.ThrowsAsync<StorageException>(() =>
             {
@@ -20,7 +21,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Stream_FileNotFound_Exception_Async()
+        public async Task Test_Get_Blob_Stream_FileNotFound_Exception_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -36,7 +37,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Stream_Directory_Exception_Async()
+        public async Task Test_Get_Blob_Stream_Directory_Exception_Async()
         {
             var ex = await Assert.ThrowsAsync<StorageException>(() =>
             {

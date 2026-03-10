@@ -11,7 +11,7 @@ namespace TwentyTwenty.Storage.Local.Test
             : base() { }
 
         [Fact]
-        public async void Test_Get_Blob_Stream_Async()
+        public async Task Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -24,7 +24,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Descriptor_Async()
+        public async Task Test_Get_Blob_Descriptor_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName() + ".json";
@@ -44,7 +44,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Does_Blob_Exist_Async()
+        public async Task Test_Does_Blob_Exist_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName() + ".json";
@@ -58,7 +58,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_List_Async()
+        public async Task Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
 
@@ -81,7 +81,7 @@ namespace TwentyTwenty.Storage.Local.Test
 
         // Test for #13
         [Fact]
-        public async void Test_Get_Deep_Blob_List()
+        public async Task Test_Get_Deep_Blob_List()
         {
             var container = GetRandomContainerName();
 
@@ -102,7 +102,7 @@ namespace TwentyTwenty.Storage.Local.Test
         [InlineData("..\\test", false)]
         [InlineData("...\\.\\test", false)]
         [InlineData("dir\\...\\.\\test", false)]
-        public async void Test_Path_Traversal_Check(string blobName, bool shouldBeThrowing)
+        public async Task Test_Path_Traversal_Check(string blobName, bool shouldBeThrowing)
         {
             async Task TestCode()
             {

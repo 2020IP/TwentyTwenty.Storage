@@ -33,12 +33,14 @@ namespace TwentyTwenty.Storage.Azure
             {
                 StorageErrorCode errorCode;
 
-                switch ((HttpStatusCode)storageException.Status)
+                switch (storageException.Status)
                 {
-                    case HttpStatusCode.Forbidden:
+                    case 0: // Network/DNS error (e.g., invalid account name)
+                    case (int)HttpStatusCode.Unauthorized:
+                    case (int)HttpStatusCode.Forbidden:
                         errorCode = StorageErrorCode.InvalidCredentials;
                         break;
-                    case HttpStatusCode.NotFound:
+                    case (int)HttpStatusCode.NotFound:
                         errorCode = StorageErrorCode.InvalidName;
                         break;
                     default:

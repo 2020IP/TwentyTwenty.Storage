@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using System.Threading.Tasks;
+using Amazon.S3.Model;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -10,7 +11,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Blob_Moved()
+        public async Task Test_Blob_Moved()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -26,13 +27,11 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.True(StreamEquals(amzObject.ResponseStream, data));
 
             // Make sure source no longer exists
-            var ex = await Assert.ThrowsAsync<AmazonS3Exception>(() => _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null));
-
-            Assert.Equal("NoSuchKey", ex.ErrorCode);
+            await Assert.ThrowsAsync<NoSuchKeyException>(() => _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null));
         }
 
         [Fact]
-        public async void Test_Blob_Moved_And_Renamed()
+        public async Task Test_Blob_Moved_And_Renamed()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -49,13 +48,11 @@ namespace TwentyTwenty.Storage.Amazon.Test
             Assert.True(StreamEquals(amzObject.ResponseStream, data));
 
             // Make sure source no longer exists
-            var ex = await Assert.ThrowsAsync<AmazonS3Exception>(() => _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null));
-
-            Assert.Equal("NoSuchKey", ex.ErrorCode);
+            await Assert.ThrowsAsync<NoSuchKeyException>(() => _client.GetObjectAsync(Bucket, sourceContainer + "/" + sourceName, null));
         }
 
         [Fact]
-        public async void Test_Blob_Copied()
+        public async Task Test_Blob_Copied()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -76,7 +73,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied_With_New_Name()
+        public async Task Test_Blob_Copied_With_New_Name()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();

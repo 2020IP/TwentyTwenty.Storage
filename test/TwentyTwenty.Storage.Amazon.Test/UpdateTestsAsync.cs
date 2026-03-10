@@ -1,6 +1,7 @@
 ﻿using Amazon.S3.Model;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -12,7 +13,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Blob_Properties_Updated_Async()
+        public async Task Test_Blob_Properties_Updated_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -38,22 +39,22 @@ namespace TwentyTwenty.Storage.Amazon.Test
 
             Assert.Equal(props.Headers.ContentType, newContentType);
 
-            var objectAclRequest = new GetACLRequest()
+            var objectAclRequest = new GetObjectAclRequest()
             {
                 BucketName = Bucket,
                 Key = container + "/" + blobName
             };
 
-            var acl = await _client.GetACLAsync(objectAclRequest);
+            var acl = await _client.GetObjectAclAsync(objectAclRequest);
 
-            var isPublic = acl.AccessControlList.Grants
-                .Where(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers").Any();
+            var isPublic = acl.Grants
+                .Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
             Assert.True(isPublic);
         }
 
         [Fact]
-        public async void Test_Blob_ContentDisposition_Updated_Async()
+        public async Task Test_Blob_ContentDisposition_Updated_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -78,7 +79,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Blob_Meta_Updated()
+        public async Task Test_Blob_Meta_Updated()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

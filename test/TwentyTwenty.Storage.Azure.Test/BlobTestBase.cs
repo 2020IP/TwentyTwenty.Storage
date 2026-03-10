@@ -63,7 +63,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 method(_exceptionProvider);
             });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, exception.ErrorCode);
         }
 
         public T TestProviderAuth<T>(Func<AzureStorageProvider, T> method)
@@ -72,7 +72,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 method(_exceptionProvider);
             });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, exception.ErrorCode);
             return method(_provider);
         }
 
@@ -82,7 +82,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             {
                 return method(_exceptionProvider);
             });
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidCredentials);
+            Assert.Equal((int)StorageErrorCode.InvalidCredentials, exception.ErrorCode);
             await method(_provider);
         }
 

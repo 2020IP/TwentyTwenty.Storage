@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Azure.Test
@@ -11,19 +12,19 @@ namespace TwentyTwenty.Storage.Azure.Test
         { }
 
         [Fact]
-        public async void Test_Exception_DeleteBlobAsync_Auth()
+        public async Task Test_Exception_DeleteBlobAsync_Auth()
         {
             await TestProviderAuthAsync(provider => provider.DeleteBlobAsync(GetRandomContainerName(), "asdf"));
         }
 
         [Fact]
-        public async void Test_Exception_DeleteContainerAsync_Auth()
+        public async Task Test_Exception_DeleteContainerAsync_Auth()
         {
             await TestProviderAuthAsync(provider => provider.DeleteContainerAsync(GetRandomContainerName()));
         }
 
         [Fact]
-        public async void Test_Exception_UpdateBlobPropertiesAsync_Auth()
+        public async Task Test_Exception_UpdateBlobPropertiesAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -38,13 +39,13 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Exception_SaveBlobStreamAsync_Auth()
+        public async Task Test_Exception_SaveBlobStreamAsync_Auth()
         {
             await TestProviderAuthAsync(provider => provider.SaveBlobStreamAsync(GetRandomContainerName(), "asdf", new MemoryStream()));
         }
 
         [Fact]
-        public async void Test_Exception_GetBlobStreamAsync_Auth()
+        public async Task Test_Exception_GetBlobStreamAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -59,7 +60,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Exception_GetBlobDescriptorAsync_Auth()
+        public async Task Test_Exception_GetBlobDescriptorAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -74,7 +75,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Exception_ListBlobAsync_Auth()
+        public async Task Test_Exception_ListBlobAsync_Auth()
         {
             var container = GetRandomContainerName();
             var containerRef = _client.GetBlobContainerClient(container);
@@ -85,14 +86,14 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Exception_ListBlobAsync_ContainerName()
+        public async Task Test_Exception_ListBlobAsync_ContainerName()
         {
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.ListBlobsAsync(GetRandomContainerName()));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, exception.ErrorCode);
         }
 
         [Fact]
-        public async void Test_Exception_GetBlobStreamAsync_BlobName()
+        public async Task Test_Exception_GetBlobStreamAsync_BlobName()
         {
             var container = GetRandomContainerName();
             var containerRef = _client.GetBlobContainerClient(container);
@@ -100,11 +101,11 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.GetBlobStreamAsync(container, "asdf"));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, exception.ErrorCode);
         }
 
         [Fact]
-        public async void Test_Exception_GetBlobDescriptorAsync_BlobName()
+        public async Task Test_Exception_GetBlobDescriptorAsync_BlobName()
         {
             var container = GetRandomContainerName();
             var containerRef = _client.GetBlobContainerClient(container);
@@ -112,11 +113,11 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.GetBlobDescriptorAsync(container, "asdf"));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, exception.ErrorCode);
         }
 
         [Fact]
-        public async void Test_Exception_UpdateBlobPropertiesAsync_BlobName()
+        public async Task Test_Exception_UpdateBlobPropertiesAsync_BlobName()
         {
             var container = GetRandomContainerName();
             var containerRef = _client.GetBlobContainerClient(container);
@@ -124,7 +125,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await containerRef.CreateAsync();
 
             var exception = await Assert.ThrowsAsync<StorageException>(() => _provider.UpdateBlobPropertiesAsync(container, "asdf", new BlobProperties()));
-            Assert.Equal(exception.ErrorCode, (int)StorageErrorCode.InvalidName);
+            Assert.Equal((int)StorageErrorCode.InvalidName, exception.ErrorCode);
         }
     }
 }

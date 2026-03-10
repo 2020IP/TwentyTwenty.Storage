@@ -1,7 +1,7 @@
 using System.IO;
 using Xunit;
-using System.Collections.Generic;
 using Azure.Storage.Blobs.Models;
+using System.Threading.Tasks;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -9,10 +9,10 @@ namespace TwentyTwenty.Storage.Azure.Test
     public class CopyMoveTests : BlobTestBase
     {
         public CopyMoveTests(StorageFixture fixture)
-            :base(fixture) { }
+            : base(fixture) { }
 
         [Fact]
-        public async void Test_Blob_Moved()
+        public async Task Test_Blob_Moved()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -31,7 +31,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await _client.GetBlobContainerClient(destContainer)
                 .GetBlobClient(sourceName)
                 .DownloadToAsync(stream);
-            
+
             Assert.True(StreamEquals(data, stream));
 
             // Make sure source no longer exists
@@ -39,7 +39,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Moved_And_Renamed()
+        public async Task Test_Blob_Moved_And_Renamed()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -59,7 +59,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await _client.GetBlobContainerClient(destContainer)
                 .GetBlobClient(destName)
                 .DownloadToAsync(stream);
-            
+
             Assert.True(StreamEquals(data, stream));
 
             // Make sure source no longer exists
@@ -67,7 +67,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied()
+        public async Task Test_Blob_Copied()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -86,7 +86,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await _client.GetBlobContainerClient(destContainer)
                 .GetBlobClient(sourceName)
                 .DownloadToAsync(stream);
-            
+
             Assert.True(StreamEquals(data, stream));
 
             stream = new MemoryStream();
@@ -100,7 +100,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied_With_New_Name()
+        public async Task Test_Blob_Copied_With_New_Name()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -120,7 +120,7 @@ namespace TwentyTwenty.Storage.Azure.Test
             await _client.GetBlobContainerClient(destContainer)
                 .GetBlobClient(destName)
                 .DownloadToAsync(stream);
-            
+
             Assert.True(StreamEquals(data, stream));
 
             stream = new MemoryStream();

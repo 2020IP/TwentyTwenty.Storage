@@ -3,6 +3,11 @@ image: Ubuntu2204
 configuration: Release
 build: script
 test: off
+install:
+  - wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+  - chmod +x dotnet-install.sh
+  - ./dotnet-install.sh --channel 10.0
+  - export PATH="$HOME/.dotnet:$PATH"
 # deploy:
 #   - provider: NuGet
 #     api_key:

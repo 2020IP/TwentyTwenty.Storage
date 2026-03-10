@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
@@ -10,7 +11,7 @@ namespace TwentyTwenty.Storage.Local.Test
             : base() { }
 
         [Fact]
-        public async void Test_Container_Deleted_Async()
+        public async Task Test_Container_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -24,7 +25,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Deleted_Async()
+        public async Task Test_Blob_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -38,7 +39,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Deleted_Async_Also_Removes_Metadata()
+        public async Task Test_Blob_Deleted_Async_Also_Removes_Metadata()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -9,7 +10,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Exception_BlobCreatedAsync_Auth()
+        public async Task Test_Exception_BlobCreatedAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -22,7 +23,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Exception_BlobDeletedAsync_Auth()
+        public async Task Test_Exception_BlobDeletedAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -34,7 +35,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Exception_ContainerDeletedAsync_Auth()
+        public async Task Test_Exception_ContainerDeletedAsync_Auth()
         {
             var container = GetRandomContainerName();
 
@@ -45,7 +46,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Exception_GetBlobStreamAsync_Auth()
+        public async Task Test_Exception_GetBlobStreamAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -57,7 +58,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Exception_GetBlobDescriptorAsync_Forbidden()
+        public async Task Test_Exception_GetBlobDescriptorAsync_Forbidden()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -69,7 +70,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Exception_BlobPropertiesUpdatedAsync_Auth()
+        public async Task Test_Exception_BlobPropertiesUpdatedAsync_Auth()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -86,7 +87,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Exception_GetBlob_NotFound()
+        public async Task Test_Exception_GetBlob_NotFound()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

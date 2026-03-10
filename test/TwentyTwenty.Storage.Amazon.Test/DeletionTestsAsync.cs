@@ -1,10 +1,10 @@
-﻿using Amazon.S3.Model;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
-using System.Net.Http;
 using System.Net;
-using Amazon.S3;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
 {
@@ -15,7 +15,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Container_Deleted_Async()
+        public async Task Test_Container_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -37,11 +37,14 @@ namespace TwentyTwenty.Storage.Amazon.Test
             {
                 var objectsResponse = await _client.ListObjectsAsync(objectsRequest);
 
-                keys.AddRange(objectsResponse.S3Objects
-                    .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
+                if (objectsResponse.S3Objects != null)
+                {
+                    keys.AddRange(objectsResponse.S3Objects
+                        .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
+                }
 
                 // If response is truncated, set the marker to get the next set of keys.
-                if (objectsResponse.IsTruncated)
+                if (objectsResponse.IsTruncated == true)
                 {
                     objectsRequest.Marker = objectsResponse.NextMarker;
                 }
@@ -55,7 +58,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Blob_Deleted_Async()
+        public async Task Test_Blob_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -69,7 +72,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             {
                 await _client.GetObjectMetadataAsync(Bucket, container + "/" + blobName);
             });
-            
+
             Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
         }
     }
