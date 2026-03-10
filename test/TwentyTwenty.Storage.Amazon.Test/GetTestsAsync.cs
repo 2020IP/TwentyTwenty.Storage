@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -10,7 +11,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Get_Blob_Stream_Async()
+        public async Task Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -23,7 +24,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Descriptor_Async()
+        public async Task Test_Get_Blob_Descriptor_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -52,7 +53,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Does_Blob_Exist_Async()
+        public async Task Test_Does_Blob_Exist_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -72,7 +73,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_List_Async()
+        public async Task Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
             var meta = new Dictionary<string, string>
@@ -103,7 +104,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Url()
+        public async Task Test_Get_Blob_Url()
         {
             var container = GetRandomContainerName();
             var blob = GenerateRandomName();

@@ -2,6 +2,7 @@
 using Xunit;
 using System.Collections.Generic;
 using Azure.Storage.Blobs.Models;
+using System.Threading.Tasks;
 
 namespace TwentyTwenty.Storage.Azure.Test
 {
@@ -9,22 +10,22 @@ namespace TwentyTwenty.Storage.Azure.Test
     public class CreationTestsAsync : BlobTestBase
     {
         public CreationTestsAsync(StorageFixture fixture)
-            :base(fixture) { }
+            : base(fixture) { }
 
         [Fact]
-        public async void Fact_Container_Created_Async()
+        public async Task Fact_Container_Created_Async()
         {
             var containerName = GetRandomContainerName();
 
             Assert.False(await _client.GetBlobContainerClient(containerName).ExistsAsync());
-            
+
             await _provider.SaveBlobStreamAsync(containerName, GenerateRandomName(), GenerateRandomBlobStream());
 
             Assert.True(await _client.GetBlobContainerClient(containerName).ExistsAsync());
         }
 
         [Fact]
-        public async void Test_Container_Created_Private_Async()
+        public async Task Test_Container_Created_Private_Async()
         {
             var containerName = GetRandomContainerName();
 
@@ -45,7 +46,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Container_Created_Public_Async()
+        public async Task Test_Container_Created_Public_Async()
         {
             var containerName = GetRandomContainerName();
 
@@ -59,7 +60,7 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_Async()
+        public async Task Test_Blob_Created_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -70,40 +71,40 @@ namespace TwentyTwenty.Storage.Azure.Test
             await _client.GetBlobContainerClient(container)
                 .GetBlobClient(blobName)
                 .DownloadToAsync(stream);
-            
+
             Assert.True(StreamEquals(data, stream));
         }
 
         [Fact]
-        public async void Test_Blob_Created_ContentType_Set_Async()
+        public async Task Test_Blob_Created_ContentType_Set_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var contentType = "image/jpg";
-            var dataLength = 256;            
+            var dataLength = 256;
             var data = GenerateRandomBlobStream(dataLength);
 
             await _provider.SaveBlobStreamAsync(container, blobName, data, new BlobProperties { ContentType = contentType });
 
             var blob = _client.GetBlobContainerClient(container)
                 .GetBlobClient(blobName);
-                
+
             var blobProperties = await blob.GetPropertiesAsync();
-            
+
             Assert.Equal(dataLength, blobProperties.Value.ContentLength);
             Assert.Equal(contentType, blobProperties.Value.ContentType);
         }
 
         [Fact]
-        public async void Test_Blob_Created_ContentDisposition_Set_Async()
+        public async Task Test_Blob_Created_ContentDisposition_Set_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
             var filename = "testFile.jpg";
-            var dataLength = 256;            
+            var dataLength = 256;
             var data = GenerateRandomBlobStream(dataLength);
             var prop = new BlobProperties().WithContentDispositionFilename(filename);
-            
+
             await _provider.SaveBlobStreamAsync(container, blobName, data, prop);
 
             var blob = _client.GetBlobContainerClient(container)
@@ -116,10 +117,10 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_Metadata_Set_Async()
+        public async Task Test_Blob_Created_Metadata_Set_Async()
         {
             var container = GetRandomContainerName();
-            var blobName = GenerateRandomName();            
+            var blobName = GenerateRandomName();
             var dataLength = 256;
             var data = GenerateRandomBlobStream(dataLength);
             var meta = new Dictionary<string, string>
@@ -128,7 +129,7 @@ namespace TwentyTwenty.Storage.Azure.Test
                 { "key2", "val2" },
             };
 
-            await _provider.SaveBlobStreamAsync(container, blobName, data, 
+            await _provider.SaveBlobStreamAsync(container, blobName, data,
                 new BlobProperties { Metadata = meta });
 
             var b = _client.GetBlobContainerClient(container).GetBlobClient(blobName);
@@ -138,9 +139,9 @@ namespace TwentyTwenty.Storage.Azure.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_Stream_Close()
+        public async Task Test_Blob_Created_Stream_Close()
         {
-            var container = GetRandomContainerName();            
+            var container = GetRandomContainerName();
             var dataLength = 256;
             var data = GenerateRandomBlobStream(dataLength);
 
@@ -149,7 +150,7 @@ namespace TwentyTwenty.Storage.Azure.Test
 
             data = GenerateRandomBlobStream(dataLength);
             await _provider.SaveBlobStreamAsync(container, GenerateRandomName(), data, closeStream: false);
-             Assert.True(data.CanRead);
+            Assert.True(data.CanRead);
         }
     }
 }

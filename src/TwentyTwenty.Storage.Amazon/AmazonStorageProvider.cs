@@ -6,15 +6,17 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Amazon.Runtime;
+using Amazon.Runtime.Credentials;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 
 namespace TwentyTwenty.Storage.Amazon
 {
     // NOTE: S3 doesn't support getting the MD5 hash of objects
-    //          It unreliably returns the MD5 in the ETAG header
-    //          which is what is currently being put into the ContentMD5 property
+    //  It unreliably returns the MD5 in the ETAG header
+    //  which is what is currently being put into the ContentMD5 property
 
     public sealed class AmazonStorageProvider : IStorageProvider
     {
@@ -59,7 +61,7 @@ namespace TwentyTwenty.Storage.Amazon
                 return new BasicAWSCredentials(options.PublicKey, options.SecretKey);
             }
 
-            return FallbackCredentialsFactory.GetCredentials();
+            return DefaultAWSCredentialsIdentityResolver.GetCredentials(null);
         }
 
         public async Task DeleteBlobAsync(string containerName, string blobName)
@@ -186,7 +188,7 @@ namespace TwentyTwenty.Storage.Amazon
                 {
                     var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
-                    if (objectsResponse.S3Objects.Count == 0) break;
+                    if (objectsResponse.S3Objects == null || objectsResponse.S3Objects.Count == 0) break;
 
                     // If response is truncated, set the marker to get the next set of keys.
                     if (objectsResponse.IsTruncated == true)
@@ -229,14 +231,14 @@ namespace TwentyTwenty.Storage.Amazon
 
                 var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-                var objectAclRequest = new GetACLRequest
+                var objectAclRequest = new GetObjectAclRequest
                 {
                     BucketName = _bucket,
                     Key = key
                 };
 
-                var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
+                var objectAclResponse = await _s3Client.GetObjectAclAsync(objectAclRequest);
+                var isPublic = objectAclResponse.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
                 return new BlobDescriptor
                 {
@@ -261,17 +263,21 @@ namespace TwentyTwenty.Storage.Amazon
         public async Task<bool> DoesBlobExistAsync(string containerName, string blobName)
         {
             try
-            {                
+            {
                 await _s3Client.GetObjectMetadataAsync(_bucket, GenerateKeyName(containerName, blobName));
                 return true;
             }
+            catch (NoSuchKeyException)
+            {
+                return false;
+            }
+            catch (NoSuchBucketException)
+            {
+                return false;
+            }
             catch (AmazonS3Exception asex)
             {
-                if (string.Equals(asex.ErrorCode, "NoSuchBucket"))
-                {
-                    return false;
-                }
-                else if (string.Equals(asex.ErrorCode, "NotFound"))
+                if (string.Equals(asex.ErrorCode, "NoSuchBucket") || string.Equals(asex.ErrorCode, "NotFound"))
                 {
                     return false;
                 }
@@ -364,7 +370,7 @@ namespace TwentyTwenty.Storage.Amazon
                 {
                     var objectsResponse = await _s3Client.ListObjectsAsync(objectsRequest);
 
-                    foreach (S3Object entry in objectsResponse.S3Objects)
+                    foreach (S3Object entry in objectsResponse.S3Objects ?? Enumerable.Empty<S3Object>())
                     {
                         var objectMetaRequest = new GetObjectMetadataRequest
                         {
@@ -374,14 +380,14 @@ namespace TwentyTwenty.Storage.Amazon
 
                         var objectMetaResponse = await _s3Client.GetObjectMetadataAsync(objectMetaRequest);
 
-                        var objectAclRequest = new GetACLRequest
+                        var objectAclRequest = new GetObjectAclRequest
                         {
                             BucketName = _bucket,
                             Key = entry.Key
                         };
 
-                        var objectAclResponse = await _s3Client.GetACLAsync(objectAclRequest);
-                        var isPublic = objectAclResponse.AccessControlList.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
+                        var objectAclResponse = await _s3Client.GetObjectAclAsync(objectAclRequest);
+                        var isPublic = objectAclResponse.Grants.Any(x => x.Grantee.URI == "http://acs.amazonaws.com/groups/global/AllUsers");
 
                         descriptors.Add(new BlobDescriptor
                         {
@@ -427,26 +433,13 @@ namespace TwentyTwenty.Storage.Amazon
 
             if (length.HasValue && length.Value >= threshold)
             {
-                // TODO: Return to using S3 library's TransferUtility when bug is fixed.  See https://github.com/aws/aws-sdk-net/issues/675
-                //var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream, length);
-                // try
-                // {
-                //     using (var util = new TransferUtility(_s3Client))
-                //     {
-                //         await util.UploadAsync(fileTransferUtilityRequest);
-                //     }
-                // }
+                var fileTransferUtilityRequest = CreateChunkedUpload(containerName, blobName, source, properties, closeStream, length);
                 try
                 {
-                    var uploader = new AmazonFileUploader(_s3Client);
-                    await uploader.UploadFileAsync(
-                        _bucket,
-                        GenerateKeyName(containerName, blobName),
-                        source,
-                        properties,
-                        GetCannedACL(properties),
-                        _serverSideEncryptionMethod,
-                        closeStream, null);
+                    using (var util = new TransferUtility(_s3Client))
+                    {
+                        await util.UploadAsync(fileTransferUtilityRequest);
+                    }
                 }
                 catch (AmazonS3Exception asex)
                 {
@@ -538,31 +531,24 @@ namespace TwentyTwenty.Storage.Amazon
             return updateRequest;
         }
 
-        // TODO: Return to using S3 library's TransferUtility when bug is fixed.  See https://github.com/aws/aws-sdk-net/issues/675
-        // private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source, 
-        //     BlobProperties properties, bool closeStream, long? length = null)
-        // {
-        //     var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-        //     {
-        //         BucketName = _bucket,
-        //         InputStream = source,
-        //         PartSize = PART_SIZE,
-        //         Key = GenerateKeyName(containerName, blobName),
-        //         ContentType = properties?.ContentType,
-        //         CannedACL = GetCannedACL(properties),
-        //         AutoCloseStream = closeStream,
-        //         ServerSideEncryptionMethod = _serverSideEncryptionMethod
-        //     };
-        //     fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
-        //     fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
+        private TransferUtilityUploadRequest CreateChunkedUpload(string containerName, string blobName, Stream source,
+            BlobProperties properties, bool closeStream, long? length = null)
+        {
+            var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                InputStream = source,
+                Key = GenerateKeyName(containerName, blobName),
+                ContentType = properties?.ContentType,
+                CannedACL = GetCannedACL(properties),
+                AutoCloseStream = closeStream,
+                ServerSideEncryptionMethod = _serverSideEncryptionMethod
+            };
+            fileTransferUtilityRequest.Headers.ContentDisposition = properties?.ContentDisposition;
+            fileTransferUtilityRequest.Metadata.AddMetadata(properties?.Metadata);
 
-        //     if (length.HasValue)
-        //     {
-        //         fileTransferUtilityRequest.Headers.ContentLength = length.Value;
-        //     }
-
-        //     return fileTransferUtilityRequest;
-        // }
+            return fileTransferUtilityRequest;
+        }
 
         private PutObjectRequest CreateUpload(string containerName, string blobName, Stream source,
             BlobProperties properties, bool closeStream, long? length = null)

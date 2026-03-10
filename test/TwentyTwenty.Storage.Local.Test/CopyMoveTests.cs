@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Local.Test
@@ -10,7 +11,7 @@ namespace TwentyTwenty.Storage.Local.Test
             : base() { }
 
         [Fact]
-        public async void Test_Blob_Moved()
+        public async Task Test_Blob_Moved()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -32,7 +33,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Moved_With_Metadata()
+        public async Task Test_Blob_Moved_With_Metadata()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -64,7 +65,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Moved_RelativePath()
+        public async Task Test_Blob_Moved_RelativePath()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = "somePatch/test.txt";
@@ -86,7 +87,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Moved_And_Renamed()
+        public async Task Test_Blob_Moved_And_Renamed()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -109,7 +110,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Moved_And_Renamed_With_Metadata()
+        public async Task Test_Blob_Moved_And_Renamed_With_Metadata()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -141,7 +142,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Moved_And_Renamed_RelativePath()
+        public async Task Test_Blob_Moved_And_Renamed_RelativePath()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = "somePatch/test.txt";
@@ -164,7 +165,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied()
+        public async Task Test_Blob_Copied()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -190,7 +191,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied_With_Metadata()
+        public async Task Test_Blob_Copied_With_Metadata()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -225,7 +226,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied_RelativePath()
+        public async Task Test_Blob_Copied_RelativePath()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = "somePatch/test.txt";
@@ -251,7 +252,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied_With_New_Name()
+        public async Task Test_Blob_Copied_With_New_Name()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();
@@ -277,7 +278,7 @@ namespace TwentyTwenty.Storage.Local.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copied_With_New_Name_With_Meta()
+        public async Task Test_Blob_Copied_With_New_Name_With_Meta()
         {
             var sourceContainer = GetRandomContainerName();
             var sourceName = GenerateRandomName();

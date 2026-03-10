@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Amazon.Test
@@ -11,7 +12,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Blob_Created_Async()
+        public async Task Test_Blob_Created_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -31,7 +32,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact, Trait("Category", "Long")]
-        public async void Test_Blob_Created_Multipart_Async()
+        public async Task Test_Blob_Created_Multipart_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -50,7 +51,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_ContentType_Set_Async()
+        public async Task Test_Blob_Created_ContentType_Set_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -68,7 +69,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_Metadata_Set_Async()
+        public async Task Test_Blob_Created_Metadata_Set_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -90,7 +91,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_Stream_Close()
+        public async Task Test_Blob_Created_Stream_Close()
         {
             var container = GetRandomContainerName();            
             var dataLength = 256;

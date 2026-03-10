@@ -1,11 +1,7 @@
-﻿using System;
-using Google.Apis.Storage.v1;
-using System.Linq;
-using Xunit;
-using Google.Apis.Storage.v1.Data;
-using Newtonsoft.Json.Linq;
+﻿using Xunit;
 using Google.Cloud.Storage.V1;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TwentyTwenty.Storage.Google.Test
 {
@@ -16,7 +12,7 @@ namespace TwentyTwenty.Storage.Google.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Blob_Properties_Updated_Async()
+        public async Task Test_Blob_Properties_Updated_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -29,12 +25,12 @@ namespace TwentyTwenty.Storage.Google.Test
             await _client.UploadObjectAsync(Bucket, GetObjectName(container, blobName), contentType, data);
 
             var blob = await _client.GetObjectAsync(Bucket, GetObjectName(container, blobName), new GetObjectOptions { Projection = Projection.Full });
-            var timestamp = blob.Updated;
+            var timestamp = blob.UpdatedDateTimeOffset;
             Assert.Equal(contentType, blob.ContentType);
             Assert.Null(blob.ContentDisposition);
             Assert.Null(blob.Metadata);
             Assert.DoesNotContain(blob.Acl, o => o.Entity == "allUsers");
-            
+
             await _provider.UpdateBlobPropertiesAsync(container, blobName, new BlobProperties
             {
                 ContentType = newContentType,
@@ -50,7 +46,7 @@ namespace TwentyTwenty.Storage.Google.Test
 
             Assert.Equal(newContentType, blob.ContentType);
             Assert.Equal(newContentDisposition, blob.ContentDisposition);
-            Assert.NotEqual(timestamp, blob.Updated);
+            Assert.NotEqual(timestamp, blob.UpdatedDateTimeOffset);
             Assert.Contains(blob.Acl, o => o.Entity == "allUsers" && o.Role == "READER");
             Assert.NotNull(blob.Metadata);
             Assert.Contains(blob.Metadata, m => m.Key == "test" && m.Value == "a");
@@ -64,7 +60,7 @@ namespace TwentyTwenty.Storage.Google.Test
             blob = await _client.GetObjectAsync(Bucket, GetObjectName(container, blobName), new GetObjectOptions { Projection = Projection.Full });
 
             Assert.Equal(newContentType, blob.ContentType);
-            Assert.NotEqual(timestamp, blob.Updated);
+            Assert.NotEqual(timestamp, blob.UpdatedDateTimeOffset);
             Assert.DoesNotContain(blob.Acl, o => o.Entity == "allUsers");
         }
     }

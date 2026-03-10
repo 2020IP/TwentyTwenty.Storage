@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Google.Cloud.Storage.V1;
 using Xunit;
 
@@ -11,7 +12,7 @@ namespace TwentyTwenty.Storage.Google.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Get_Blob_Stream_Async()
+        public async Task Test_Get_Blob_Stream_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -24,7 +25,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Descriptor_Async()
+        public async Task Test_Get_Blob_Descriptor_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -47,7 +48,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Does_Blob_Exist_Async()
+        public async Task Test_Does_Blob_Exist_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -62,7 +63,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_List_Async()
+        public async Task Test_Get_Blob_List_Async()
         {
             var container = GetRandomContainerName();
 
@@ -93,7 +94,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Security_Public()
+        public async Task Test_Get_Blob_Security_Public()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -107,7 +108,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Url()
+        public async Task Test_Get_Blob_Url()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -122,7 +123,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Get_Blob_Sas_Url()
+        public async Task Test_Get_Blob_Sas_Url()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

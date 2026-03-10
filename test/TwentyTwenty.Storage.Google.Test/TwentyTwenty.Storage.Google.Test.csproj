@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>TwentyTwenty.Storage.Google.Test</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Google.Test</PackageId>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <UserSecretsId>TwentyTwenty.Storage.Google.Test-EFCF7CA3-97B7-45A4-8D19-FAB47939AB03</UserSecretsId>
   </PropertyGroup>
 

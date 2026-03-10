@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using Google;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace TwentyTwenty.Storage.Google.Test
         { }
 
         [Fact]
-        public async void Test_Blob_Created_Async()
+        public async Task Test_Blob_Created_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -27,7 +28,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact, Trait("Category", "Long")]
-        public async void Test_Blob_Created_Resumable_Async()
+        public async Task Test_Blob_Created_Resumable_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -41,7 +42,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Blob_Created_ContentType_Set_Async()
+        public async Task Test_Blob_Created_ContentType_Set_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -59,7 +60,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Blob_Copy()
+        public async Task Test_Blob_Copy()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
@@ -84,7 +85,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Blob_Move()
+        public async Task Test_Blob_Move()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();

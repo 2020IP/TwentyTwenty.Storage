@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>TwentyTwenty.Storage.Azure.Test</AssemblyName>
     <PackageId>TwentyTwenty.Storage.Azure.Test</PackageId>
     <UserSecretsId>TwentyTwenty.Storage.Azure.Test-C9E3EB7B-4203-4571-842A-D6086C466F68</UserSecretsId>

@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Amazon.S3;
 using Amazon.S3.Model;
 
@@ -29,6 +27,13 @@ namespace TwentyTwenty.Storage.Amazon
 
         public static StorageException ToStorageException(this AmazonS3Exception asex)
         {
+            // AWSSDK.S3 v4 uses typed exceptions (e.g. NoSuchKeyException) which may have an empty ErrorCode.
+            // Check by type first, then fall back to ErrorCode string matching.
+            if (asex is NoSuchKeyException || asex is NoSuchBucketException || asex is NoSuchUploadException)
+            {
+                return new StorageException(StorageErrorCode.NotFound, asex);
+            }
+
             switch (asex?.ErrorCode)
             {
                 case "InvalidAccessKeyId":

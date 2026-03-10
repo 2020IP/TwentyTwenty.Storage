@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace TwentyTwenty.Storage.Google.Test
@@ -10,7 +11,7 @@ namespace TwentyTwenty.Storage.Google.Test
             : base(fixture) { }
 
         [Fact]
-        public async void Test_Container_Deleted_Async()
+        public async Task Test_Container_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName1 = GenerateRandomName();
@@ -33,7 +34,7 @@ namespace TwentyTwenty.Storage.Google.Test
         }
 
         [Fact]
-        public async void Test_Blob_Deleted_Async()
+        public async Task Test_Blob_Deleted_Async()
         {
             var container = GetRandomContainerName();
             var blobName = GenerateRandomName();
