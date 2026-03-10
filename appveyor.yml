@@ -1,5 +1,5 @@
 version: '{build}'
-image: Ubuntu2204
+image: Ubuntu2404
 configuration: Release
 build: script
 test: off
