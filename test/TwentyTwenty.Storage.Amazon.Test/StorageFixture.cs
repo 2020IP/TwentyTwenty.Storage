@@ -50,7 +50,7 @@ namespace TwentyTwenty.Storage.Amazon.Test
                     .Select(x => new KeyVersion() { Key = x.Key, VersionId = null }));
 
                 // If response is truncated, set the marker to get the next set of keys.
-                if (objectsResponse.IsTruncated)
+                if (objectsResponse.IsTruncated == true)
                 {
                     objectsRequest.Marker = objectsResponse.NextMarker;
                 }

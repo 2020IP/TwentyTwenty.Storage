@@ -189,7 +189,7 @@ namespace TwentyTwenty.Storage.Amazon
                     if (objectsResponse.S3Objects.Count == 0) break;
 
                     // If response is truncated, set the marker to get the next set of keys.
-                    if (objectsResponse.IsTruncated)
+                    if (objectsResponse.IsTruncated == true)
                     {
                         objectsRequest.Marker = objectsResponse.NextMarker;
                     }
@@ -387,7 +387,7 @@ namespace TwentyTwenty.Storage.Amazon
                         {
                             Name = entry.Key.Remove(0, containerName.Length + 1),
                             Container = containerName,
-                            Length = entry.Size,
+                            Length = entry.Size ?? 0,
                             ETag = entry.ETag,
                             ContentMD5 = entry.ETag,
                             ContentType = objectMetaResponse.Headers.ContentType,
@@ -399,7 +399,7 @@ namespace TwentyTwenty.Storage.Amazon
                     }
 
                     // If response is truncated, set the marker to get the next set of keys.
-                    if (objectsResponse.IsTruncated)
+                    if (objectsResponse.IsTruncated == true)
                     {
                         objectsRequest.Marker = objectsResponse.NextMarker;
                     }
